@@ -1,0 +1,77 @@
+/*
+ *  ADOBE CONFIDENTIAL
+ *  __________________
+ *
+ *  Copyright 2019 Adobe
+ *  All Rights Reserved.
+ *
+ *  NOTICE:  All information contained herein is, and remains
+ *  the property of Adobe and its suppliers,
+ *  if any.  The intellectual and technical concepts contained
+ *  herein are proprietary to Adobe and its
+ *  suppliers and are protected by trade secret or copyright law.
+ *  Dissemination of this information or reproduction of this material
+ *  is strictly forbidden unless prior written permission is obtained
+ *  from Adobe.
+ */
+
+buildscript {
+  repositories {
+    jcenter()
+  }
+}
+
+plugins {
+  id 'project-report'
+  id 'java'
+  id 'idea'
+  id 'checkstyle'
+  id 'jacoco'
+  id 'org.sonarqube' version '2.6.2'
+}
+
+description 'Experience Platform Streaming Connect'
+
+repositories {
+  jcenter()
+}
+
+subprojects {
+  apply plugin: 'base'
+  apply plugin: 'checkstyle'
+  apply plugin: 'java'
+  apply plugin: 'idea'
+  apply plugin: 'jacoco'
+
+  checkstyle {
+    configFile = '../config/checkstyle/checkstyle.xml' as File
+    maxWarnings = 0
+    toolVersion '8.10.1'
+  }
+
+  repositories {
+    jcenter()
+  }
+
+  compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    options.deprecation = true
+  }
+
+  compileTestJava {
+    options.deprecation = true
+  }
+
+  task unitTest(type: Test) {
+    exclude '**/*IUTest.class'
+  }
+
+  task integrationTest(type: Test) {
+    include '**/*IUTest.class'
+  }
+}
+
+configurations.all {
+  exclude module: 'slf4j-log4j12'
+}

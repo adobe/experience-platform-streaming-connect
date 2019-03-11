@@ -21,3 +21,26 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+data/
+
+# intellij idea project files
+*.iml
+*.ipr
+*.iws
+*.ids
+*.idea
+
+# build dir
+**/build/*
+**/out/*
+
+# gradle dir
+.gradle/*
+
+.DS_Store
+
+caches/*
+native/*
+notifications/*
+wrapper/*

@@ -1,0 +1,62 @@
+/*
+ *  ADOBE CONFIDENTIAL
+ *  __________________
+ *
+ *  Copyright 2019 Adobe
+ *  All Rights Reserved.
+ *
+ *  NOTICE:  All information contained herein is, and remains
+ *  the property of Adobe and its suppliers,
+ *  if any.  The intellectual and technical concepts contained
+ *  herein are proprietary to Adobe and its
+ *  suppliers and are protected by trade secret or copyright law.
+ *  Dissemination of this information or reproduction of this material
+ *  is strictly forbidden unless prior written permission is obtained
+ *  from Adobe.
+ */
+
+ext {
+  libraries = [:]
+  versions = [:]
+}
+
+versions.commonslang = '3.7'
+versions.gson = '2.8.2'
+versions.guava = '23.5-jre'
+versions.httpClient = '4.5.6'
+versions.jcommander = '1.30'
+versions.orgJson = '20180130'
+versions.kafkaConnect = '0.11.0.2'
+versions.slf4j = '1.7.25'
+
+libraries.commonslang = [
+  "org.apache.commons:commons-lang3:$versions.commonslang"
+]
+
+libraries.gson = [
+  "com.google.code.gson:gson:$versions.gson"
+]
+
+libraries.guava = [
+  "com.google.guava:guava:$versions.guava"
+]
+
+libraries.httpClient = [
+  "org.apache.httpcomponents:httpclient:$versions.httpClient"
+]
+
+libraries.jcommander = [
+  "com.beust:jcommander:$versions.jcommander"
+]
+
+libraries.kafkaConnect = [
+  "org.apache.kafka:connect-api:$versions.kafkaConnect"
+]
+
+libraries.orgJson = [
+  "org.json:json:$versions.orgJson"
+]
+
+libraries.slf4j = [
+  "org.slf4j:slf4j-api:$versions.slf4j"
+]
