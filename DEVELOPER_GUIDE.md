@@ -1,10 +1,10 @@
 # Developer Guide
 
 ## Build
-```./gradlew build```
+```./gradlew build copyDependencies```
 
 ## Build docker
-```./gradlew copyDependencies```
+
 ```docker build -t streaming-connect .```
 
 ## Running Docker
