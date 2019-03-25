@@ -15,10 +15,13 @@
  *  from Adobe.
  */
 
-apply from: '../dependencies.gradle'
+package com.adobe.platform.streaming.auth;
 
-dependencies {
-  libraries.with {
-    compile collections, commonslang, guava, httpClient, jackson, jmockit, junitJupiter, jjwt, orgJson, slf4j
-  }
+/**
+ * @author Adobe Inc.
+ */
+public interface AuthProvider {
+
+  String getToken() throws AuthException;
+
 }

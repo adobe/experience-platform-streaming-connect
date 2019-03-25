@@ -20,14 +20,23 @@ ext {
   versions = [:]
 }
 
+versions.collections = '3.2.2'
 versions.commonslang = '3.7'
 versions.gson = '2.8.2'
 versions.guava = '23.5-jre'
 versions.httpClient = '4.5.6'
+versions.jackson = '2.9.3'
 versions.jcommander = '1.30'
+versions.jmockit = '1.41'
+versions.junitJupiter = '5.2.0'
+versions.jjwt = '0.9.0'
 versions.orgJson = '20180130'
 versions.kafkaConnect = '0.11.0.2'
 versions.slf4j = '1.7.25'
+
+libraries.collections = [
+  "commons-collections:commons-collections:$versions.collections"
+]
 
 libraries.commonslang = [
   "org.apache.commons:commons-lang3:$versions.commonslang"
@@ -45,8 +54,28 @@ libraries.httpClient = [
   "org.apache.httpcomponents:httpclient:$versions.httpClient"
 ]
 
+libraries.jackson = [
+  "com.fasterxml.jackson.core:jackson-annotations:$versions.jackson",
+  "com.fasterxml.jackson.core:jackson-databind:$versions.jackson",
+  "com.fasterxml.jackson.core:jackson-core:$versions.jackson"
+]
+
 libraries.jcommander = [
   "com.beust:jcommander:$versions.jcommander"
+]
+
+libraries.jmockit = [
+  "org.jmockit:jmockit:$versions.jmockit"
+]
+
+libraries.junitJupiter = [
+  "org.junit.jupiter:junit-jupiter-api:$versions.junitJupiter",
+  "org.junit.jupiter:junit-jupiter-engine:$versions.junitJupiter",
+  "org.junit.jupiter:junit-jupiter-params:$versions.junitJupiter"
+]
+
+libraries.jjwt = [
+  "io.jsonwebtoken:jjwt:$versions.jjwt"
 ]
 
 libraries.kafkaConnect = [

@@ -17,6 +17,7 @@
 
 package com.adobe.platform.streaming.http;
 
+import com.adobe.platform.streaming.auth.AuthProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,7 @@ public class HttpProducer implements Serializable {
 
   private String endpoint;
   private int connectTimeout;
+  private AuthProvider auth;
   private int readTimeout;
   private int maxRetries;
   private int retryBackoff;
@@ -75,6 +77,7 @@ public class HttpProducer implements Serializable {
     return new HttpConnection.HttpConnectionBuilder()
       .withEndpoint(endpoint)
       .withConnectTimeout(connectTimeout)
+      .withAuth(auth)
       .withReadTimeout(readTimeout)
       .withRetryBackoff(retryBackoff)
       .withMaxRetries(maxRetries);
@@ -111,6 +114,11 @@ public class HttpProducer implements Serializable {
 
     public HttpProducerBuilder withRetryBackoff(int retryBackoff) {
       instance.retryBackoff = retryBackoff;
+      return this;
+    }
+
+    public HttpProducerBuilder withAuth(AuthProvider auth) {
+      instance.auth = auth;
       return this;
     }
 

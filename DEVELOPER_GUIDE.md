@@ -45,6 +45,28 @@ curl -s -X POST \
 }' http://localhost:8083/connectors
 ```
 
+### Adobe Experience Platform Sink Connector (Authentication Enabled)
+
+```
+curl -s -X POST \
+-H "Content-Type: application/json" \
+--data '{
+  "name": "aep-sink-connector-failure",
+  "config": {
+    "topics": "connect-test",
+    "connector.class": "com.adobe.platform.streaming.sink.impl.DCSSinkConnector",
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false",
+    "dcs.endpoint": "https://dcs-dev.data.adobe.net/collection/33bd38e1d58b5f379ace3399aa34a32d5caf6fec9ed27924c5fc6f12d592d7c9",
+    "dcs.connection.auth.enabled": true,
+    "dcs.connection.auth.token.type": "access_token",
+    "dcs.connection.auth.client.id": "<client_id>",
+    "dcs.connection.auth.client.code": "<client_code>",
+    "dcs.connection.auth.client.secret": "<client_secret>"
+  }
+}' http://localhost:8083/connectors
+```
+
 ### Debug using Console Sink Connector
 
 For debugging we can use Console Sink connector, which would print the messages on console

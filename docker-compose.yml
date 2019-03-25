@@ -12,6 +12,7 @@ services:
       - streaming
     environment:
       KAFKA_VERSION: 0.11.0.2
+      AUTH_ENDPOINT: "https://ims-na1-stg1.adobelogin.com"
       CONNECT_PRODUCER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
       CONNECT_CONSUMER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor
       CONNECT_BOOTSTRAP_SERVERS: vm9596.ut1.omniture.com:9096

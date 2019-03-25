@@ -15,10 +15,19 @@
  *  from Adobe.
  */
 
-apply from: '../dependencies.gradle'
+package com.adobe.platform.streaming.auth;
 
-dependencies {
-  libraries.with {
-    compile collections, commonslang, guava, httpClient, jackson, jmockit, junitJupiter, jjwt, orgJson, slf4j
+/**
+ * @author Adobe Inc.
+ */
+public class AuthException extends Exception {
+
+  public AuthException(String message, Throwable cause) {
+    super(message, cause);
   }
+
+  public AuthException(String message) {
+    super(message);
+  }
+
 }

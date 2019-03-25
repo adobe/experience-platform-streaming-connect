@@ -17,6 +17,8 @@
 
 package com.adobe.platform.streaming.http;
 
+import com.adobe.platform.streaming.auth.AuthException;
+import com.adobe.platform.streaming.auth.AuthProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +37,7 @@ import java.util.zip.GZIPOutputStream;
 /**
  * @author Adobe Inc.
  */
-class HttpConnection {
+public class HttpConnection {
 
   private static final Logger LOG = LoggerFactory.getLogger(HttpConnection.class);
 
@@ -51,6 +53,7 @@ class HttpConnection {
   private int retryBackoff;
   private int connectTimeout;
   private int readTimeout;
+  private AuthProvider auth;
   private String requestMethod = "GET";
   private boolean enableGzip;
   private boolean isPostDataCompressed;
@@ -79,6 +82,10 @@ class HttpConnection {
 
         for (Map.Entry<String, String> header : headers.entrySet()) {
           conn.setRequestProperty(header.getKey(), header.getValue());
+        }
+
+        if (auth != null) {
+          conn.setRequestProperty("Authorization", "Bearer " + auth.getToken());
         }
 
         if (postData != null) {
@@ -121,6 +128,8 @@ class HttpConnection {
         close();
         cause = e;
         HttpUtil.sleepUninterrupted(retryBackoff);
+      } catch (AuthException authException) {
+        throw new HttpException("exception while fetching the auth token", authException);
       }
     }
 
@@ -161,7 +170,7 @@ class HttpConnection {
     }
   }
 
-  InputStream getInputStream() throws HttpException {
+  public InputStream getInputStream() throws HttpException {
     try {
       if (isGzip()) {
         return new GZIPInputStream(conn.getInputStream());
@@ -223,6 +232,11 @@ class HttpConnection {
 
     HttpConnectionBuilder withReadTimeout(int readTimeout) {
       instance.readTimeout = readTimeout;
+      return this;
+    }
+
+    HttpConnectionBuilder withAuth(AuthProvider auth) {
+      instance.auth = auth;
       return this;
     }
 
