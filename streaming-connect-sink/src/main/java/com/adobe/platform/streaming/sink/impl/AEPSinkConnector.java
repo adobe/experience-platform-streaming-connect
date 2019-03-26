@@ -23,11 +23,11 @@ import org.apache.kafka.connect.connector.Task;
 /**
  * @author Adobe Inc.
  */
-public class DCSSinkConnector extends AbstractSinkConnector {
+public class AEPSinkConnector extends AbstractSinkConnector {
 
   @Override
   public Class<? extends Task> taskClass() {
-    return DCSSinkTask.class;
+    return AEPSinkTask.class;
   }
 
 }

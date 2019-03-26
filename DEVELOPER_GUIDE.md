@@ -37,10 +37,10 @@ curl -s -X POST \
   "name": "aep-sink-connector",
   "config": {
     "topics": "connect-test",
-    "connector.class": "com.adobe.platform.streaming.sink.impl.DCSSinkConnector",
+    "connector.class": "com.adobe.platform.streaming.sink.impl.AEPSinkConnector",
     "key.converter.schemas.enable": "false",
     "value.converter.schemas.enable": "false",
-    "dcs.endpoint": "https://dcs-dev.data.adobe.net/collection/33bd38e1d58b5f379ace3399aa34a32d5caf6fec9ed27924c5fc6f12d592d7c9"
+    "aep.endpoint": "https://dcs-dev.data.adobe.net/collection/33bd38e1d58b5f379ace3399aa34a32d5caf6fec9ed27924c5fc6f12d592d7c9"
   }
 }' http://localhost:8083/connectors
 ```
@@ -51,39 +51,37 @@ curl -s -X POST \
 curl -s -X POST \
 -H "Content-Type: application/json" \
 --data '{
-  "name": "aep-sink-connector-failure",
+  "name": "aep-auth-sink-connector",
   "config": {
     "topics": "connect-test",
-    "connector.class": "com.adobe.platform.streaming.sink.impl.DCSSinkConnector",
+    "connector.class": "com.adobe.platform.streaming.sink.impl.AEPSinkConnector",
     "key.converter.schemas.enable": "false",
     "value.converter.schemas.enable": "false",
-    "dcs.endpoint": "https://dcs-dev.data.adobe.net/collection/33bd38e1d58b5f379ace3399aa34a32d5caf6fec9ed27924c5fc6f12d592d7c9",
-    "dcs.connection.auth.enabled": true,
-    "dcs.connection.auth.token.type": "access_token",
-    "dcs.connection.auth.client.id": "<client_id>",
-    "dcs.connection.auth.client.code": "<client_code>",
-    "dcs.connection.auth.client.secret": "<client_secret>"
+    "aep.endpoint": "https://dcs-dev.data.adobe.net/collection/33bd38e1d58b5f379ace3399aa34a32d5caf6fec9ed27924c5fc6f12d592d7c9",
+    "aep.connection.auth.enabled": true,
+    "aep.connection.auth.token.type": "access_token",
+    "aep.connection.auth.client.id": "<client_id>",
+    "aep.connection.auth.client.code": "<client_code>",
+    "aep.connection.auth.client.secret": "<client_secret>"
   }
 }' http://localhost:8083/connectors
 ```
 
-### Debug using Console Sink Connector
-
-For debugging we can use Console Sink connector, which would print the messages on console
+### Adobe Experience Platform Sink Connector (Batching Enabled)
 
 ```
 curl -s -X POST \
 -H "Content-Type: application/json" \
 --data '{
-  "name": "TestConsoleSinkConnector",
+  "name": "aep-batch-sink-connector",
   "config": {
     "topics": "connect-test",
-    "connector.class": "com.adobe.platform.pipeline.connect.sink.console.ConsoleSinkConnector"
+    "connector.class": "com.adobe.platform.streaming.sink.impl.AEPSinkConnector",
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false",
+    "aep.endpoint": "https://dcs-dev.data.adobe.net/collection/33bd38e1d58b5f379ace3399aa34a32d5caf6fec9ed27924c5fc6f12d592d7c9",
+    "aep.batch.enabled": true,
+    "aep.batch.size": 2
   }
 }' http://localhost:8083/connectors
-```
-
-```
-connect | [2018-12-05 17:29:06,779] INFO Received sink record with metadata {kafka.partition=0, kafka.offset=1267, kafka.timestamp=1544030946379, kafka.topic=connect-test, key=} (com.adobe.platform.pipeline.connect.sink.console.ConsoleSinkTask)
-connect | [2018-12-05 17:29:06,779] INFO Sink record: SinkRecord{kafkaOffset=1267, timestampType=CreateTime} ConnectRecord{topic='connect-test', kafkaPartition=0, key=, value={a=441, b=315}, timestamp=1544030946379, headers=ConnectHeaders(headers=)} (com.adobe.platform.pipeline.connect.sink.console.ConsoleSinkTask)
 ```

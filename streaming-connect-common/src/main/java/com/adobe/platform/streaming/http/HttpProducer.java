@@ -41,7 +41,7 @@ public class HttpProducer implements Serializable {
   private int retryBackoff;
   private boolean enableGzip;
 
-  public HttpProducer(String endpoint) {
+  private HttpProducer(String endpoint) {
     LOG.info("in init: {}", endpoint);
     this.endpoint = endpoint;
     this.maxRetries = 3;

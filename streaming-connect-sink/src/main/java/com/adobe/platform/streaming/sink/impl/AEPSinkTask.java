@@ -24,12 +24,18 @@ import java.util.Map;
 /**
  * @author Adobe Inc.
  */
-public class DCSSinkTask extends AbstractSinkTask {
+public class AEPSinkTask extends AbstractSinkTask {
+  private static final String AEP_BATCH_ENABLED = "aep.batch.enabled";
+  private static final String AEP_BATCH_DISABLED_VALUE = "false";
+  private static final String AEP_BATCH_ENABLED_VALUE = "true";
 
   @Override
   public void start(Map<String, String> props) {
     super.start(props);
-    publisher = new DCSPublisher(props);
+    publisher = props.getOrDefault(AEP_BATCH_ENABLED, AEP_BATCH_DISABLED_VALUE).equals(AEP_BATCH_ENABLED_VALUE) ?
+      new BatchAEPPublisher(props) :
+      new AEPPublisher(props);
+    publisher.start();
   }
 
 }

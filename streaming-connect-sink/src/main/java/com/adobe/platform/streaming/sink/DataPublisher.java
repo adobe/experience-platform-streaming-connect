@@ -24,6 +24,9 @@ import org.apache.kafka.connect.sink.SinkRecord;
  */
 public interface DataPublisher {
 
+  void start();
+
   void sendData(SinkRecord message);
 
+  void stop();
 }

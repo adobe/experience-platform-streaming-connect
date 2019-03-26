@@ -48,6 +48,7 @@ public abstract class AbstractSinkTask extends SinkTask {
   @Override
   public void stop() {
     LOG.info("Stopped Sink Task");
+    publisher.stop();
   }
 
   @Override
