@@ -39,13 +39,14 @@ In order to send streaming data, you must first request a Streaming Connection f
 
 Once you have an IMS access token and API key, it needs to be provided as part of the POST request.
 
-```curl -X POST https://platform.adobe.io/data/core/edge/inlet \
-     -H 'Authorization: Bearer <ims_token>' \
-     -H 'Cache-Control: no-cache' \
-     -H 'Content-Type: application/json' \
-     -H 'x-api-key: <api_key>' \
-     -H 'x-gw-ims-org-id: <ims_org_id>' \
-     -d '{
+```
+CURL -X POST "https://platform.adobe.io/data/core/edge/inlet" \
+  -H "Cache-Control: no-cache" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer {ACCESS_TOKEN}" \
+  -H "x-api-key: {API_KEY}" \
+  -H "x-gw-ims-org-id: {IMS_ORG}" \
+  -d '{
        "name" : "<data_inlet_name>",
        "description" : "<data_inlet_description>",
        "sourceId" : "<identifier_of_device_or_source_that_helps_you_identify_it>",
@@ -57,21 +58,22 @@ If the request was successful a new Data Inlet should be created for you.  The r
 
 ```
 {
-  "inletId": "d212ea1db6c896ef6c59c7443c717d05232e8f85bfffb0988000d68fe46dd373",
-  "imsOrg": "<ims_org_id>",
-  "sourceId": "<identifier_of_device_or_source__that_helps_you_identify_it>",
-  "dataType": "xdm",
-  "name": "<data_inlet_name>",
-  "description": "<data_inlet_description>.",
-  "createdBy": "<api_key>",
-  "authenticationRequired": false,
-  "createdDate": 1532624324022,
-  "modifiedDate": 1532624324022,
-  "streamingEndpointUrl": "https://dcs.data.adobe.net/collection/d212ea1db6c896ef6c59c7443c717d05232e8f85bfffb0988000d68fe46dd373"
+    "inletId": "{DATA_INLET_ID}",
+    "imsOrg": "{IMS_ORG}",
+    "sourceId": "website",
+    "dataType": "xdm",
+    "name": "My Data Inlet",
+    "description": "Collects streaming data from my website",
+    "createdBy": "{API_KEY}",
+    "authenticationRequired": false,
+    "validationRequired": true,
+    "createdDate": 1532624324022,
+    "modifiedDate": 1532624324022,
+    "inletUrl": "https://dcs.data.adobe.net/collection/{DATA_INLET_ID}"
 }
 ```
 
-The `streamingEndpointUrl` in the response above is the AEP Streaming Connection to which the real time events will be getting sinked to.
+The `inletUrl` in the response above is the AEP Streaming Connection to which the real time events will be getting sinked to.
 
 
 ```
