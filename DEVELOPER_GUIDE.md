@@ -1,5 +1,16 @@
 # Developer Guide
 
+The docker setup comes with a full stack of Kafka tools and utilities including Kafka Connect
+
+* Kafka broker
+* Zookeeper
+* Kafka Rest proxy
+* Kafka Topics UI
+* Kafka Connect, with the AEP Sink Connector installed.
+
+Once the docker is running, you should be able to test the entire setup using a rest api to insert the message into your local docker kafka topic.
+
+
 ## Build
 ```./gradlew build copyDependencies```
 
@@ -136,3 +147,67 @@ curl -s -X POST \
   }
 }' http://localhost:8083/connectors
 ```
+
+### Use the Kafka Topics UI to view your topics
+
+The docker setup comes with Topics UI to view the topic and messages within.
+Open a browser and go to http://localhost:8000 and view the connect-test topic
+
+![Topics UI](./docs/resources/topics-ui.png)
+
+In order to test the flow, you can use the following curl command to post a message into the Kafka topic using the Kafka rest proxy
+Please ensure that the curl commmand uses your inlet endpoint, and the schema of the XDM message corresponding to your setup.
+
+```bash
+curl -X POST \
+  http://localhost:8082/topics/connect-test \
+  -H 'Content-Type: application/vnd.kafka.json.v2+json' \
+  -H 'Host: localhost:8082' \
+  -d '{
+	"records": [{
+		"value": {
+			"header": {
+				"schemaRef": {
+					"id": "https://ns.adobe.com/msft_cds_acp/schemas/90ca63bb5b07354f72080ba7643ef783",
+					"contentType": "application/vnd.adobe.xed-full+json;version=1"
+				},
+				"msgId": "1553542044760:1153:5",
+				"source": {
+					"name": "POCEvent1122ew2"
+				},
+				"msgVersion": "1.0",
+				"imsOrgId": "0DD379AC5B117F6E0A494106@AdobeOrg"
+			},
+			"body": {
+				"xdmMeta": {
+					"schemaRef": {
+						"id": "https://ns.adobe.com/msft_cds_acp/schemas/90ca63bb5b07354f72080ba7643ef783",
+						"contentType": "application/vnd.adobe.xed-full+json;version=1"
+					}
+				},
+				"xdmEntity": {
+					"identityMap": {
+						"email": [{
+							"id": "ninair@adobe.com"
+						}]
+					},
+					"_id": "1553542044071",
+					"timestamp": "2019-03-25T19:27:24Z",
+					"_msft_cds_acp": {
+						"productListItems": {
+							"priceTotal": 10,
+							"name": "prod1",
+							"_id": "1212121",
+							"SKU": "13455"
+						}
+					}
+				}
+			}
+		}
+	}]
+}'
+```
+
+You will be able to see the message written to the "connect-test" topic in the Local Kafka cluster, which is picked up 
+by the AEP Streaming Sink Connector and sent the AEP Streaming inlet.
+

@@ -1,4 +1,4 @@
-FROM confluentinc/cp-kafka-connect:latest
+FROM confluentinc/cp-kafka-connect:5.2.1
 
 RUN mkdir /usr/share/java/streaming-connectors
 
