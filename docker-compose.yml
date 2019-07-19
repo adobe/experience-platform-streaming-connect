@@ -86,9 +86,8 @@ services:
       - kafka-schema-registry
       - kafka-rest-proxy
 
-
   kafka-connect:
-    image: streaming-connect-1
+    image: streaming-connect
     hostname: kafka-connect
     ports:
       - "8083:8083"
