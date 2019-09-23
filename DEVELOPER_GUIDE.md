@@ -11,6 +11,27 @@ The docker setup comes with a full stack of Kafka tools and utilities including 
 Once the docker is running, you should be able to test the entire setup using a rest api to insert the message into
 your local docker kafka topic.
 
+## Configuration Options
+
+The AEP connector is a uber jar containing all the classfiles and its third-party dependencies.
+To install the connector, drop the jar file into the plug in directory of Kafka connect installation.
+
+AEP Sink connector configurations can be supplied in the call register the connector.
+
+
+| Config Name                       | Description                                   | Default                                                 | Required | Example |
+|-----------------------------------|-----------------------------------------------|---------------------------------------------------------|----------|---------|
+| topics                            | comma separated list of topics                |                                                         | yes      |         |
+| connector.class                   | classname of impl                             | com.adobe.platform.streaming.sink.impl.AEPSinkConnector | yes      |         |
+| key.converter.schemas.enable      | enables conversion of schemas                 | false                                                   | no       |         |
+| value.converter.schemas.enable    | enables conversion of schemas                 | false                                                   | no       |         |
+| aep.endpoint                      | aep streaming endpoint url                    |                                                         | yes      |         |
+| aep.connection.auth.enabled       | required for authenticated streaming endpoint | false                                                   | no       |         |
+| aep.connection.auth.token.type    | always set to access_token                    | access_token                                            | no       |         |
+| aep.connection.auth.client.id     | IMS client id                                 |                                                         | no       |         |
+| aep.connection.auth.client.code   | IMS client code                               |                                                         | no       |         |
+| aep.connection.auth.client.secret | IME client secret                             |                                                         |          |         |
+
 ## Step-by-Step Workflow
 
 ### Build

@@ -36,10 +36,10 @@ access_token=$(curl -X POST \
   -F client_secret=${CLIENT_SECRET} \
   -F jwt_token=${JWT_TOKEN} 2>/dev/null | jq -r ".access_token")
 
-dateString=`date +%Y_%m_%d_%H_%M_%S`
+dateString=`date +%Y%m%d%H%M%S`
 
 # Create A Schema
-SCHEMA_NAME=${SCHEMA_NAME:-"Streaming_test_profile_api"}_${dateString}
+SCHEMA_NAME=${SCHEMA_NAME:-"Streaming_test_profile_api"}-${dateString}
 echo "Making call to create schema ${PLATFORM_GATEWAY} with name ${SCHEMA_NAME}"
 schema=$(curl -X POST \
   ${PLATFORM_GATEWAY}data/foundation/schemaregistry/tenant/schemas \
@@ -79,7 +79,7 @@ schema=$(curl -X POST \
 echo "Schema ID: "${schema}
 
 # Create a dataset for the schema
-dataSetName="Streaming Ingest Test_${dateString}"
+dataSetName="Streaming Ingest Test-${dateString}"
 dataSet=$(curl -X POST \
   ${PLATFORM_GATEWAY}data/foundation/catalog/dataSets \
   -H "Authorization: Bearer ${access_token}" \
@@ -108,7 +108,7 @@ dataSet=$(curl -X POST \
 echo "Data Set: "${dataSet}
 
 # Create a streaming connection
-INLET_NAME="My Streaming Endpoint_${dateString}"
+INLET_NAME="My Streaming Endpoint-${dateString}"
 INLET_SOURCE="AEP_Streaming_Connection_${dateString}"
 streamingEndpoint=$(curl POST \
   ${PLATFORM_GATEWAY}data/core/edge/inlet \
@@ -126,6 +126,10 @@ streamingEndpoint=$(curl POST \
 echo "Streaming Connection: "${streamingEndpoint}
 
 # Create a Connect Instance
+connectTopicName="connect-test-${dateString}"
+docker exec experience-platform-streaming-connect_kafka1_1 /usr/bin/kafka-topics --bootstrap-server localhost:9092 \
+ --create --replication-factor 1 --partitions 1 --topic ${connectTopicName}
+
 aemSinkConnectorName="aep-sink-connector-${dateString}"
 aemSinkConnector=$(curl -s -X POST \
   http://localhost:8083/connectors \
@@ -133,7 +137,7 @@ aemSinkConnector=$(curl -s -X POST \
   -d '{
     "name": "'"${aemSinkConnectorName}"'",
     "config": {
-      "topics": "connect-test",
+      "topics": "'"${connectTopicName}"'",
       "connector.class": "com.adobe.platform.streaming.sink.impl.AEPSinkConnector",
       "key.converter.schemas.enable": "false",
       "value.converter.schemas.enable": "false",
@@ -143,29 +147,15 @@ aemSinkConnector=$(curl -s -X POST \
 
 echo "AEP Sink Connector ${aemSinkConnectorName}"
 
-# Create a temp file to publish data to topic via FileStreamSourceConnector
-
-docker exec experience-platform-streaming-connect_kafka-connect_1 rm /tmp/test.txt
-docker exec experience-platform-streaming-connect_kafka-connect_1 touch /tmp/test.txt
-
-# Create instance of FileStreamSourceConnector
-fileSourceConnectorName="local-file-source-${dateString}"
-fileSourceConnector=$(curl -s -X POST \
-  http://localhost:8083/connectors \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "'"${fileSourceConnectorName}"'",
-    "config": {
-      "topic": "connect-test",
-      "connector.class": "org.apache.kafka.connect.file.FileStreamSourceConnector",
-      "file": "/tmp/test.txt"
-    }
-}')
-
 datasetId=`echo ${dataSet} | cut -d'"' -f2 | cut -d'/' -f3`
 
 # Generate sample data for the given schema to the inlet
 echo "Enter the number of Experience events to publish"
 read count
 
-./generate_data.sh ${schema} ${datasetId} ${count}
+echo "org=${IMS_ORG}" > ./application.conf
+echo "schema=${schema}" >> ./application.conf
+echo "dataset=${datasetId}" >> ./application.conf
+echo "topic=${connectTopicName}" >> ./application.conf
+
+./generate_data.sh ${count} ${IMS_ORG} ${schema} ${datasetId}  ${connectTopicName}

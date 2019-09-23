@@ -20,27 +20,6 @@ AEP sink connector delivers data from Kafka topics to a registered endpoint of t
 
 ![AEP Sink Connector](./docs/resources/aep_sink_connector.png)
 
-#### Configuration Options
-
-The AEP connector is a uber jar containing all the classfiles and its third-party dependencies.
-To install the connector, drop the jar file into the plug in directory of Kafka connect installation.
-
-AEP Sink connector configurations can be supplied in the call register the connector.
-
-
-| Config Name                       | Description                                   | Default                                                 | Required | Example |
-|-----------------------------------|-----------------------------------------------|---------------------------------------------------------|----------|---------|
-| topics                            | comma separated list of topics                |                                                         | yes      |         |
-| connector.class                   | classname of impl                             | com.adobe.platform.streaming.sink.impl.AEPSinkConnector | yes      |         |
-| key.converter.schemas.enable      | enables conversion of schemas                 | false                                                   | no       |         |
-| value.converter.schemas.enable    | enables conversion of schemas                 | false                                                   | no       |         |
-| aep.endpoint                      | aep streaming endpoint url                    |                                                         | yes      |         |
-| aep.connection.auth.enabled       | required for authenticated streaming endpoint | false                                                   | no       |         |
-| aep.connection.auth.token.type    | always set to access_token                    | access_token                                            | no       |         |
-| aep.connection.auth.client.id     | IMS client id                                 |                                                         | no       |         |
-| aep.connection.auth.client.code   | IMS client code                               |                                                         | no       |         |
-| aep.connection.auth.client.secret | IME client secret                             |                                                         |          |         |
-
 #### Features
 
 * Seamlessly ingest events from your Kafka topic to Adobe Experience Platform
@@ -82,23 +61,32 @@ Enter Client Secret
 Enter JWT Token
 ***
 
-Making call to create schema https://platform.adobe.io/ with name Test Schema_2019_09_21_18_42_57
-Schema ID: https://ns.adobe.com/<tenant>/schemas/55f4ad0f534b3ffcbe18be78b01e0651
+Making call to create schema https://platform.adobe.io/ with name Streaming_test_profile_api-20190922211238
+Schema ID: https://ns.adobe.com/<tenant>/schemas/090d01896b3cbd72dc7defff1290eb99
 Data Set: ["@/dataSets/5d86d1a29ba7e11648cc3afb"]
-Streaming Connection: https://dcs-int.adobedc.net/collection/1e58b84cb62853b333b54980c45bdb40fc3bf80bc47022da0f76eececb2f9237
-AEP Sink Connector aep-sink-connector-2019_09_21_18_42_57
+Streaming Connection: https://dcs.adobedc.net/collection/1e58b84cb62853b333b54980c45bdb40fc3bf80bc47022da0f76eececb2f9237
+AEP Sink Connector aep-sink-connector-20190922211238
 Enter the number of Experience events to publish
 5
-Publishing 5 messages for Data set 5d86d1a29ba7e11648cc3afb and schema https://ns.adobe.com/<tenant>/schemas/55f4ad0f534b3ffcbe18be78b01e0651
+Publishing 5 messages for Data set 5d86d1a29ba7e11648cc3afb and schema https://ns.adobe.com/<tenant>/schemas/090d01896b3cbd72dc7defff1290eb99
 Published 5 messages
 ```
+This will also save the values for entities created in application.conf for running test multiple times with same values.
 
 #### Send data to Adobe with quick-start script
 In case the resources are already created then you can run only data generation script to send data to Adobe
+The values for IMS Org, SchemaID, data set id and topic should be stored in application.conf else it will prompt for missing values.
 ```
 cd scripts
-./generate_data.sh <schemaUrl> <datasetId> <count>
-Example: ./generate_data.sh https://ns.adobe.com/<tenant>/schemas/55f4ad0f534b3ffcbe18be78b01e0651 5d86d1a29ba7e11648cc3afb 500
+./generate_data.sh <count>
+
+Example: ./generate_data.sh 500
+IMS ORG: XYZ@AdobeOrg
+Schema ref: https://ns.adobe.com/<tenant>/schemas/090d01896b3cbd72dc7defff1290eb99
+Dataset ID: 5d86d1a29ba7e11648cc3afb
+Topic Name: connect-test-20190922211238
+Publishing 500 messages for Data set 5d86d1a29ba7e11648cc3afb and schema https://ns.adobe.com/<tenant>/schemas/090d01896b3cbd72dc7defff1290eb99
+Published 500 messages
 ```
 
 > Note: To debug logs you may use following command in different terminal
