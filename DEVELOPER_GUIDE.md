@@ -60,14 +60,6 @@ connect instances.
 
 Once the Connect server is running on port 8083, you can use REST APIs to launch multiple instances of connectors.
 
-#### Adobe Experience Platform Sink Connector
-
-
-#### Before you begin
-
-First, you need to get an API Key and IMS Token for accessing Adobe Cloud Platform APIs.
-We recommend you start with [this tutorial][tutorial].  There's also a [super helpful blogpost][blogpost] to better
- guide you through this process. 
 
 #### Create a Streaming Connection
 

@@ -28,7 +28,16 @@ AEP sink connector delivers data from Kafka topics to a registered endpoint of t
 
 
 ### Quick Start
-For running experience-platform-streaming-connect with minimal commands. Following figure illustrates steps simulated by setup script.
+
+We have included a setup script that automates the configuration needed in the AEP Platform by creating the following
+* Register a Sample Schema
+* Creating a Dataset for the Schema
+* Creating a Streaming Ingestion endpoint to send data
+* Setting up a Kafka topic in local cluster, along with configuring the AEP Sink Kafka Connector.
+* Running a Sample Data Generator to hydrate the topic
+
+Following figure illustrates steps simulated by setup script.
+
 ![AEP Sink Connector setup](./docs/resources/aep_sink_connector_setup.png)
 
 #### Prerequisite
@@ -38,6 +47,7 @@ For running experience-platform-streaming-connect with minimal commands. Followi
 brew install jq
 ```
 
+
 #### Build Docker and Run
 ```bash
 ./gradlew build copyDependencies
@@ -45,7 +55,17 @@ docker build -t streaming-connect .
 docker-compose up -d
 ```
 
-#### Create Required Resources and send data
+
+#### Before you begin
+
+First, you need to get an API Key and IMS Token for accessing Adobe Cloud Platform APIs.
+We recommend you start with [this tutorial][tutorial].  There's also a [super helpful blogpost][blogpost] to better
+~~~~ guide you through this process. 
+
+
+#### Running the Quick Start Script to setup AEP resources
+
+
 ```bash
 cd scripts
 ./setup.sh
@@ -73,7 +93,6 @@ Published 5 messages
 ```
 This will also save the values for entities created in application.conf for running test multiple times with same values.
 
-#### Send data to Adobe with quick-start script
 In case the resources are already created then you can run only data generation script to send data to Adobe
 The values for IMS Org, SchemaID, data set id and topic should be stored in application.conf else it will prompt for missing values.
 ```
@@ -104,3 +123,5 @@ For running experience-platform-streaming-connect locally step-by-step refer [De
 [docker]: https://www.docker.com/
 [jq-tool]: https://stedolan.github.io/jq/download/
 [monitor-streaming-data-flows]: https://www.adobe.io/apis/experienceplatform/home/data-ingestion/data-ingestion-services.html#!api-specification/markdown/narrative/technical_overview/streaming_ingest/e2e-monitor-streaming-data-flows.md
+[blogpost]: https://medium.com/adobetech/using-postman-for-jwt-authentication-on-adobe-i-o-7573428ffe7f
+[tutorial]: https://www.adobe.io/apis/experienceplatform/home/tutorials/alltutorials.html#!api-specification/markdown/narrative/tutorials/authenticate_to_acp_tutorial/authenticate_to_acp_tutorial.md
