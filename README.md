@@ -47,7 +47,6 @@ Following figure illustrates steps simulated by setup script.
 brew install jq
 ```
 
-
 #### Build Docker and Run
 ```bash
 ./gradlew build copyDependencies
@@ -55,17 +54,19 @@ docker build -t streaming-connect .
 docker-compose up -d
 ```
 
+>> Note: wait for the docker process to start, validate if Kafka connect is running using command below
+```bash
+curl http://localhost:8083/connectors
+[]
+```
 
 #### Before you begin
 
 First, you need to get an API Key and IMS Token for accessing Adobe Cloud Platform APIs.
 We recommend you start with [this tutorial][tutorial].  There's also a [super helpful blogpost][blogpost] to better
-~~~~ guide you through this process. 
-
+guide you through this process.
 
 #### Running the Quick Start Script to setup AEP resources
-
-
 ```bash
 cd scripts
 ./setup.sh
