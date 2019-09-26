@@ -21,7 +21,7 @@ dependencies {
   compile project(':streaming-connect-common')
 
   libraries.with {
-    compile commonslang, gson, guava, httpClient, jcommander, kafkaConnect, slf4j
+    compile commonslang, gson, guava, httpClient, kafkaConnect, slf4j
   }
 }
 

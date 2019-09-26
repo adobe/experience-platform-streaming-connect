@@ -28,15 +28,17 @@ plugins {
   id 'checkstyle'
   id 'jacoco'
   id 'org.sonarqube' version '2.6.2'
+  id 'org.ajoberstar.grgit' version '2.2.1-rc.2'
 }
 
-description 'Experience Platform Streaming Connect'
+description 'Adobe Experience Platform Streaming Connect'
 
 repositories {
   jcenter()
 }
 
 subprojects {
+  apply plugin: 'project-report'
   apply plugin: 'base'
   apply plugin: 'checkstyle'
   apply plugin: 'java'
@@ -63,12 +65,89 @@ subprojects {
     options.deprecation = true
   }
 
+  task listAllDependencies(type: DependencyReportTask) {}
+
+  tasks.withType(Test) {
+    useJUnitPlatform()
+
+    reports.html.enabled = false
+
+    beforeTest { descriptor ->
+      logger.lifecycle("Running test: " + descriptor)
+    }
+  }
+
+  jacoco {
+    toolVersion = "0.8.1"
+  }
+
+  jacocoTestReport {
+    getAdditionalSourceDirs().setFrom(sourceSets.main.allSource.srcDirs)
+    getSourceDirectories().setFrom(sourceSets.main.allSource.srcDirs)
+    getClassDirectories().setFrom(sourceSets.main.output)
+
+    reports {
+      xml.enabled = true
+      csv.enabled = false
+      html.enabled = true
+    }
+  }
+
+  test.onlyIf { !project.hasProperty('mySkipTests') }
+
   task unitTest(type: Test) {
     exclude '**/*IUTest.class'
   }
 
   task integrationTest(type: Test) {
     include '**/*IUTest.class'
+  }
+}
+
+task jacocoRootReport(type: JacocoReport) {
+  dependsOn = subprojects.test
+  getAdditionalSourceDirs().setFrom(subprojects.sourceSets.main.allSource.srcDirs)
+  getSourceDirectories().setFrom(subprojects.sourceSets.main.allSource.srcDirs)
+  getClassDirectories().setFrom(subprojects.sourceSets.main.output)
+  getExecutionData().setFrom(subprojects.jacocoTestReport.executionData)
+
+  reports {
+    html.enabled = true
+    xml.enabled = true
+    csv.enabled = false
+  }
+  onlyIf = {
+    true
+  }
+  doFirst {
+    getExecutionData().setFrom(executionData.findAll {
+      it.exists()
+    })
+  }
+}
+
+ext {
+  branchName = System.getenv("BRANCHNAME") ?: grgit.branch.current().getName()
+}
+
+sonarqube {
+  properties {
+    // Sonar server settings
+    property 'sonar.host.url', 'http://mcdpv2.sonar.corp.adobe.com:9000/'
+    property 'sonar.login', System.getenv('SONARQUBE_ACCESS_TOKEN')
+
+    // project identity & general info
+    property 'sonar.projectKey', "com.adobe.platform.streaming:experience-platform-streaming-connect:$branchName"
+    property 'sonar.projectName', "Adobe Experience Platform Streaming Connect :: $branchName"
+    property 'sonar.projectDescription', "Adobe Experience Platform Streaming Connect (branch: $branchName)"
+    property 'sonar.links.homepage', 'https://git.corp.adobe.com/experience-platform/experience-platform-streaming-connect'
+    property 'sonar.links.ci', 'https://pipeline.ci.corp.adobe.com/view/CICD/job/experience-platform-streaming-connect-pr-build'
+    property 'sonar.links.issue', 'https://jira.corp.adobe.com/secure/RapidBoard.jspa?rapidView=23428&view=planning.nodetail'
+    property 'sonar.links.scm', 'https://git.corp.adobe.com/experience-platform/experience-platform-streaming-connect'
+    property 'sonar.java.coveragePlugin', 'jacoco'
+    property 'sonar.jacoco.reportPaths', "$buildDir/jacoco/test.exec"
+    property 'sonar.verbose', 'true'
+    property 'sonar.sourceEncoding', 'UTF-8'
   }
 }
 

@@ -17,8 +17,6 @@
 
 package com.adobe.platform.streaming.sink.utils;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.ParameterException;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.connect.sink.SinkRecord;
@@ -71,5 +69,7 @@ public class SinkUtils {
 
     return gson.toJson(record.value()).getBytes(StandardCharsets.UTF_8);
   }
+
+  private SinkUtils() {}
 
 }

@@ -41,6 +41,7 @@ Following figure illustrates steps simulated by setup script.
 ![AEP Sink Connector setup](./docs/resources/aep_sink_connector_setup.png)
 
 #### Prerequisite
+* Install [Java 8][java-8]
 * Install [docker][docker]
 * Install [jq][jq-tool]
 ```bash
@@ -122,6 +123,7 @@ For running experience-platform-streaming-connect locally step-by-step refer [De
 
 [aep]: https://platform.adobe.com
 [docker]: https://www.docker.com/
+[java-8]: https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 [jq-tool]: https://stedolan.github.io/jq/download/
 [monitor-streaming-data-flows]: https://www.adobe.io/apis/experienceplatform/home/data-ingestion/data-ingestion-services.html#!api-specification/markdown/narrative/technical_overview/streaming_ingest/e2e-monitor-streaming-data-flows.md
 [blogpost]: https://medium.com/adobetech/using-postman-for-jwt-authentication-on-adobe-i-o-7573428ffe7f
