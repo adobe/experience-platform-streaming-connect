@@ -20,21 +20,21 @@ ext {
   versions = [:]
 }
 
-versions.collections = '3.2.2'
-versions.commonslang = '3.7'
-versions.gson = '2.8.2'
-versions.guava = '23.5-jre'
-versions.httpClient = '4.5.6'
+versions.collections4 = '4.4'
+versions.commonslang = '3.9'
+versions.gson = '2.8.5'
+versions.guava = '28.0-jre'
+versions.httpClient = '4.5.9'
 versions.jackson = '2.9.3'
 versions.jmockit = '1.41'
 versions.junitJupiter = '5.2.0'
 versions.jjwt = '0.9.0'
 versions.orgJson = '20180130'
-versions.kafkaConnect = '0.11.0.2'
+versions.kafkaConnect = '2.3.0'
 versions.slf4j = '1.7.25'
 
-libraries.collections = [
-  "commons-collections:commons-collections:$versions.collections"
+libraries.collections4 = [
+  "org.apache.commons:commons-collections4:$versions.collections4"
 ]
 
 libraries.commonslang = [
@@ -75,6 +75,10 @@ libraries.jjwt = [
 
 libraries.kafkaConnect = [
   "org.apache.kafka:connect-api:$versions.kafkaConnect"
+]
+
+libraries.metrics = [
+  "io.dropwizard.metrics:metrics-core:$versions.metrics"
 ]
 
 libraries.orgJson = [

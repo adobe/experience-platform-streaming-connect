@@ -23,7 +23,7 @@ import com.adobe.platform.streaming.http.HttpProducer;
 import com.adobe.platform.streaming.sink.AbstractAEPPublisher;
 import com.adobe.platform.streaming.sink.utils.SinkUtils;
 import com.google.common.base.Preconditions;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.kafka.connect.sink.SinkRecord;
@@ -38,8 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -70,7 +70,7 @@ public class BatchAEPPublisher extends AbstractAEPPublisher {
     initialDelay = SinkUtils.getProperty(props, AEP_BATCH_INITIAL_DELAY, 500);
     schedulingPreiod = SinkUtils.getProperty(props, AEP_BATCH_SCHEDULE_PERIOD, 1000);
 
-    executorService = Executors.newSingleThreadScheduledExecutor();
+    executorService = new ScheduledThreadPoolExecutor(1);
     producer = getHttpProducer(props);
   }
 

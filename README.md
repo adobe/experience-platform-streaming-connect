@@ -50,7 +50,7 @@ brew install jq
 
 #### Build Docker and Run
 ```bash
-./gradlew build copyDependencies
+./gradlew clean build copyDependencies
 docker build -t streaming-connect .
 docker-compose up -d
 ```

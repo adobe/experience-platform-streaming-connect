@@ -65,12 +65,11 @@ services:
     hostname: kafka-connect
     ports:
       - "8083:8083"
+      - "9999:9999"
     environment:
       CONNECT_BOOTSTRAP_SERVERS: "kafka1:19092"
       CONNECT_REST_PORT: 8083
       CONNECT_GROUP_ID: "streaming-connect"
-      CONNECT_PRODUCER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor
-      CONNECT_CONSUMER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor
       AUTH_ENDPOINT: "https://ims-na1-stg1.adobelogin.com"
       CONNECT_CONFIG_STORAGE_TOPIC: "streaming-connect-config"
       CONNECT_OFFSET_STORAGE_TOPIC: "streaming-connect-offsets"

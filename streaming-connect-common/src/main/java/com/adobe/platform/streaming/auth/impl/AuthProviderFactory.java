@@ -22,7 +22,7 @@ import com.adobe.platform.streaming.auth.AuthProvider;
 import com.adobe.platform.streaming.auth.AuthUtils;
 import com.adobe.platform.streaming.auth.TokenType;
 import com.google.common.base.Preconditions;
-import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;

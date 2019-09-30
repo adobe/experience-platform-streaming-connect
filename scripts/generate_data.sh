@@ -52,7 +52,7 @@ fi
 echo "Publishing ${totalMessages} messages for Data set ${datasetId} and schema ${schemaRef}"
 for i in `seq 1 ${totalMessages}`;
 do
-  ecid="100000000000000000000000000000000000$1"
+  ecid="10000000000000000000"$(printf "%018d" $i)
   message='{
     "records": [{
       "value": {
