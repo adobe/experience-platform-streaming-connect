@@ -1,0 +1,4 @@
+startDelaySeconds: 10
+ssl: false
+lowercaseOutputName: false
+lowercaseOutputLabelNames: false

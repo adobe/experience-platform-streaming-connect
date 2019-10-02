@@ -27,6 +27,7 @@ versions.guava = '28.0-jre'
 versions.httpClient = '4.5.9'
 versions.jackson = '2.9.3'
 versions.jmockit = '1.41'
+versions.jmxPrometheusJavaAgent = '0.12.0'
 versions.junitJupiter = '5.2.0'
 versions.jjwt = '0.9.0'
 versions.orgJson = '20180130'
@@ -63,6 +64,10 @@ libraries.jmockit = [
   "org.jmockit:jmockit:$versions.jmockit"
 ]
 
+libraries.jmxPrometheusJavaAgent = [
+  "io.prometheus.jmx:jmx_prometheus_javaagent:$versions.jmxPrometheusJavaAgent",
+]
+
 libraries.junitJupiter = [
   "org.junit.jupiter:junit-jupiter-api:$versions.junitJupiter",
   "org.junit.jupiter:junit-jupiter-engine:$versions.junitJupiter",
@@ -75,10 +80,6 @@ libraries.jjwt = [
 
 libraries.kafkaConnect = [
   "org.apache.kafka:connect-api:$versions.kafkaConnect"
-]
-
-libraries.metrics = [
-  "io.dropwizard.metrics:metrics-core:$versions.metrics"
 ]
 
 libraries.orgJson = [

@@ -26,13 +26,14 @@ ENV PATH=$PATH:/${KAFKA_HOME}/bin \
     CONNECT_CFG=${KAFKA_HOME}/config/connect-distributed.properties \
     CONNECT_BIN=${KAFKA_HOME}/bin/connect-distributed.sh
 
-ENV JMX_PORT=9999 \
-    CONNECT_PORT=8083
+ENV CONNECT_PORT=8083
+ENV EXTRA_ARGS="-javaagent:$KAFKA_HOME/connectors/jmx_prometheus_javaagent-0.12.0.jar=9999:${KAFKA_HOME}/config/prometheus.yml"
 
-EXPOSE ${JMX_PORT}
+EXPOSE 9999
 EXPOSE ${CONNECT_PORT}
 
 WORKDIR $KAFKA_HOME
+COPY prometheus-agent.yml ${KAFKA_HOME}/config/prometheus.yml
 COPY start-connect.sh $KAFKA_HOME/start-connect.sh
 COPY docker-entrypoint.sh /
 RUN mkdir -p $KAFKA_HOME/connectors
