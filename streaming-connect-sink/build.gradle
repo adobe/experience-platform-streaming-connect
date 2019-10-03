@@ -17,15 +17,50 @@
 
 apply from: '../dependencies.gradle'
 
+repositories {
+  jcenter()
+
+  publishing {
+    repositories {
+      maven {
+        url "https://artifactory.corp.adobe.com/artifactory/maven-experienceplatform-release"
+        credentials {
+          username = "${param_artifactory_user}" == "" ? System.getenv("ARTIFACTORY_USER") : "${param_artifactory_user}"
+          password = "${param_artifactory_api_token}" == "" ? System.getenv("ARTIFACTORY_API_TOKEN") : "${param_artifactory_api_token}"
+        }
+      }
+    }
+
+    publications {
+      maven(MavenPublication) {
+        groupId = 'com.adobe.platform.streaming'
+        artifactId = 'streaming-connect-sink'
+        version = "${version}"
+        from components.java
+      }
+    }
+  }
+}
+
+configurations {
+  jmxAgent
+}
+
 dependencies {
   compile project(':streaming-connect-common')
 
   libraries.with {
     compile commonslang, gson, guava, httpClient, kafkaConnect, slf4j
   }
+
+  jmxAgent libraries.jmxPrometheusJavaAgent
 }
 
-task copyDependencies(type: Copy) {
-  from configurations.compile
-  into 'build/dependencies'
+task copyJmxAgent(type: Copy) {
+  into "${buildDir}/libs"
+  from configurations.jmxAgent
 }
+
+jar.enabled = false
+build.dependsOn(copyJmxAgent)
+build.dependsOn(shadowJar)

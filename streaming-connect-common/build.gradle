@@ -19,7 +19,7 @@ apply from: '../dependencies.gradle'
 
 dependencies {
   libraries.with {
-    compile collections4, commonslang, guava, httpClient, jackson, jmockit, jmxPrometheusJavaAgent, junitJupiter, jjwt, orgJson, slf4j
+    compile collections4, commonslang, guava, httpClient, jackson, jmockit, junitJupiter, jjwt, orgJson, slf4j
     testCompile jmockit, junitJupiter
   }
 }

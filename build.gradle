@@ -19,6 +19,10 @@ buildscript {
   repositories {
     jcenter()
   }
+
+  dependencies {
+    classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.3'
+  }
 }
 
 plugins {
@@ -27,6 +31,7 @@ plugins {
   id 'idea'
   id 'checkstyle'
   id 'jacoco'
+  id 'maven-publish'
   id 'org.sonarqube' version '2.6.2'
   id 'org.ajoberstar.grgit' version '2.2.1-rc.2'
 }
@@ -41,9 +46,12 @@ subprojects {
   apply plugin: 'project-report'
   apply plugin: 'base'
   apply plugin: 'checkstyle'
+  apply plugin: 'com.github.johnrengelman.shadow'
   apply plugin: 'java'
   apply plugin: 'idea'
   apply plugin: 'jacoco'
+
+  version = System.getenv("PROJECT_VERSION") ?: "${versionMain}${versionQualifier}"
 
   checkstyle {
     configFile = '../config/checkstyle/checkstyle.xml' as File

@@ -38,8 +38,9 @@ COPY start-connect.sh $KAFKA_HOME/start-connect.sh
 COPY docker-entrypoint.sh /
 RUN mkdir -p $KAFKA_HOME/connectors
 
-COPY streaming-connect-sink/build/libs/streaming-connect-sink.jar $KAFKA_HOME/connectors
-COPY streaming-connect-sink/build/dependencies $KAFKA_HOME/connectors
+COPY streaming-connect-sink/build/libs/jmx_prometheus_javaagent-*.jar $KAFKA_HOME/connectors
+COPY streaming-connect-sink/build/libs/streaming-connect-sink-*.jar $KAFKA_HOME/connectors
+
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 CMD ["./start-connect.sh"]
