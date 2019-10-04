@@ -23,18 +23,17 @@ AEP sink connector delivers data from Kafka topics to a registered endpoint of t
 #### Features
 
 * Seamlessly ingest events from your Kafka topic to Adobe Experience Platform
-* Support for Authenticated streaming connections with integration with Adobe's Identity Management Service 
-* Support for Batching of requests (for reduced network calls)
+* Authenticated collection of data using Adobe's Identity Management Service 
+* Batching of messages for reduced network calls & higher throughput
 
 
 ### Quick Start
 
-We have included a setup script that automates the configuration needed in the AEP Platform by creating the following
-* Register a Sample Schema
-* Creating a Dataset for the Schema
-* Creating a Streaming Ingestion endpoint to send data
-* Setting up a Kafka topic in local cluster, along with configuring the AEP Sink Kafka Connector.
-* Running a Sample Data Generator to hydrate the topic
+We have included a quick-start script which automates configuration by creating the following artifacts
+* Sample XDM (Experience Data Model) schema
+* Dataset to collect streamed records
+* Data Collection URL
+* Kafka topic on your local machine, along with necessary configuration for the AEP Connector
 
 Following figure illustrates steps simulated by setup script.
 
@@ -72,7 +71,7 @@ guide you through this process.
 cd scripts
 ./setup.sh
 ```
-The output would be like following
+The resulting output should look similar to the one below
 ```
 Enter IMS ORG
 <IMS-ORG>
@@ -93,10 +92,7 @@ Enter the number of Experience events to publish
 Publishing 5 messages for Data set 5d86d1a29ba7e11648cc3afb and schema https://ns.adobe.com/<tenant>/schemas/090d01896b3cbd72dc7defff1290eb99
 Published 5 messages
 ```
-This will also save the values for entities created in application.conf for running test multiple times with same values.
-
-In case the resources are already created then you can run only data generation script to send data to Adobe
-The values for IMS Org, SchemaID, data set id and topic should be stored in application.conf else it will prompt for missing values.
+The quick-start script will save values for newly created resources like schema and dataset in application.conf making it easier to run test multiple times. Assuming the resources already exist, you have the option of running the data generation script to send data to Adobe Experience Platform. 
 ```
 cd scripts
 ./generate_data.sh <count>
