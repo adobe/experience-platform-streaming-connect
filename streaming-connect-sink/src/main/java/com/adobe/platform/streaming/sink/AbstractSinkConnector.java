@@ -30,7 +30,7 @@ public abstract class AbstractSinkConnector extends SinkConnector {
 
   private static final Logger LOG = LoggerFactory.getLogger(AbstractSinkConnector.class);
 
-  private static Map<String, String> connectorProps;
+  private Map<String, String> connectorProps;
 
   @Override
   public String version() {

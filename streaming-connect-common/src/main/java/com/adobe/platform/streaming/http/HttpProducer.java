@@ -30,7 +30,7 @@ public class HttpProducer implements Serializable {
 
   private String endpoint;
   private int connectTimeout;
-  private AuthProvider auth;
+  private transient AuthProvider auth;
   private int readTimeout;
   private int maxRetries;
   private int retryBackoff;

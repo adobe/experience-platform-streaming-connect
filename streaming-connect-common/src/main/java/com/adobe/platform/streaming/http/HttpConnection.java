@@ -61,6 +61,7 @@ public class HttpConnection {
     retries = 0;
   }
 
+  @SuppressWarnings("squid:S3776")
   HttpURLConnection connect() throws HttpException {
     Throwable cause = null;
     while (retries++ < maxRetries) {
@@ -145,7 +146,7 @@ public class HttpConnection {
   }
 
   private boolean isGzip() {
-    return "gzip".equals(conn.getHeaderField("Content-Encoding"));
+    return "gzip".equals(conn.getHeaderField(CONTENT_ENCODING));
   }
 
   void close() {
