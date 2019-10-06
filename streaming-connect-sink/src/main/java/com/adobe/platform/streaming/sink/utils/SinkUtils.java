@@ -16,8 +16,6 @@ import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.connect.sink.SinkRecord;
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -25,25 +23,12 @@ import java.util.Map;
  */
 public class SinkUtils {
 
-  private static final String KAFKA_MESSAGE_KEY_ATTRIBUTE = "key";
-  private static final String KAFKA_TOPIC_ATTRIBUTE = "kafka.topic";
-  private static final String KAFKA_PARTITION_ATTRIBUTE = "kafka.partition";
-  private static final String KAFKA_OFFSET_ATTRIBUTE = "kafka.offset";
-  private static final String KAFKA_TIMESTAMP_ATTRIBUTE = "kafka.timestamp";
-
-  public static Map<String, String> getRecordMetadata(SinkRecord record) {
-
-    Map<String, String> attributes = new HashMap<>();
-    if (record.key() != null) {
-      String key = record.key().toString();
-      attributes.put(KAFKA_MESSAGE_KEY_ATTRIBUTE, key);
+  public static String getStringPayload(Gson gson, SinkRecord record) {
+    if (record.value() instanceof String) {
+      return (String) record.value();
     }
-    attributes.put(KAFKA_TOPIC_ATTRIBUTE, record.topic());
-    attributes.put(KAFKA_PARTITION_ATTRIBUTE, record.kafkaPartition().toString());
-    attributes.put(KAFKA_OFFSET_ATTRIBUTE, Long.toString(record.kafkaOffset()));
-    attributes.put(KAFKA_TIMESTAMP_ATTRIBUTE, record.timestamp().toString());
 
-    return attributes;
+    return gson.toJson(record.value());
   }
 
   public static int getProperty(Map<String, String> props, String propertyName, int defaultValue) {
@@ -57,12 +42,13 @@ public class SinkUtils {
     return defaultValue;
   }
 
-  public static byte[] getBytePayload(Gson gson, SinkRecord record) {
-    if (record.value() instanceof String) {
-      return ((String) record.value()).getBytes();
+  public static int getProperty(Map<String, String> properties, String key, int defaultValue, int multiplier) {
+    int flushIntervalMilliSec = getProperty(properties, key, defaultValue) * multiplier;
+    if (flushIntervalMilliSec < 1) {
+      return defaultValue * multiplier;
     }
 
-    return gson.toJson(record.value()).getBytes(StandardCharsets.UTF_8);
+    return flushIntervalMilliSec;
   }
 
   private SinkUtils() {}

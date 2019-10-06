@@ -12,25 +12,45 @@
 
 package com.adobe.platform.streaming.sink.impl;
 
+import com.adobe.platform.streaming.AEPStreamingException;
 import com.adobe.platform.streaming.sink.AbstractSinkTask;
+import com.adobe.platform.streaming.sink.DataPublisher;
 
+import java.util.List;
 import java.util.Map;
 
 /**
  * @author Adobe Inc.
  */
-public class AEPSinkTask extends AbstractSinkTask {
-  private static final String AEP_BATCH_ENABLED = "aep.batch.enabled";
-  private static final String AEP_BATCH_DISABLED_VALUE = "false";
-  private static final String AEP_BATCH_ENABLED_VALUE = "true";
+public class AEPSinkTask extends AbstractSinkTask<String> {
+
+  private DataPublisher publisher;
 
   @Override
-  public void start(Map<String, String> props) {
-    super.start(props);
-    publisher = props.getOrDefault(AEP_BATCH_ENABLED, AEP_BATCH_DISABLED_VALUE).equals(AEP_BATCH_ENABLED_VALUE) ?
-      new BatchAEPPublisher(props) :
-      new AEPPublisher(props);
+  public void init(Map<String, String> props) throws AEPStreamingException {
+    publisher = new AEPPublisher(props);
     publisher.start();
+  }
+
+  @Override
+  public String getDataToPublish(String sinkRecord) {
+    return sinkRecord;
+  }
+
+  @Override
+  public int getPayloadLength(String dataToPublish) {
+    return dataToPublish.length();
+  }
+
+  @Override
+  public void publishData(List<String> eventDataList) {
+    publisher.publishData(eventDataList);
+  }
+
+  @Override
+  public void stop() {
+    super.stop();
+    publisher.stop();
   }
 
 }

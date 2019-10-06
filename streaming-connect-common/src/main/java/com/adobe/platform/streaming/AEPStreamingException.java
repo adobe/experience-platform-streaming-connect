@@ -10,18 +10,18 @@
  * governing permissions and limitations under the License.
  */
 
-package com.adobe.platform.streaming.sink;
-
-import java.util.List;
+package com.adobe.platform.streaming;
 
 /**
  * @author Adobe Inc.
  */
-public interface DataPublisher {
+public class AEPStreamingException extends Exception {
 
-  void start();
+  public AEPStreamingException(String message) {
+    this(message, null);
+  }
 
-  void publishData(List<String> messages);
-
-  void stop();
+  public AEPStreamingException(String message, Throwable t) {
+    super(message, t);
+  }
 }

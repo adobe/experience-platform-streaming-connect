@@ -12,20 +12,20 @@
 
 package com.adobe.platform.streaming.sink.impl;
 
+import com.adobe.platform.streaming.AEPStreamingException;
 import com.adobe.platform.streaming.http.ContentHandler;
 import com.adobe.platform.streaming.http.HttpException;
 import com.adobe.platform.streaming.http.HttpProducer;
 import com.adobe.platform.streaming.sink.AbstractAEPPublisher;
-import com.adobe.platform.streaming.sink.utils.SinkUtils;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
-import org.apache.kafka.connect.sink.SinkRecord;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,28 +34,32 @@ import java.util.Map;
 class AEPPublisher extends AbstractAEPPublisher {
 
   private static final Logger LOG = LoggerFactory.getLogger(AEPPublisher.class);
+  private static final String MESSAGES_KEY = "messages";
 
   private int count;
   private final HttpProducer producer;
-  private final Gson gson;
 
-  AEPPublisher(Map<String, String> props) {
+  AEPPublisher(Map<String, String> props) throws AEPStreamingException {
     count = 0;
-    gson = new GsonBuilder().create();
     producer = getHttpProducer(props);
   }
 
   @Override
-  public void start() {
-    LOG.info("Starting AEP publisher");
-  }
+  public void publishData(List<String> messages) {
+    if (CollectionUtils.isEmpty(messages)) {
+      LOG.debug("No messages to publish");
+      return;
+    }
 
-  @Override
-  public void sendData(SinkRecord record) {
     try {
+      JSONArray jsonMessages = new JSONArray();
+      messages.stream().map(JSONObject::new).forEach(jsonMessages::put);
+      JSONObject payload = new JSONObject();
+      payload.put(MESSAGES_KEY, jsonMessages);
+
       JSONObject response = producer.post(
         StringUtils.EMPTY,
-        SinkUtils.getBytePayload(gson, record),
+        payload.toString().getBytes(),
         ContentType.APPLICATION_JSON.getMimeType(),
         ContentHandler.jsonHandler()
       );

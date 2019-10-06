@@ -31,6 +31,7 @@ AEP Sink connector configurations can be supplied in the call register the conne
 | aep.connection.auth.client.id     | IMS client id                                 |                                                         | no       |         |
 | aep.connection.auth.client.code   | IMS client code                               |                                                         | no       |         |
 | aep.connection.auth.client.secret | IME client secret                             |                                                         |          |         |
+| aep.flush.bytes.kb                | bytes threshold to determine the batch        | 4                                                       | no       |         |
 
 ## Step-by-Step Workflow
 
@@ -162,8 +163,7 @@ curl -s -X POST \
     "key.converter.schemas.enable": "false",
     "value.converter.schemas.enable": "false",
     "aep.endpoint": "https://dcs.adobedc.net/collection/{DATA_INLET_ID}",
-    "aep.batch.enabled": true,
-    "aep.batch.size": 2
+    "aep.flush.bytes.kb": 20
   }
 }' http://localhost:8083/connectors
 ```

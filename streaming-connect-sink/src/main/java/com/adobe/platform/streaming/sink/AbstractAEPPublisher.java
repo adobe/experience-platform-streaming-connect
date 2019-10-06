@@ -12,6 +12,7 @@
 
 package com.adobe.platform.streaming.sink;
 
+import com.adobe.platform.streaming.AEPStreamingException;
 import com.adobe.platform.streaming.auth.AuthException;
 import com.adobe.platform.streaming.auth.AuthProvider;
 import com.adobe.platform.streaming.auth.AuthUtils;
@@ -20,6 +21,7 @@ import com.adobe.platform.streaming.auth.impl.AuthProviderFactory;
 import com.adobe.platform.streaming.http.HttpProducer;
 import com.adobe.platform.streaming.sink.utils.SinkUtils;
 import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,14 +52,27 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
   private static final String AEP_CONNECTION_AUTH_ENABLED_VALUE = "true";
   private static final String AEP_CONNECTION_AUTH_DISABLED_VALUE = "false";
 
-  protected HttpProducer getHttpProducer(Map<String, String> props) {
-    return HttpProducer.newBuilder(props.get(AEP_ENDPOINT))
+  protected HttpProducer getHttpProducer(Map<String, String> props) throws AEPStreamingException {
+    return HttpProducer.newBuilder(getAepEndpoint(props.get(AEP_ENDPOINT)))
       .withConnectTimeout(SinkUtils.getProperty(props, AEP_CONNECTION_TIMEOUT, 5000))
       .withReadTimeout(SinkUtils.getProperty(props, AEP_CONNECTION_READ_TIMEOUT, 60000))
       .withMaxRetries(SinkUtils.getProperty(props, AEP_CONNECTION_MAX_RETRIES, 3))
       .withRetryBackoff(SinkUtils.getProperty(props, AEP_CONNECTION_MAX_RETRIES_BACKOFF, 300))
       .withAuth(getAuthProvider(props))
       .build();
+  }
+
+  @Override
+  public void start() {
+    LOG.info("Starting AEP publisher");
+  }
+
+  private String getAepEndpoint(String aepEndpoint) throws AEPStreamingException {
+    if (StringUtils.isEmpty(aepEndpoint)) {
+      throw new AEPStreamingException("Invalid AEP Endpoint to publish");
+    }
+
+    return aepEndpoint.replace("/collection/", "/collection/batch/");
   }
 
   private AuthProvider getAuthProvider(Map<String, String> props) {
