@@ -26,7 +26,6 @@ plugins {
   id 'idea'
   id 'checkstyle'
   id 'jacoco'
-  id 'maven-publish'
   id 'org.sonarqube' version '2.6.2'
   id 'org.ajoberstar.grgit' version '2.2.1-rc.2'
 }
@@ -43,6 +42,7 @@ subprojects {
   apply plugin: 'checkstyle'
   apply plugin: 'com.github.johnrengelman.shadow'
   apply plugin: 'java'
+  apply plugin: 'maven-publish'
   apply plugin: 'idea'
   apply plugin: 'jacoco'
 
@@ -56,6 +56,26 @@ subprojects {
 
   repositories {
     jcenter()
+
+    publishing {
+      repositories {
+        maven {
+          url "https://artifactory.corp.adobe.com/artifactory/maven-experienceplatform-release"
+          credentials {
+            username = "${param_artifactory_user}" == "" ? System.getenv("ARTIFACTORY_USER") : "${param_artifactory_user}"
+            password = "${param_artifactory_api_token}" == "" ? System.getenv("ARTIFACTORY_API_TOKEN") : "${param_artifactory_api_token}"
+          }
+        }
+      }
+
+      publications {
+        maven(MavenPublication) {
+          groupId = 'com.adobe.platform.streaming'
+          version = "${version}"
+          from components.java
+        }
+      }
+    }
   }
 
   compileJava {
@@ -128,6 +148,8 @@ task jacocoRootReport(type: JacocoReport) {
     })
   }
 }
+
+jar.enabled = false
 
 ext {
   branchName = System.getenv("BRANCHNAME") ?: grgit.branch.current().getName()

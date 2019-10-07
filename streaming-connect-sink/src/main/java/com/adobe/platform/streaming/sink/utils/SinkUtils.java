@@ -43,12 +43,12 @@ public class SinkUtils {
   }
 
   public static int getProperty(Map<String, String> properties, String key, int defaultValue, int multiplier) {
-    int flushIntervalMilliSec = getProperty(properties, key, defaultValue) * multiplier;
-    if (flushIntervalMilliSec < 1) {
+    int propertyValue = getProperty(properties, key, defaultValue) * multiplier;
+    if (propertyValue < 1) {
       return defaultValue * multiplier;
     }
 
-    return flushIntervalMilliSec;
+    return propertyValue;
   }
 
   private SinkUtils() {}
