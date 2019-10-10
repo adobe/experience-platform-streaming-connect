@@ -1,0 +1,12 @@
+language: java
+jdk:
+  - oraclejdk8
+dist: trusty
+install: true
+sudo: required
+services:
+  - docker
+script: ./gradlew clean build
+cache:
+  directories:
+    - "$HOME/.m2"
