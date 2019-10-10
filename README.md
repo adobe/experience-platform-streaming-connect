@@ -1,5 +1,7 @@
 # What is Kafka Connect?
 
+[![Build Status](https://travis-ci.com/adobe/experience-platform-streaming-connect.svg?branch=master)](https://travis-ci.com/adobe/experience-platform-streaming-connect)
+
 "[Kafka Connect](https://docs.confluent.io/current/connect/index.html)", an open source component of Apache Kafka, is a framework for connecting Kafka with external systems such as databases, key-value stores, search indexes, and file systems.
 
 Kafka Connect is a framework which enables connectors developed by the open source community around Apache Kafka. It allows developers to easily import data from their data sources directly into Kafka, and then take that data from Kafka and then feed it into other systems like Elastic Search.
