@@ -11,6 +11,14 @@ The docker setup comes with a full stack of Kafka tools and utilities including 
 Once the docker is running, you should be able to test the entire setup using a rest api to insert the message into
 your local docker kafka topic.
 
+
+## Build Docker locally and Run
+```bash
+./gradlew clean build
+docker build -t streaming-connect .
+docker-compose up -d
+```
+
 ## Configuration Options
 
 The AEP connector is a uber jar containing all the classfiles and its third-party dependencies.
@@ -57,12 +65,7 @@ connect instances.
 
 ```curl -X GET http://localhost:8083/connectors```
 
-### Create a connector instance
-
-Once the Connect server is running on port 8083, you can use REST APIs to launch multiple instances of connectors.
-
-
-#### Create a Streaming Connection
+### Create a Streaming Connection
 
 In order to send streaming data, you must first request a Streaming Connection from Adobe by providing some essential
  properties. Data Inlet Registration APIs are behind adobe.io gateway, so the first step in requesting a new endpoint,
@@ -109,6 +112,11 @@ the one below
 The `inletUrl` in the response above is the AEP Streaming Connection to which the real time events will be getting
 sinked to.
 
+### Run AEP Streaming Connector
+
+Once the Connect server is running on port 8083, you can use REST APIs to launch multiple instances of connectors.
+
+#### Basic
 ```
 curl -s -X POST \
 -H "Content-Type: application/json" \
@@ -116,6 +124,9 @@ curl -s -X POST \
   "name": "aep-sink-connector",
   "config": {
     "topics": "connect-test",
+    "tasks.max": 1,
+    "aep.flush.interval.seconds": 1,
+    "aep.flush.bytes.kb": 4,
     "connector.class": "com.adobe.platform.streaming.sink.impl.AEPSinkConnector",
     "key.converter.schemas.enable": "false",
     "value.converter.schemas.enable": "false",
@@ -124,7 +135,7 @@ curl -s -X POST \
 }' http://localhost:8083/connectors
 ```
 
-#### Adobe Experience Platform Sink Connector (Authentication Enabled)
+#### Authentication Enabled
 
 Use the command below to set up an Sink connector to a Authenticated Streaming Connection:
 
@@ -135,6 +146,9 @@ curl -s -X POST \
   "name": "aep-auth-sink-connector",
   "config": {
     "topics": "connect-test",
+    "tasks.max": 1,
+    "aep.flush.interval.seconds": 1,
+    "aep.flush.bytes.kb": 4,
     "connector.class": "com.adobe.platform.streaming.sink.impl.AEPSinkConnector",
     "key.converter.schemas.enable": "false",
     "value.converter.schemas.enable": "false",
@@ -148,7 +162,7 @@ curl -s -X POST \
 }' http://localhost:8083/connectors
 ```
 
-#### Adobe Experience Platform Sink Connector (Batching Enabled)
+#### Batching
 
 Use the command below to set up an Sink connector to batch up requests and reduce the number of network calls 
 
@@ -159,11 +173,13 @@ curl -s -X POST \
   "name": "aep-batch-sink-connector",
   "config": {
     "topics": "connect-test",
+    "tasks.max": 1,
+    "aep.flush.interval.seconds": 1,
+    "aep.flush.bytes.kb": 20,
     "connector.class": "com.adobe.platform.streaming.sink.impl.AEPSinkConnector",
     "key.converter.schemas.enable": "false",
     "value.converter.schemas.enable": "false",
     "aep.endpoint": "https://dcs.adobedc.net/collection/{DATA_INLET_ID}",
-    "aep.flush.bytes.kb": 20
   }
 }' http://localhost:8083/connectors
 ```

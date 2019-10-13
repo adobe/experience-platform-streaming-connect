@@ -6,7 +6,7 @@ install: true
 sudo: required
 services:
   - docker
-script: ./gradlew clean build
+script: ./gradlew clean build && docker build -t streaming-connect .
 cache:
   directories:
     - "$HOME/.m2"

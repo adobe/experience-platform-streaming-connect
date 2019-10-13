@@ -32,7 +32,7 @@ RUN set -x && \
     mv ${KAFKA_DIST_TGZ} /tmp && \
     tar xfz /tmp/${KAFKA_DIST_TGZ} -C /opt && \
     rm /tmp/${KAFKA_DIST_TGZ} && \
-    apk del unzip curl ca-certificates gnupg
+    apk del unzip ca-certificates gnupg
 
 ENV PATH=$PATH:/${KAFKA_HOME}/bin \
     CONNECT_CFG=${KAFKA_HOME}/config/connect-distributed.properties \
@@ -47,6 +47,11 @@ EXPOSE ${CONNECT_PORT}
 WORKDIR $KAFKA_HOME
 COPY prometheus-agent.yml ${KAFKA_HOME}/config/prometheus.yml
 COPY start-connect.sh $KAFKA_HOME/start-connect.sh
+
+COPY setup.sh $KAFKA_HOME/setup.sh
+COPY generate_data.sh $KAFKA_HOME/generate_data.sh
+COPY application.conf $KAFKA_HOME/application.conf
+
 COPY docker-entrypoint.sh /
 RUN mkdir -p $KAFKA_HOME/connectors
 
