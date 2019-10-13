@@ -1,3 +1,4 @@
+#!/bin/sh
 ##
  # Copyright 2019 Adobe. All rights reserved.
  # This file is licensed to you under the Apache License, Version 2.0 (the "License");
@@ -10,7 +11,6 @@
  # governing permissions and limitations under the License.
 ##
 
-#!/bin/sh
 set -e
 
 totalMessages=$1
@@ -19,7 +19,7 @@ schemaRef=$3
 datasetId=$4
 topicName=$5
 
-. ./application.conf
+. ${PWD}/application.conf
 
 if [ -z "${imsOrg}" ]; then
   if [ -z "${org}" ]; then
@@ -121,9 +121,9 @@ do
     }]
   }'
   messageToPublish=`echo ${message} | jq -c .`
-  response=$(curl -X POST http://localhost:8082/topics/${topicName} \
+  response=$(curl -X POST http://kafka-rest-proxy:8082/topics/${topicName} \
     -H 'Content-Type: application/vnd.kafka.json.v2+json' \
-    -H 'Host: localhost:8082' \
+    -H 'Host: kafka-rest-proxy:8082' \
     -d ${messageToPublish} 2> /dev/null)
 done
 

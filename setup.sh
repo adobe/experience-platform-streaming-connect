@@ -1,3 +1,4 @@
+#!/bin/sh
  #
  # Copyright 2019 Adobe. All rights reserved.
  # This file is licensed to you under the Apache License, Version 2.0 (the "License");
@@ -10,7 +11,6 @@
  # governing permissions and limitations under the License.
  #
 
-#!/bin/sh
 set -e
 
 IMS_HOST=${IMS_HOST:-"ims-na1.adobelogin.com"}
@@ -43,16 +43,22 @@ fi
 # Fetch Access token
 access_token=$(curl -X POST \
   https://${IMS_HOST}/ims/exchange/jwt/ \
-  -H "content-type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW" \
+  -H "Content-Type: multipart/form-data" \
   -F client_id=${CLIENT_ID} \
   -F client_secret=${CLIENT_SECRET} \
   -F jwt_token=${JWT_TOKEN} 2>/dev/null | jq -r ".access_token")
 
 dateString=`date +%Y%m%d%H%M%S`
 
-# Create A Schema
-SCHEMA_NAME=${SCHEMA_NAME:-"Streaming_test_profile_api"}-${dateString}
-echo "Making call to create schema ${PLATFORM_GATEWAY} with name ${SCHEMA_NAME}"
+DEFAULT_SCHEMA_NAME="Streaming_Connect_Schema_${dateString}"
+if [ -z "${SCHEMA_NAME}" ]; then
+  echo "Enter Schema Name: [default: ${DEFAULT_SCHEMA_NAME}]"
+  read SCHEMA_NAME
+fi
+
+SCHEMA_NAME=${SCHEMA_NAME:-${DEFAULT_SCHEMA_NAME}}
+echo "Making call to create schema to ${PLATFORM_GATEWAY} with name ${SCHEMA_NAME}"
+
 schema=$(curl -X POST \
   ${PLATFORM_GATEWAY}data/foundation/schemaregistry/tenant/schemas \
   -H "Authorization: Bearer ${access_token}" \
@@ -88,10 +94,18 @@ schema=$(curl -X POST \
     ]
 }' 2>/dev/null | jq -r '.["$id"]')
 
-echo "Schema ID: "${schema}
+echo "Schema ID: ${schema}"
 
 # Create a dataset for the schema
-dataSetName="Streaming Ingest Test-${dateString}"
+DEFAULT_DATASET_NAME="Streaming_Ingest_Test_${dateString}"
+if [ -z "${DATASET_NAME}" ]; then
+  echo "Enter Dataset Name: [default: ${DEFAULT_DATASET_NAME}]"
+  read DATASET_NAME
+fi
+
+DATASET_NAME=${DATASET_NAME:-${DEFAULT_DATASET_NAME}}
+
+echo "Making call to create dataset to ${PLATFORM_GATEWAY} with name ${DATASET_NAME}"
 dataSet=$(curl -X POST \
   ${PLATFORM_GATEWAY}data/foundation/catalog/dataSets \
   -H "Authorization: Bearer ${access_token}" \
@@ -99,7 +113,7 @@ dataSet=$(curl -X POST \
   -H "x-api-key: ${CLIENT_ID}" \
   -H "x-gw-ims-org-id: ${IMS_ORG}" \
   -d '{
-    "name": "'"${dataSetName}"'",
+    "name": "'"${DATASET_NAME}"'",
     "description": "Test for ingesting streaming data into profile",
     "schemaRef": {
       "id": "'"${schema}"'",
@@ -120,8 +134,23 @@ dataSet=$(curl -X POST \
 echo "Data Set: "${dataSet}
 
 # Create a streaming connection
-INLET_NAME="My Streaming Endpoint-${dateString}"
-INLET_SOURCE="AEP_Streaming_Connection_${dateString}"
+DEFAULT_INLET_NAME="My Streaming Connection-${dateString}"
+if [ -z "${STREAMING_CONNECTION_NAME}" ]; then
+  echo "Enter Streaming Connection Name: [default: ${DEFAULT_INLET_NAME}]"
+  read STREAMING_CONNECTION_NAME
+fi
+
+INLET_NAME=${STREAMING_CONNECTION_NAME:-${DEFAULT_INLET_NAME}}
+
+DEFAULT_INLET_SOURCE="My Streaming Source-${dateString}"
+if [ -z "${STREAMING_CONNECTION_SOURCE}" ]; then
+  echo "Enter Streaming Connection Source: [default: ${DEFAULT_INLET_SOURCE}]"
+  read STREAMING_CONNECTION_SOURCE
+fi
+INLET_SOURCE=${STREAMING_CONNECTION_SOURCE:-${DEFAULT_INLET_SOURCE}}
+
+echo "Making call to create streaming connection to ${PLATFORM_GATEWAY} with name ${INLET_NAME} and source ${INLET_SOURCE}"
+
 streamingEndpoint=$(curl POST \
   ${PLATFORM_GATEWAY}data/core/edge/inlet \
   -H "Authorization: Bearer ${access_token}" \
@@ -139,12 +168,15 @@ echo "Streaming Connection: "${streamingEndpoint}
 
 # Create a Connect Instance
 connectTopicName="connect-test-${dateString}"
-docker exec experience-platform-streaming-connect_kafka1_1 /usr/bin/kafka-topics --bootstrap-server localhost:9092 \
- --create --replication-factor 1 --partitions 1 --topic ${connectTopicName}
+${KAFKA_HOME}/bin/kafka-topics.sh \
+ --bootstrap-server kafka1:19092 \
+ --create --replication-factor 1 \
+ --partitions 1 \
+ --topic ${connectTopicName}
 
 aemSinkConnectorName="aep-sink-connector-${dateString}"
 aemSinkConnector=$(curl -s -X POST \
-  http://localhost:8083/connectors \
+  http://kafka-connect:8083/connectors \
   -H "Content-Type: application/json" \
   -d '{
     "name": "'"${aemSinkConnectorName}"'",
@@ -165,9 +197,9 @@ datasetId=`echo ${dataSet} | cut -d'"' -f2 | cut -d'/' -f3`
 echo "Enter the number of Experience events to publish"
 read count
 
-echo "org=${IMS_ORG}" > ./application.conf
-echo "schema=${schema}" >> ./application.conf
-echo "dataset=${datasetId}" >> ./application.conf
-echo "topic=${connectTopicName}" >> ./application.conf
+echo "org=${IMS_ORG}" > ${PWD}/application.conf
+echo "schema=${schema}" >> ${PWD}/application.conf
+echo "dataset=${datasetId}" >> ${PWD}/application.conf
+echo "topic=${connectTopicName}" >> ${PWD}/application.conf
 
-./generate_data.sh ${count} ${IMS_ORG} ${schema} ${datasetId}  ${connectTopicName}
+${PWD}/generate_data.sh ${count} ${IMS_ORG} ${schema} ${datasetId}  ${connectTopicName}

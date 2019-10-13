@@ -28,6 +28,23 @@ AEP sink connector delivers data from Kafka topics to a registered endpoint of t
 * Authenticated collection of data using Adobe's Identity Management Service 
 * Batching of messages for reduced network calls & higher throughput
 
+### Artifacts
+
+#### AEP Streaming Connector JAR
+
+If you have your own Kafka Connect Cluster then you just need to drop AEP Streaming Connector which is an Kafka Connect
+Plugin Uber JAR. Refer [documentation](https://docs.confluent.io/current/connect/userguide.html#installing-plugins)
+on how to install Kafka Connect plugin.
+Once plugin has been installed in Kafka Connect cluster, you can run streaming connector instances to send data to
+Adobe. Refer [developer guide](./DEVELOPER_GUIDE.md#run-aep-streaming-connector)
+
+#### AEP Streaming Connector with Kafka Connect
+
+If you have your own Kafka deployment but not Kafka Connect Instance, then you can use [docker](https://hub.docker.com/r/adobe/experience-platform-streaming-connect)
+to talk to your Kafka brokers and send data to Adobe.
+```bash
+docker run adobe/experience-platform-streaming-connect --props connect.bootstrap.servers=<karkabrokers:port>
+```
 
 ### Quick Start
 
@@ -51,7 +68,7 @@ brew install jq
 
 #### Build Docker and Run
 ```bash
-./gradlew clean build
+./gradlew clean build -x test
 docker build -t streaming-connect .
 docker-compose up -d
 ```
@@ -70,8 +87,7 @@ guide you through this process.
 
 #### Running the Quick Start Script to setup AEP resources
 ```bash
-cd scripts
-./setup.sh
+docker exec -i experience-platform-streaming-connect_kafka-connect_1 ./setup.sh
 ```
 The resulting output should look similar to the one below
 ```
@@ -94,10 +110,12 @@ Enter the number of Experience events to publish
 Publishing 5 messages for Data set 5d86d1a29ba7e11648cc3afb and schema https://ns.adobe.com/<tenant>/schemas/090d01896b3cbd72dc7defff1290eb99
 Published 5 messages
 ```
-The quick-start script will save values for newly created resources like schema and dataset in application.conf making it easier to run test multiple times. Assuming the resources already exist, you have the option of running the data generation script to send data to Adobe Experience Platform. 
+
+The quick-start script will save values for newly created resources like schema and dataset in application.conf
+making it easier to run test multiple times. Assuming the resources already exist, you have the option of running
+the data generation script to send data to Adobe Experience Platform.
 ```
-cd scripts
-./generate_data.sh <count>
+docker exec -i experience-platform-streaming-connect_kafka-connect_1 ./generate_data.sh <count>
 
 Example: ./generate_data.sh 500
 IMS ORG: XYZ@AdobeOrg
@@ -118,6 +136,14 @@ To verify your data is landing into platform, login to [AEP][aep] and follow [do
 
 ### Developer Guide
 For running experience-platform-streaming-connect locally step-by-step refer [Developer Guide](./DEVELOPER_GUIDE.md)
+
+### Releasing a New Version
+
+Guidelines:
+* If you haven't already, familiarize yourself with the [semver specs](http://semver.org/)
+* Do not change the major version unless there is a breaking change.
+* Bump the minor version when adding new functionality which is backward compatible or enhancing an existing functionality
+* Bump the patch version when making changes that are completely isolated from the API.
 
 [aep]: https://platform.adobe.com
 [docker]: https://www.docker.com/
