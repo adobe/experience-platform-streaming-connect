@@ -1,5 +1,6 @@
 # What is Kafka Connect?
 
+[![Docker Hub](https://img.shields.io/badge/docker-latest-blue.svg)](https://hub.docker.com/r/adobe/experience-platform-streaming-connect/)
 [![Build Status](https://travis-ci.com/adobe/experience-platform-streaming-connect.svg?branch=master)](https://travis-ci.com/adobe/experience-platform-streaming-connect)
 
 "[Kafka Connect](https://docs.confluent.io/current/connect/index.html)", an open source component of Apache Kafka, is a framework for connecting Kafka with external systems such as databases, key-value stores, search indexes, and file systems.
