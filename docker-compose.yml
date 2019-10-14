@@ -10,7 +10,7 @@
  # governing permissions and limitations under the License.
 ##
 
-version: "2.1"
+version: "3"
 services:
   zoo1:
     image: zookeeper:3.4.9
