@@ -41,17 +41,25 @@ if [ -z "${JWT_TOKEN}" ]; then
 fi
 
 # Fetch Access token
-access_token=$(curl -X POST \
+ims_response=$(curl -i -o - --silent -X POST \
   https://${IMS_HOST}/ims/exchange/jwt/ \
   -H "Content-Type: multipart/form-data" \
   -F client_id=${CLIENT_ID} \
   -F client_secret=${CLIENT_SECRET} \
-  -F jwt_token=${JWT_TOKEN} 2>/dev/null | jq -r ".access_token")
+  -F jwt_token=${JWT_TOKEN} 2>/dev/null)
+
+ims_response_code=$(echo "$ims_response" | grep -v '100 Continue' | grep HTTP |  awk '{print $2}')
+if [[ "${ims_response_code}" -ge "400" ]]; then
+  echo "Error: Unable to fetch access token from IMS, response code: ${ims_response_code}";
+  exit 1;
+fi
+
+access_token=$(echo "${ims_response}" | grep 'access_token' | jq -r ".access_token");
 
 dateString=`date +%Y%m%d%H%M%S`
 
 DEFAULT_SCHEMA_NAME="Streaming_Connect_Schema_${dateString}"
-if [ -z "${SCHEMA_NAME}" ]; then
+if [[ -z "${SCHEMA_NAME}" ]]; then
   echo "Enter Schema Name: [default: ${DEFAULT_SCHEMA_NAME}]"
   read SCHEMA_NAME
 fi
@@ -59,7 +67,7 @@ fi
 SCHEMA_NAME=${SCHEMA_NAME:-${DEFAULT_SCHEMA_NAME}}
 echo "Making call to create schema to ${PLATFORM_GATEWAY} with name ${SCHEMA_NAME}"
 
-schema=$(curl -X POST \
+schema_response=$(curl -i -o - --silent -X POST \
   ${PLATFORM_GATEWAY}data/foundation/schemaregistry/tenant/schemas \
   -H "Authorization: Bearer ${access_token}" \
   -H "Content-Type: application/json" \
@@ -92,13 +100,20 @@ schema=$(curl -X POST \
     "meta:immutableTags": [
       "union"
     ]
-}' 2>/dev/null | jq -r '.["$id"]')
+}' 2>/dev/null)
 
+schema_response_code=$(echo "$schema_response" | grep -v '100 Continue' | grep HTTP |  awk '{print $2}')
+if [[ "${schema_response_code}" -ge "400" ]]; then
+  echo "Error: Unable to create schema, response code: ${schema_response_code}";
+  exit 1;
+fi
+
+schema=$(echo "${schema_response}" | grep 'meta:resourceType' | jq -r '.["$id"]')
 echo "Schema ID: ${schema}"
 
 # Create a dataset for the schema
 DEFAULT_DATASET_NAME="Streaming_Ingest_Test_${dateString}"
-if [ -z "${DATASET_NAME}" ]; then
+if [[ -z "${DATASET_NAME}" ]]; then
   echo "Enter Dataset Name: [default: ${DEFAULT_DATASET_NAME}]"
   read DATASET_NAME
 fi
@@ -143,7 +158,7 @@ fi
 INLET_NAME=${STREAMING_CONNECTION_NAME:-${DEFAULT_INLET_NAME}}
 
 DEFAULT_INLET_SOURCE="My Streaming Source-${dateString}"
-if [ -z "${STREAMING_CONNECTION_SOURCE}" ]; then
+if [[ -z "${STREAMING_CONNECTION_SOURCE}" ]]; then
   echo "Enter Streaming Connection Source: [default: ${DEFAULT_INLET_SOURCE}]"
   read STREAMING_CONNECTION_SOURCE
 fi
@@ -151,7 +166,7 @@ INLET_SOURCE=${STREAMING_CONNECTION_SOURCE:-${DEFAULT_INLET_SOURCE}}
 
 echo "Making call to create streaming connection to ${PLATFORM_GATEWAY} with name ${INLET_NAME} and source ${INLET_SOURCE}"
 
-streamingEndpoint=$(curl POST \
+inlet_response=$(curl -i -o - --silent -X POST \
   ${PLATFORM_GATEWAY}data/core/edge/inlet \
   -H "Authorization: Bearer ${access_token}" \
   -H "Content-Type: application/json" \
@@ -162,7 +177,14 @@ streamingEndpoint=$(curl POST \
     "description" : "Collects streaming data from my website",
     "sourceId" : "'"${INLET_SOURCE}"'",
     "dataType": "xdm"
-}' 2> /dev/null | jq -r ".inletUrl" )
+}' 2> /dev/null)
+
+inlet_response_code=$(echo "$inlet_response" | grep -v '100 Continue' | grep HTTP  |  awk '{print $2}')
+if [[ "${inlet_response_code}" -ge "400" ]]; then
+  echo "Error: Unable to create schema, response code: ${inlet_response_code}";
+  exit 1;
+fi
+streamingEndpoint=$(echo "${inlet_response}" | grep 'inletUrl' | jq -r ".inletUrl")
 
 echo "Streaming Connection: "${streamingEndpoint}
 
@@ -175,7 +197,7 @@ ${KAFKA_HOME}/bin/kafka-topics.sh \
  --topic ${connectTopicName}
 
 aemSinkConnectorName="aep-sink-connector-${dateString}"
-aemSinkConnector=$(curl -s -X POST \
+aem_connector_response=$(curl -i -o - --silent -X POST \
   http://kafka-connect:8083/connectors \
   -H "Content-Type: application/json" \
   -d '{
@@ -188,6 +210,12 @@ aemSinkConnector=$(curl -s -X POST \
       "aep.endpoint": "'"${streamingEndpoint}"'"
     }
 }')
+
+aem_connector_response_code=$(echo "$aem_connector_response" | grep -v '100 Continue'| grep HTTP |  awk '{print $2}')
+if [[ "${aem_connector_response_code}" -ge "400" ]]; then
+  echo "Error: Unable to create streaming connector, response code: ${aem_connector_response_code}";
+  exit 1;
+fi
 
 echo "AEP Sink Connector ${aemSinkConnectorName}"
 

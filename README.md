@@ -1,7 +1,8 @@
-# What is Kafka Connect?
-
+\
 [![Docker Hub](https://img.shields.io/badge/docker-latest-blue.svg)](https://hub.docker.com/r/adobe/experience-platform-streaming-connect/)
 [![Build Status](https://travis-ci.com/adobe/experience-platform-streaming-connect.svg?branch=master)](https://travis-ci.com/adobe/experience-platform-streaming-connect)
+
+# What is Kafka Connect?
 
 "[Kafka Connect](https://docs.confluent.io/current/connect/index.html)", an open source component of Apache Kafka, is a framework for connecting Kafka with external systems such as databases, key-value stores, search indexes, and file systems.
 
@@ -100,16 +101,26 @@ Enter Client Secret
 ***
 Enter JWT Token
 ***
+Enter Schema Name: [default: Streaming_Connect_Schema_20191014074347]
 
-Making call to create schema https://platform.adobe.io/ with name Streaming_test_profile_api-20190922211238
-Schema ID: https://ns.adobe.com/<tenant>/schemas/090d01896b3cbd72dc7defff1290eb99
-Data Set: ["@/dataSets/5d86d1a29ba7e11648cc3afb"]
-Streaming Connection: https://dcs.adobedc.net/collection/1e58b84cb62853b333b54980c45bdb40fc3bf80bc47022da0f76eececb2f9237
-AEP Sink Connector aep-sink-connector-20190922211238
+Making call to create schema to https://platform.adobe.io/ with name Streaming_Connect_Schema_20191014074347
+Schema ID: https://ns.adobe.com/<tenant>/schemas/<schema ID>
+Enter Dataset Name: [default: Streaming_Ingest_Test_20191014074347]
+
+Making call to create dataset to https://platform.adobe.io/ with name Streaming_Ingest_Test_20191014074347
+Data Set: ["@/dataSets/<Dataset ID>"]
+Enter Streaming Connection Name: [default: My Streaming Connection-20191014074347]
+
+Enter Streaming Connection Source: [default: My Streaming Source-20191014074347]
+
+Making call to create streaming connection to https://platform.adobe.io/ with name My Streaming Connection-20191014074347 and source My Streaming Source-20191014074347
+Streaming Connection: https://dcs.adobedc.net/collection/<Streaming Connection ID>
+AEP Sink Connector aep-sink-connector-20191014074347
 Enter the number of Experience events to publish
-5
-Publishing 5 messages for Data set 5d86d1a29ba7e11648cc3afb and schema https://ns.adobe.com/<tenant>/schemas/090d01896b3cbd72dc7defff1290eb99
-Published 5 messages
+100
+Publishing 100 messages for Data set <Dataset ID> and schema https://ns.adobe.com/<tenant>/schemas/<schema ID>
+Published 100 messages
+
 ```
 
 The quick-start script will save values for newly created resources like schema and dataset in application.conf
