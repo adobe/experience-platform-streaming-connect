@@ -166,25 +166,54 @@ INLET_SOURCE=${STREAMING_CONNECTION_SOURCE:-${DEFAULT_INLET_SOURCE}}
 
 echo "Making call to create streaming connection to ${PLATFORM_GATEWAY} with name ${INLET_NAME} and source ${INLET_SOURCE}"
 
-inlet_response=$(curl -i -o - --silent -X POST \
-  ${PLATFORM_GATEWAY}data/core/edge/inlet \
+connection_response=$(curl -X POST \
+  ${PLATFORM_GATEWAY}data/foundation/flowservice/connections \
   -H "Authorization: Bearer ${access_token}" \
   -H "Content-Type: application/json" \
   -H "x-api-key: ${CLIENT_ID}" \
   -H "x-gw-ims-org-id: ${IMS_ORG}" \
-  -d '{
-    "name" : "'"${INLET_NAME}"'",
-    "description" : "Collects streaming data from my website",
-    "sourceId" : "'"${INLET_SOURCE}"'",
-    "dataType": "xdm"
-}' 2> /dev/null)
+  -d '
+   {
+    "name": "'"${INLET_NAME}"'",
+    "providerId": "521eee4d-8cbe-4906-bb48-fb6bd4450033",
+    "description": "Streaming Connection from kafka topic",
+    "connectionSpec": {
+        "id": "bc7b00d6-623a-4dfc-9fdb-f1240aeadaeb",
+        "version": "1.0"
+    },
+    "auth": {
+        "specName": "Streaming Connection",
+        "params": {
+            "sourceId": "'"${INLET_SOURCE}"'",
+            "dataType": "xdm",
+            "name": "'"${INLET_NAME}"'"
+        }
+    }
+   }' 2> /dev/null)
+
+connection_response_code=$(echo "${connection_response}" | grep -v '100 Continue' | grep HTTP  |  awk '{print $2}')
+if [[ "${connection_response_code}" -ge "400" ]]; then
+  echo "Error: Unable to create streaming connection, response code: ${connection_response_code}";
+  exit 1;
+fi
+streamingConnectionId=$(echo "${connection_response}" | grep 'id' | jq -r ".id")
+
+echo "Streaming Connection: ${streamingConnectionId}"
+
+inlet_response=$(curl -i -o - --silent \
+  ${PLATFORM_GATEWAY}data/foundation/flowservice/connections/${streamingConnectionId} \
+  -H "Authorization: Bearer ${access_token}" \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: ${CLIENT_ID}" \
+  -H "x-gw-ims-org-id: ${IMS_ORG}"
+  2> /dev/null)
 
 inlet_response_code=$(echo "$inlet_response" | grep -v '100 Continue' | grep HTTP  |  awk '{print $2}')
 if [[ "${inlet_response_code}" -ge "400" ]]; then
-  echo "Error: Unable to create schema, response code: ${inlet_response_code}";
+  echo "Error: Unable to fetch connection info, response code: ${inlet_response_code}";
   exit 1;
 fi
-streamingEndpoint=$(echo "${inlet_response}" | grep 'inletUrl' | jq -r ".inletUrl")
+streamingEndpoint=$(echo "${inlet_response}" | grep "inletUrl" | jq -r ".items[0].auth.params.inletUrl")
 
 echo "Streaming Connection: "${streamingEndpoint}
 
