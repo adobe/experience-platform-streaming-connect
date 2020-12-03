@@ -74,38 +74,87 @@ is to either use your existing authentication token and API key combination, or 
 
 Once you have an IMS access token and API key, it needs to be provided as part of the POST request.
 
+Note that the sandbox-name is optional, if not provided will default to the Production sandbox.
+
+
 ```
-CURL -X POST "https://platform.adobe.io/data/core/edge/inlet" \
-  -H "Cache-Control: no-cache" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer {ACCESS_TOKEN}" \
-  -H "x-api-key: {API_KEY}" \
-  -H "x-gw-ims-org-id: {IMS_ORG}" \
-  -d '{
-       "name" : "<data_inlet_name>",
-       "description" : "<data_inlet_description>",
-       "sourceId" : "<identifier_of_device_or_source_that_helps_you_identify_it>",
-       "dataType": "xdm"
-   }'
+curl -X POST https://platform.adobe.io/data/foundation/flowservice/connections \
+ -H 'Authorization: Bearer {ACCESS_TOKEN}' \
+ -H 'Content-Type: application/json' \
+ -H 'x-gw-ims-org-id: {IMS_ORG}' \
+ -H 'x-api-key: {API_KEY}' \
+ -H 'x-sandbox-name: {SANDBOX_NAME}' \
+ -d '{
+     "name": "Sample Streaming Connection",
+     "providerId": "521eee4d-8cbe-4906-bb48-fb6bd4450033",
+     "description": "Sample description",
+     "connectionSpec": {
+         "id": "bc7b00d6-623a-4dfc-9fdb-f1240aeadaeb",
+         "version": "1.0"
+     },
+     "auth": {
+         "specName": "Streaming Connection",
+         "params": {
+             "sourceId": "Sample connection source",
+             "dataType": "xdm",
+             "name": "Sample connection"
+         }
+     }
+ }
 ```
 
-If the request was successful a new Data Inlet should be created for you. The response will looking similar to
-the one below
+If the request was successful a new Streaming Connection should be created for you. The response will looking similar to
+the one below. The `id` field in the response is the Connection Id.
+
+```json
+{
+    "id": "77a05521-91d6-451c-a055-2191d6851c34",
+    "etag": "\"a500e689-0000-0200-0000-5e31df730000\""
+}
+```
+
+With the connection created, you can now retrieve your data collection URL from the connection information.
+
+```
+curl -X GET https://platform.adobe.io/data/foundation/flowservice/connections/{CONNECTION_ID} \
+ -H 'Authorization: Bearer {ACCESS_TOKEN}' \
+ -H 'x-gw-ims-org-id: {IMS_ORG}' \
+ -H 'x-api-key: {API_KEY}' \
+ -H 'x-sandbox-name: {SANDBOX_NAME}'
+```
 
 ```
 {
-    "inletUrl": "https://dcs.adobedc.net/collection/{DATA_INLET_ID}",
-    "inletId": "{DATA_INLET_ID}",
-    "imsOrg": "{IMS_ORG}",
-    "sourceId": "website",
-    "dataType": "xdm",
-    "name": "My Data Inlet",
-    "description": "Collects streaming data from my website",
-    "authenticationRequired": false,
-    "createdBy": "{API_KEY}",
-    "createdAt": "2019-01-11T21:03:49.090Z",
-    "modifiedBy": "{API_KEY}",
-    "modifiedAt": "2019-01-11T21:03:49.090Z"
+    "items": [
+        {
+            "createdAt": 1583971856947,
+            "updatedAt": 1583971856947,
+            "createdBy": "{API_KEY}",
+            "updatedBy": "{API_KEY}",
+            "createdClient": "{USER_ID}",
+            "updatedClient": "{USER_ID}",
+            "id": "77a05521-91d6-451c-a055-2191d6851c34",
+            "name": "Another new sample connection (Experience Event)",
+            "description": "Sample description",
+            "connectionSpec": {
+                "id": "bc7b00d6-623a-4dfc-9fdb-f1240aeadaeb",
+                "version": "1.0"
+            },
+            "state": "enabled",
+            "auth": {
+                "specName": "Streaming Connection",
+                "params": {
+                    "sourceId": "Sample connection (ExperienceEvent)",
+                    "inletUrl": "https://dcs.adobedc.net/collection/a868e1ce678a911ef1482b083329af3cafa4bafdc781285f25911eaae9e00eb2",
+                    "inletId": "a868e1ce678a911ef1482b083329af3cafa4bafdc781285f25911eaae9e00eb2",
+                    "dataType": "xdm",
+                    "name": "Sample connection (ExperienceEvent)"
+                }
+            },
+            "version": "\"56008aee-0000-0200-0000-5e697e150000\"",
+            "etag": "\"56008aee-0000-0200-0000-5e697e150000\""
+        }
+    ]
 }
 ```
 
