@@ -10,10 +10,10 @@
  # governing permissions and limitations under the License.
 ##
 
-FROM anapsix/alpine-java:jdk8
+FROM adoptopenjdk/openjdk11:jre-11.0.11_9-alpine
 
 ENV SCALA_VERSION="2.12" \
-    KAFKA_VERSION="2.3.0"
+    KAFKA_VERSION="2.8.0"
 ENV KAFKA_HOME=/opt/kafka_${SCALA_VERSION}-${KAFKA_VERSION}
 
 ARG KAFKA_DIST=kafka_${SCALA_VERSION}-${KAFKA_VERSION}
@@ -23,7 +23,7 @@ ARG KAFKA_DIST_ASC=${KAFKA_DIST}.tgz.asc
 RUN set -x && \
     apk add --no-cache unzip curl ca-certificates gnupg jq && \
     eval $(gpg-agent --daemon) && \
-    MIRROR=`curl -sSL https://www.apache.org/dyn/closer.cgi\?as_json\=1 | jq -r '.preferred'` && \
+    MIRROR=`curl -sSL https://www.apache.org/dyn/closer.cgi\?as_json\=1 | jq -r '.http[0]'` && \
     curl -sSLO "${MIRROR}kafka/${KAFKA_VERSION}/${KAFKA_DIST_TGZ}" && \
     curl -sSLO https://dist.apache.org/repos/dist/release/kafka/${KAFKA_VERSION}/${KAFKA_DIST_ASC} && \
     curl -sSL  https://kafka.apache.org/KEYS | gpg -q --import - && \
@@ -32,11 +32,13 @@ RUN set -x && \
     mv ${KAFKA_DIST_TGZ} /tmp && \
     tar xfz /tmp/${KAFKA_DIST_TGZ} -C /opt && \
     rm /tmp/${KAFKA_DIST_TGZ} && \
-    apk del unzip ca-certificates gnupg
+    apk del unzip ca-certificates gnupg && \
+    apk add bash
 
 ENV PATH=$PATH:/${KAFKA_HOME}/bin \
     CONNECT_CFG=${KAFKA_HOME}/config/connect-distributed.properties \
-    CONNECT_BIN=${KAFKA_HOME}/bin/connect-distributed.sh
+    CONNECT_BIN=${KAFKA_HOME}/bin/connect-distributed.sh \
+    CONNECT_LOG_CFG=$KAFKA_HOME/config/log4j.properties
 
 ENV CONNECT_PORT=8083
 ENV EXTRA_ARGS="-javaagent:$KAFKA_HOME/connectors/jmx_prometheus_javaagent-0.12.0.jar=9999:${KAFKA_HOME}/config/prometheus.yml"

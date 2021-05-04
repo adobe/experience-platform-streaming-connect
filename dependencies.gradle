@@ -26,7 +26,7 @@ versions.jmxPrometheusJavaAgent = '0.12.0'
 versions.junitJupiter = '5.2.0'
 versions.jjwt = '0.9.0'
 versions.orgJson = '20180130'
-versions.kafkaConnect = '2.3.0'
+versions.kafkaConnect = '2.8.0'
 versions.slf4j = '1.7.25'
 
 libraries.collections4 = [
