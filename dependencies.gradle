@@ -28,6 +28,7 @@ versions.jjwt = '0.9.0'
 versions.orgJson = '20180130'
 versions.kafkaConnect = '2.8.0'
 versions.slf4j = '1.7.25'
+versions.jaxb = '2.3.0'
 
 libraries.collections4 = [
   "org.apache.commons:commons-collections4:$versions.collections4"
@@ -83,4 +84,8 @@ libraries.orgJson = [
 
 libraries.slf4j = [
   "org.slf4j:slf4j-api:$versions.slf4j"
+]
+
+libraries.jaxb = [
+  "javax.xml.bind:jaxb-api:$versions.jaxb"
 ]
