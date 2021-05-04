@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  */
 class JWTTokenProviderTest {
 
-  private static final String ENDPOINT = "https://ims-na1-stg1.adobelogin.com";
+  private static final String ENDPOINT = "https://ims-na1.adobelogin.com";
   private static final String TEST_CLIENT = "testClientId";
   private static final String TEST_ORG = "testImsOrg";
   private static final String TEST_ACCOUNT_ID = "testTechnicalAccountId";
