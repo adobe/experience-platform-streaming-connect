@@ -34,6 +34,7 @@ import java.util.Map;
 public abstract class AbstractSinkTask<T> extends SinkTask {
 
   private static final Logger LOG = LoggerFactory.getLogger(AbstractSinkConnector.class);
+  public static final Gson GSON = new GsonBuilder().create();
 
   private static final String FLUSH_INTERVAL_SECS = "aep.flush.interval.seconds";
   private static final String FLUSH_BYTES_KB = "aep.flush.bytes.kb";
@@ -42,7 +43,6 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
   private static final int MILLIS_IN_A_SEC = 1000;
   private static final int BYTES_IN_A_KB = 1024;
 
-  private Gson gson;
   private int bytesRead = 0;
   private int flushIntervalMillis;
   private int flushBytesCount;
@@ -58,8 +58,6 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
     LOG.info("Started Sink Task with props: {}", props);
 
     try {
-      gson = new GsonBuilder().create();
-
       flushIntervalMillis = SinkUtils.getProperty(props, FLUSH_INTERVAL_SECS, DEFAULT_FLUSH_INTERVAL, MILLIS_IN_A_SEC);
       flushBytesCount = SinkUtils.getProperty(props, FLUSH_BYTES_KB, DEFAULT_FLUSH_BYTES_KB, BYTES_IN_A_KB);
 
@@ -67,7 +65,7 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
       LOG.info("Connection created with flush interval {} secs and flush bytes {} KB",
         flushIntervalMillis / MILLIS_IN_A_SEC, flushBytesCount / BYTES_IN_A_KB);
     } catch (AEPStreamingException aepStreamingException) {
-      LOG.error("ConnectorSinkTask: Exception while creating connection {}", aepStreamingException);
+      LOG.error("ConnectorSinkTask: Exception while creating connection.", aepStreamingException);
     }
   }
 
@@ -88,7 +86,7 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
 
     List<T> eventsToPublish = new ArrayList<>();
     for (SinkRecord record : records) {
-      T dataToPublish = getDataToPublish(SinkUtils.getStringPayload(gson, record));
+      T dataToPublish = getDataToPublish(SinkUtils.getStringPayload(GSON, record));
       eventsToPublish.add(dataToPublish);
       bytesRead += getPayloadLength(dataToPublish);
 

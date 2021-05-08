@@ -61,19 +61,21 @@ public final class AuthProviderFactory {
   }
 
   private static AuthProvider getJWTAuthProvider(Map<String, String> authProperties) {
-    String clientId = authProperties.get(AuthUtils.AUTH_CLIENT_ID);
-    String imsOrgId = authProperties.get(AuthUtils.AUTH_IMS_ORG_ID);
-    String technicalAccountKey = authProperties.get(AuthUtils.AUTH_TECHNICAL_ACCOUNT_ID);
-    String filePath = authProperties.get(AuthUtils.AUTH_PRIVATE_KEY_FILE_PATH);
+    final String clientId = authProperties.get(AuthUtils.AUTH_CLIENT_ID);
+    final String clientSecret = authProperties.get(AuthUtils.AUTH_CLIENT_SECRET);
+    final String imsOrgId = authProperties.get(AuthUtils.AUTH_IMS_ORG_ID);
+    final String technicalAccountKey = authProperties.get(AuthUtils.AUTH_TECHNICAL_ACCOUNT_ID);
+    final String filePath = authProperties.get(AuthUtils.AUTH_PRIVATE_KEY_FILE_PATH);
 
     Preconditions.checkNotNull(clientId, "Invalid client Id");
+    Preconditions.checkNotNull(clientSecret, "Invalid client secret.");
     Preconditions.checkNotNull(imsOrgId, "Invalid IMS Org");
     Preconditions.checkNotNull(technicalAccountKey, "Invalid technical account Id");
 
     String endpoint = authProperties.get(AuthUtils.AUTH_ENDPOINT);
     return StringUtils.isEmpty(endpoint) ?
-      new JWTTokenProvider(clientId, imsOrgId, technicalAccountKey, filePath) :
-      new JWTTokenProvider(endpoint, clientId, imsOrgId, technicalAccountKey, filePath);
+      new JWTTokenProvider(clientId, clientSecret, imsOrgId, technicalAccountKey, filePath) :
+      new JWTTokenProvider(endpoint, clientId, clientSecret, imsOrgId, technicalAccountKey, filePath);
   }
 
   private AuthProviderFactory() {}

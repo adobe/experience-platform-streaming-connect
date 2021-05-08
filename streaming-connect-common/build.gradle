@@ -13,8 +13,8 @@
 apply from: '../dependencies.gradle'
 
 dependencies {
-  libraries.with {
-    compile collections4, commonslang, guava, httpClient, jackson, jmockit, junitJupiter, jjwt, orgJson, slf4j, jaxb
-    testCompile jmockit, junitJupiter
-  }
+    implementation libraries.collections4, libraries.commonslang, libraries.guava,
+                   libraries.httpClient, libraries.jackson, libraries.jmockit, libraries.junitJupiter,
+                   libraries.jjwt, libraries.orgJson, libraries.slf4j, libraries.jaxb
+    testImplementation libraries.jmockit, libraries.junitJupiter
 }

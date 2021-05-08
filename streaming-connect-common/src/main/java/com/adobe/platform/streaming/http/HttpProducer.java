@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -28,13 +29,14 @@ public class HttpProducer implements Serializable {
   private static final Logger LOG = LoggerFactory.getLogger(HttpProducer.class);
   private static final String CONTENT_TYPE = "Content-type";
 
-  private String endpoint;
+  private final String endpoint;
+  private final boolean enableGzip;
   private int connectTimeout;
   private transient AuthProvider auth;
   private int readTimeout;
   private int maxRetries;
   private int retryBackoff;
-  private boolean enableGzip;
+  private Map<String, String> endpointHeaders;
 
   private HttpProducer(String endpoint) {
     LOG.info("in init: {}", endpoint);
@@ -44,10 +46,12 @@ public class HttpProducer implements Serializable {
     this.enableGzip = false;
     this.connectTimeout = 5000;
     this.readTimeout = 60000;
+    this.endpointHeaders = Collections.emptyMap();
   }
 
   public <T> T post(String url, byte[] postData, String contentType, ContentHandler<T> handler) throws HttpException {
-    Map<String, String> headers = Collections.singletonMap(CONTENT_TYPE, contentType);
+    Map<String, String> headers = new HashMap<>(Collections.singletonMap(CONTENT_TYPE, contentType));
+    headers.putAll(endpointHeaders);
     return post(url, postData, headers, handler);
   }
 
@@ -114,6 +118,11 @@ public class HttpProducer implements Serializable {
 
     public HttpProducerBuilder withAuth(AuthProvider auth) {
       instance.auth = auth;
+      return this;
+    }
+
+    public HttpProducerBuilder withHeaders(Map<String, String> headers) {
+      instance.endpointHeaders = headers;
       return this;
     }
 

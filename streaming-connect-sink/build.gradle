@@ -17,18 +17,24 @@ configurations {
 }
 
 dependencies {
-  compile project(':streaming-connect-common')
-
-  libraries.with {
-    compile commonslang, gson, guava, httpClient, kafkaConnect, slf4j
-  }
-
+  implementation project(':streaming-connect-common')
+  implementation libraries.collections4, libraries.commonslang,
+                 libraries.gson, libraries.guava,
+                 libraries.jackson, libraries.httpClient,
+                 libraries.kafkaConnect, libraries.orgJson,
+                 libraries.slf4j
   jmxAgent libraries.jmxPrometheusJavaAgent
+  testImplementation libraries.jmockit, libraries.junitJupiter
 }
 
 task copyJmxAgent(type: Copy) {
   into "${buildDir}/libs"
   from configurations.jmxAgent
+}
+
+shadowJar {
+  var javaVersion = "java-" + compileVersion
+  archiveClassifier.set(javaVersion)
 }
 
 jar.enabled = false
