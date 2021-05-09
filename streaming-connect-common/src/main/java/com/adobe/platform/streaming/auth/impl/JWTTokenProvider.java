@@ -61,18 +61,20 @@ public class JWTTokenProvider extends AbstractAuthProvider {
   private final String imsOrgId;
   private final String technicalAccountKey;
   private final String clientId;
+  private final String clientSecret;
   private final String keyPath;
   private String jwtToken;
 
-  JWTTokenProvider(String endpoint, String imsOrgId, String clientId, String technicalAccountKey,
+  JWTTokenProvider(String endpoint, String clientId, String clientSecret, String imsOrgId, String technicalAccountKey,
     String keyPath) {
-    this(imsOrgId, clientId, technicalAccountKey, keyPath);
+    this(clientId, clientSecret, imsOrgId, technicalAccountKey, keyPath);
     this.endpoint = endpoint;
   }
 
-  JWTTokenProvider(String imsOrgId, String clientId, String technicalAccountKey, String keyPath) {
+  JWTTokenProvider(String clientId, String clientSecret, String imsOrgId, String technicalAccountKey, String keyPath) {
     this.imsOrgId = imsOrgId;
     this.clientId = clientId;
+    this.clientSecret = clientSecret;
     this.technicalAccountKey = technicalAccountKey;
     this.keyPath = keyPath;
   }
@@ -80,16 +82,16 @@ public class JWTTokenProvider extends AbstractAuthProvider {
   @Override
   protected TokenResponse getTokenResponse() throws AuthException {
     LOG.debug("refreshing expired jwtToken: {}", clientId);
-    StringBuffer params = new StringBuffer()
+    StringBuilder params = new StringBuilder()
       .append("&client_id=").append(clientId)
-      .append("&client_secret=").append(technicalAccountKey)
+      .append("&client_secret=").append(clientSecret)
       .append("&jwt_token=").append(getJWTToken());
 
     try {
       return HttpProducer.newBuilder(endpoint).build().post(
         IMS_ENDPOINT_PATH,
         params.toString().getBytes(),
-        ContentType.MULTIPART_FORM_DATA.getMimeType(),
+        ContentType.APPLICATION_FORM_URLENCODED.getMimeType(),
         getContentHandler()
       );
     } catch (HttpException httpException) {
@@ -151,7 +153,7 @@ public class JWTTokenProvider extends AbstractAuthProvider {
         StandardCharsets.UTF_8.name()
       );
       JSONObject tokenBodyJson = new JSONObject(tokenBody);
-      Long expiresIn = (Long)tokenBodyJson.get(JWT_EXPIRY_KEY);
+      long expiresIn = ((Number)tokenBodyJson.get(JWT_EXPIRY_KEY)).longValue();
       return System.currentTimeMillis() <= (expiresIn - DEFAULT_JWT_TOKEN_UPDATE_THRESHOLD);
     } catch (UnsupportedEncodingException exception) {
       LOG.error("Exception while parsing JWT token", exception);

@@ -21,10 +21,13 @@ import com.adobe.platform.streaming.auth.impl.AuthProviderFactory;
 import com.adobe.platform.streaming.http.HttpProducer;
 import com.adobe.platform.streaming.sink.utils.SinkUtils;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.reflect.TypeToken;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -45,9 +48,12 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
   private static final String AEP_CONNECTION_AUTH_CLIENT_ID = "aep.connection.auth.client.id";
   private static final String AEP_CONNECTION_AUTH_CLIENT_CODE = "aep.connection.auth.client.code";
   private static final String AEP_CONNECTION_AUTH_CLIENT_SECRET = "aep.connection.auth.client.secret";
+  private static final String AEP_CONNECTION_AUTH_ENDPOINT = "aep.connection.auth.endpoint";
   private static final String AEP_CONNECTION_AUTH_IMS_ORG = "aep.connection.auth.imsOrg";
   private static final String AEP_CONNECTION_AUTH_ACCOUNT_KEY = "aep.connection.auth.accountKey";
   private static final String AEP_CONNECTION_AUTH_FILE_PATH = "aep.connection.auth.filePath";
+
+  private static final String AEP_CONNECTION_OPTIONAL_HEADER = "aep.connection.endpoint.headers";
 
   private static final String AEP_CONNECTION_AUTH_ENABLED_VALUE = "true";
   private static final String AEP_CONNECTION_AUTH_DISABLED_VALUE = "false";
@@ -58,6 +64,7 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
       .withReadTimeout(SinkUtils.getProperty(props, AEP_CONNECTION_READ_TIMEOUT, 60000))
       .withMaxRetries(SinkUtils.getProperty(props, AEP_CONNECTION_MAX_RETRIES, 3))
       .withRetryBackoff(SinkUtils.getProperty(props, AEP_CONNECTION_MAX_RETRIES_BACKOFF, 300))
+      .withHeaders(getHeaders(props.get(AEP_CONNECTION_OPTIONAL_HEADER)))
       .withAuth(getAuthProvider(props))
       .build();
   }
@@ -73,6 +80,11 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
     }
 
     return aepEndpoint.replace("/collection/", "/collection/batch/");
+  }
+
+  private Map<String, String> getHeaders(String header) {
+    return StringUtils.isEmpty(header) ? Collections.emptyMap() : AbstractSinkTask.GSON.fromJson(header,
+      new TypeToken<Map<String,String>>(){}.getType());
   }
 
   private AuthProvider getAuthProvider(Map<String, String> props) {
@@ -106,6 +118,8 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
   private AuthProvider getJWTTokenProvider(Map<String, String> props) throws AuthException {
     return AuthProviderFactory.getAuthProvider(TokenType.JWT_TOKEN, ImmutableMap.<String, String>builder()
       .put(AuthUtils.AUTH_CLIENT_ID, props.get(AEP_CONNECTION_AUTH_CLIENT_ID))
+      .put(AuthUtils.AUTH_CLIENT_SECRET, props.get(AEP_CONNECTION_AUTH_CLIENT_SECRET))
+      .put(AuthUtils.AUTH_ENDPOINT, props.get(AEP_CONNECTION_AUTH_ENDPOINT))
       .put(AuthUtils.AUTH_IMS_ORG_ID, props.get(AEP_CONNECTION_AUTH_IMS_ORG))
       .put(AuthUtils.AUTH_TECHNICAL_ACCOUNT_ID, props.get(AEP_CONNECTION_AUTH_ACCOUNT_KEY))
       .put(AuthUtils.AUTH_PRIVATE_KEY_FILE_PATH, props.get(AEP_CONNECTION_AUTH_FILE_PATH))

@@ -186,8 +186,9 @@ curl -s -X POST \
 
 #### Authentication Enabled
 
-Use the command below to set up an Sink connector to a Authenticated Streaming Connection:
+Use the command below to set up a Sink connector to a Authenticated Streaming Connection:
 
+1. Using access_token
 ```
 curl -s -X POST \
 -H "Content-Type: application/json" \
@@ -210,6 +211,51 @@ curl -s -X POST \
   }
 }' http://localhost:8083/connectors
 ```
+
+2. Using jwt_token
+ - Convert private.key from adobe console to PKCS8 private using command
+```
+openssl pkcs8 -topk8 -inform PEM -outform DER -in private.key -out private-pkcs8.key -nocrypt
+```
+
+ - Create http connector
+```
+curl -s -X POST \
+-H "Content-Type: application/json" \
+--data '{
+  "name": "aep-auth-sink-connector",
+  "config": {
+    "topics": "connect-test",
+    "tasks.max": 1,
+    "aep.flush.interval.seconds": 1,
+    "aep.flush.bytes.kb": 4,
+    "connector.class": "com.adobe.platform.streaming.sink.impl.AEPSinkConnector",
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false",
+    "aep.endpoint": "https://dcs.adobedc.net/collection/{DATA_INLET_ID}",
+    "aep.connection.auth.enabled": true,
+    "aep.connection.auth.token.type": "jwt_token",
+    "aep.connection.auth.client.id": "<client_id>",
+    "aep.connection.auth.imsOrg": "<organization-id>",
+    "aep.connection.auth.accountKey": "<technical-account-id>",
+    "aep.connection.auth.filePath": "<path-to-private-pkcs8.key>",
+    "aep.connection.auth.endpoint": "<ims-url>",
+    "aep.connection.endpoint.headers": "<optional-header-that-needs-to-be-passed-to-AEP>"
+    "aep.connection.auth.client.secret": "<client_secret>"
+  }
+}' http://localhost:8083/connectors
+```
+Note - `aep.connection.endpoint.headers` format should be comma separated. 
+Example: To send below 2 http header - 
+1. key: x-adobe-flow-id, value: 341fd4f0-cdec-4912-1ab6-fb54aeb41286
+2. key: x-adobe-dataset-id, value: 3096fbfd5978431948af3ba3
+
+Use `aep.connection.endpoint.headers` value -
+```
+{'x-adobe-flow-id':'341fd4f0-cdec-4912-1ab6-fb54aeb41286','x-adobe-dataset-id': '3096fbfd5978431948af3ba3'}
+```
+
+
 
 #### Batching
 

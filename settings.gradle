@@ -18,5 +18,8 @@ pluginManagement {
 
 rootProject.name = 'experience-platform-streaming-connect'
 
-include 'streaming-connect-common'
-include 'streaming-connect-sink'
+include ':streaming-connect-common'
+include ':streaming-connect-sink'
+
+project(':streaming-connect-common').projectDir = file('streaming-connect-common')
+project(':streaming-connect-sink').projectDir = file('streaming-connect-sink')

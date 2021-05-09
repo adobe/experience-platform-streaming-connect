@@ -13,10 +13,11 @@
 buildscript {
   repositories {
     jcenter()
+    mavenCentral()
   }
 
   dependencies {
-    classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.3'
+    classpath 'com.github.johnrengelman.shadow:com.github.johnrengelman.shadow.gradle.plugin:6.1.0'
   }
 }
 
@@ -34,6 +35,7 @@ description 'Adobe Experience Platform Streaming Connect'
 
 repositories {
   jcenter()
+  mavenCentral()
 }
 
 subprojects {
@@ -55,8 +57,23 @@ subprojects {
     toolVersion '8.10.1'
   }
 
+  var compileJavaVersion = System.getenv("JAVA_COMPILATION_VERSION") == null ? (JavaVersion.current().getMajorVersion() == "" ? "11" :
+    JavaVersion.current().getMajorVersion()) : System.getenv("JAVA_COMPILATION_VERSION")
+
+  ext {
+    branchName = System.getenv("BRANCHNAME") ?: grgit.branch.current().getName()
+    compileVersion = compileJavaVersion + (JavaVersion.toVersion(compileJavaVersion) <= JavaVersion.VERSION_1_8 ? "-deprecated" : "")
+  }
+
+  java {
+    toolchain {
+      languageVersion.set(JavaLanguageVersion.of(JavaVersion.toVersion(compileJavaVersion).getMajorVersion()))
+    }
+  }
+
   repositories {
     jcenter()
+    mavenCentral()
 
     publishing {
       repositories {
@@ -77,12 +94,6 @@ subprojects {
         }
       }
     }
-  }
-
-  compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-    options.deprecation = true
   }
 
   compileTestJava {
