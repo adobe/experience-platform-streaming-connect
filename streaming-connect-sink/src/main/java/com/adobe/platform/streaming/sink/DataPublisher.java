@@ -12,6 +12,8 @@
 
 package com.adobe.platform.streaming.sink;
 
+import com.adobe.platform.streaming.AEPStreamingException;
+
 import java.util.List;
 
 /**
@@ -21,7 +23,7 @@ public interface DataPublisher {
 
   void start();
 
-  void publishData(List<String> messages);
+  void publishData(List<String> messages) throws AEPStreamingException;
 
   void stop();
 }

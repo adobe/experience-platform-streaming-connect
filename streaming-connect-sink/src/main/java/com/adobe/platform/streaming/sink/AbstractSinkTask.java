@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.kafka.common.utils.AppInfoParser;
+import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 import org.slf4j.Logger;
@@ -84,28 +85,32 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
       LOG.debug("ConnectorSinkTask: {} sink records received", records.size());
     }
 
-    List<T> eventsToPublish = new ArrayList<>();
-    for (SinkRecord record : records) {
-      T dataToPublish = getDataToPublish(SinkUtils.getStringPayload(GSON, record));
-      eventsToPublish.add(dataToPublish);
-      bytesRead += getPayloadLength(dataToPublish);
+    try {
+      List<T> eventsToPublish = new ArrayList<>();
+      for (SinkRecord record : records) {
+        T dataToPublish = getDataToPublish(SinkUtils.getStringPayload(GSON, record));
+        eventsToPublish.add(dataToPublish);
+        bytesRead += getPayloadLength(dataToPublish);
 
-      long tempCurrTime = System.currentTimeMillis();
-      if (flushNow(tempCurrTime)) {
+        long tempCurrTime = System.currentTimeMillis();
+        if (flushNow(tempCurrTime)) {
+          publishAndLogIfRequired(eventsToPublish);
+          if (LOG.isDebugEnabled()) {
+            LOG.debug("ConnectorSinkTask: {} events flushed partially", eventsToPublish.size());
+          }
+          reset(eventsToPublish, tempCurrTime);
+        }
+      }
+
+      if (!eventsToPublish.isEmpty()) {
         publishAndLogIfRequired(eventsToPublish);
         if (LOG.isDebugEnabled()) {
-          LOG.debug("ConnectorSinkTask: {} events flushed partially", eventsToPublish.size());
+          LOG.debug("ConnectorSinkTask: {} events flushed finally", eventsToPublish.size());
         }
-        reset(eventsToPublish, tempCurrTime);
+        reset(eventsToPublish, System.currentTimeMillis());
       }
-    }
-
-    if (!eventsToPublish.isEmpty()) {
-      publishAndLogIfRequired(eventsToPublish);
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("ConnectorSinkTask: {} events flushed finally", eventsToPublish.size());
-      }
-      reset(eventsToPublish, System.currentTimeMillis());
+    } catch (AEPStreamingException e) {
+      throw new ConnectException("Failed to sink records",e);
     }
   }
 
@@ -115,13 +120,13 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
 
   public abstract int getPayloadLength(T dataToPublish);
 
-  public abstract void publishData(List<T> eventsToPublish);
+  public abstract void publishData(List<T> eventsToPublish) throws AEPStreamingException;
 
   private boolean flushNow(long tempCurrTime) {
     return tempCurrTime >= lastFlushMilliSec + flushIntervalMillis || bytesRead >= flushBytesCount;
   }
 
-  private void publishAndLogIfRequired(List<T> eventsToPublish) {
+  private void publishAndLogIfRequired(List<T> eventsToPublish) throws AEPStreamingException {
     if (LOG.isDebugEnabled()) {
       LOG.debug("ConnectorSinkTask: {} events sent to destination", eventsToPublish.size());
     }
