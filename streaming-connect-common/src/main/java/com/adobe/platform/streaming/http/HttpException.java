@@ -17,14 +17,19 @@ package com.adobe.platform.streaming.http;
  */
 public class HttpException extends Exception {
 
-  public HttpException() {}
+  int code;
 
-  public HttpException(String message) {
+  public HttpException(String message, int code) {
     super(message);
+    this.code = code;
   }
 
-  public HttpException(String message, Throwable cause) {
+  public HttpException(String message, int code, Throwable cause) {
     super(message, cause);
+    this.code = code;
   }
 
+  public int getCode() {
+    return this.code;
+  }
 }

@@ -115,22 +115,22 @@ public class HttpConnection {
           close();
           HttpUtil.sleepUninterrupted(retryBackoff);
         } else {
-          throw new HttpException("request failed (" + responseCode + "): " + errorMsg);
+          throw new HttpException("request failed (" + responseCode + "): " + errorMsg, responseCode);
         }
       } catch (MalformedURLException e) {
-        throw new HttpException(("bad withUrl: " + url), e);
+        throw new HttpException(("bad withUrl: " + url), 400, e);
       } catch (IOException e) {
         LOG.warn("attempt {} of {} failed with exception - {}", retries, maxRetries, e.getMessage());
         close();
         cause = e;
         HttpUtil.sleepUninterrupted(retryBackoff);
       } catch (AuthException authException) {
-        throw new HttpException("exception while fetching the auth token", authException);
+        throw new HttpException("exception while fetching the auth token", 401, authException);
       }
     }
 
     if (conn == null) {
-      throw new HttpException("unable to connect", cause);
+      throw new HttpException("unable to connect", 500, cause);
     }
 
     return conn;
@@ -174,7 +174,7 @@ public class HttpConnection {
         return conn.getInputStream();
       }
     } catch (IOException e) {
-      throw new HttpException("problem getting input stream", e);
+      throw new HttpException("problem getting input stream", 500, e);
     }
   }
 

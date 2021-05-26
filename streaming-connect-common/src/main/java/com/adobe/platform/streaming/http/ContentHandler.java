@@ -35,7 +35,7 @@ public abstract class ContentHandler<T> {
       try (InputStream in = conn.getInputStream()) {
         return new JSONObject(HttpUtil.streamToString(in));
       } catch (IOException e) {
-        throw new HttpException("Error parsing content", e);
+        throw new HttpException("Error parsing content", 405, e);
       }
     }
   };

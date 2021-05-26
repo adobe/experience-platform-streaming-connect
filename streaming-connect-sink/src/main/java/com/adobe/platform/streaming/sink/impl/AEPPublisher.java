@@ -68,7 +68,9 @@ class AEPPublisher extends AbstractAEPPublisher {
       LOG.debug("Successfully published data to Adobe Experience Platform: {}", response);
     } catch (HttpException httpException) {
       LOG.error("Failed to publish data to Adobe Experience Platform", httpException);
-      throw new AEPStreamingException("Failed to publish", httpException);
+      if (httpException.getCode() == 401 || httpException.getCode() == 500) {
+        throw new AEPStreamingException("Failed to publish", httpException);
+      }
     }
   }
 

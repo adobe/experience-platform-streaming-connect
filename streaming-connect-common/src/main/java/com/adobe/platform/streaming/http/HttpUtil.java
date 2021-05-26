@@ -39,7 +39,7 @@ class HttpUtil {
         sb.append(str);
       }
     } catch (IOException e) {
-      throw new HttpException("problem reading string", e);
+      throw new HttpException("problem reading string", 405, e);
     }
 
     return sb.toString();
