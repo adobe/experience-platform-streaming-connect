@@ -64,6 +64,9 @@ public class HttpConnection {
   @SuppressWarnings("squid:S3776")
   HttpURLConnection connect() throws HttpException {
     Throwable cause = null;
+    int responseCode = 500;
+    String errorMsg = "";
+
     while (retries++ < maxRetries) {
       try {
         URL request = new URL(new URL(endpoint), url);
@@ -104,18 +107,21 @@ public class HttpConnection {
           }
         }
 
-        int responseCode = conn.getResponseCode();
+        responseCode = conn.getResponseCode();
         if (HttpUtil.is2xx(responseCode)) {
           break;
         }
 
-        String errorMsg = errorStreamToString();
+        errorMsg = errorStreamToString();
         if (HttpUtil.is5xx(responseCode)) {
           LOG.warn("attempt {} of {} failed with {} response - {}", retries, maxRetries, responseCode, errorMsg);
           close();
           HttpUtil.sleepUninterrupted(retryBackoff);
+        } else if (HttpUtil.isUnauthorized(responseCode)) {
+          throw new AuthException(String.format("requested failed. unauthorized to access the endpoint. " +
+            "response code %s", responseCode));
         } else {
-          throw new HttpException("request failed (" + responseCode + "): " + errorMsg);
+          throw new HttpException("request failed (" + responseCode + "): " + errorMsg, responseCode);
         }
       } catch (MalformedURLException e) {
         throw new HttpException(("bad withUrl: " + url), e);
@@ -125,8 +131,12 @@ public class HttpConnection {
         cause = e;
         HttpUtil.sleepUninterrupted(retryBackoff);
       } catch (AuthException authException) {
-        throw new HttpException("exception while fetching the auth token", authException);
+        throw new HttpException("exception while fetching the auth token", authException, responseCode);
       }
+    }
+
+    if (HttpUtil.is5xx(responseCode)) {
+      throw new HttpException("request failed (" + responseCode + "): " + errorMsg, responseCode);
     }
 
     if (conn == null) {

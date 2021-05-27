@@ -50,7 +50,7 @@ public class IMSTokenProvider extends AbstractAuthProvider {
   @Override
   protected TokenResponse getTokenResponse() throws AuthException {
     LOG.debug("refreshing expired accessToken: {}", clientId);
-    StringBuffer params = new StringBuffer()
+    StringBuilder params = new StringBuilder()
       .append("grant_type=authorization_code")
       .append("&client_id=").append(clientId)
       .append("&client_secret=").append(clientSecret)

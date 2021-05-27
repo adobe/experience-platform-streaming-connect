@@ -58,7 +58,7 @@ public abstract class AbstractAuthProvider implements AuthProvider {
       public TokenResponse getContent(HttpConnection conn) throws HttpException {
         try (InputStream in = conn.getInputStream()) {
           return mapper.readValue(in, TokenResponse.class);
-        } catch (HttpException | IOException e) {
+        } catch (IOException e) {
           throw new HttpException("Error parsing response", e);
         }
       }
