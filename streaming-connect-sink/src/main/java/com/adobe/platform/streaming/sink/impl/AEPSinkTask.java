@@ -43,7 +43,7 @@ public class AEPSinkTask extends AbstractSinkTask<String> {
   }
 
   @Override
-  public void publishData(List<String> eventDataList) {
+  public void publishData(List<String> eventDataList) throws AEPStreamingException {
     publisher.publishData(eventDataList);
   }
 

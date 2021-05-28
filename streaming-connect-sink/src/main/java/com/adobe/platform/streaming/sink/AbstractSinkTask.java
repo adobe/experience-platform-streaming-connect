@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.kafka.common.utils.AppInfoParser;
+import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 import org.slf4j.Logger;
@@ -115,17 +116,21 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
 
   public abstract int getPayloadLength(T dataToPublish);
 
-  public abstract void publishData(List<T> eventsToPublish);
+  public abstract void publishData(List<T> eventsToPublish) throws AEPStreamingException;
 
   private boolean flushNow(long tempCurrTime) {
     return tempCurrTime >= lastFlushMilliSec + flushIntervalMillis || bytesRead >= flushBytesCount;
   }
 
   private void publishAndLogIfRequired(List<T> eventsToPublish) {
+    try {
+      publishData(eventsToPublish);
+    } catch (AEPStreamingException e) {
+      throw new ConnectException("Failed to sink records.", e);
+    }
     if (LOG.isDebugEnabled()) {
       LOG.debug("ConnectorSinkTask: {} events sent to destination", eventsToPublish.size());
     }
-    publishData(eventsToPublish);
   }
 
   private void reset(List<T> eventsToPublish, long tempCurrentTime) {

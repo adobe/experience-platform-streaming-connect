@@ -21,14 +21,22 @@ import java.nio.charset.StandardCharsets;
 /**
  * @author Adobe Inc.
  */
-class HttpUtil {
+public class HttpUtil {
 
-  static boolean is2xx(int responseCode) {
+  public static boolean is2xx(int responseCode) {
     return (responseCode >= 200 && responseCode < 300);
   }
 
-  static boolean is5xx(int responseCode) {
+  public static boolean is5xx(int responseCode) {
     return (responseCode >= 500 && responseCode < 600);
+  }
+
+  public static boolean is500(int responseCode) {
+    return responseCode == 500;
+  }
+
+  public static boolean isUnauthorized(int responseCode) {
+    return responseCode == 401 || responseCode == 403;
   }
 
   static String streamToString(InputStream in) throws HttpException {

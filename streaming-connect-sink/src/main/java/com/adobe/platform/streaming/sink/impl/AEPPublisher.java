@@ -16,6 +16,7 @@ import com.adobe.platform.streaming.AEPStreamingException;
 import com.adobe.platform.streaming.http.ContentHandler;
 import com.adobe.platform.streaming.http.HttpException;
 import com.adobe.platform.streaming.http.HttpProducer;
+import com.adobe.platform.streaming.http.HttpUtil;
 import com.adobe.platform.streaming.sink.AbstractAEPPublisher;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +46,7 @@ class AEPPublisher extends AbstractAEPPublisher {
   }
 
   @Override
-  public void publishData(List<String> messages) {
+  public void publishData(List<String> messages) throws AEPStreamingException {
     if (CollectionUtils.isEmpty(messages)) {
       LOG.debug("No messages to publish");
       return;
@@ -68,6 +69,9 @@ class AEPPublisher extends AbstractAEPPublisher {
       LOG.debug("Successfully published data to Adobe Experience Platform: {}", response);
     } catch (HttpException httpException) {
       LOG.error("Failed to publish data to Adobe Experience Platform", httpException);
+      if (HttpUtil.is500(httpException.getResponseCode()) || HttpUtil.isUnauthorized(httpException.getResponseCode())) {
+        throw new AEPStreamingException("Failed to publish", httpException);
+      }
     }
   }
 
