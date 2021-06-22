@@ -85,7 +85,7 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
     Assertions.assertEquals(HTTP_SERVER_SIDE_ERROR_CODE, errorContext.get("errorCode").asInt());
 
     // Verify inlet endpoint received 1 XDM record
-    getWiremockServer().verify(3, postRequestedFor(urlEqualTo(getRelativeUrl()))
+    getWiremockServer().verify(postRequestedFor(urlEqualTo(getRelativeUrl()))
       .withRequestBody(equalToJson(payloadReceivedXdmData())));
   }
 
@@ -109,7 +109,8 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
       NUMBER_OF_TASKS,
       getInletUrl());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, new TypeReference<>(){});
+    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
+      new TypeReference<Map<String, String>>(){});
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }

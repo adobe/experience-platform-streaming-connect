@@ -95,7 +95,8 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       NUMBER_OF_TASKS,
       getInletUrl());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, new TypeReference<>() {});
+    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
+      new TypeReference<Map<String, String>>() {});
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
