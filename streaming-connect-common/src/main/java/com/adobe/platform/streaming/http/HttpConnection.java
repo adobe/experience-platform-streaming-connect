@@ -169,7 +169,7 @@ public class HttpConnection {
           is.close();
         }
       } catch (IOException ioe) {
-        LOG.info("close(): failed to close input stream: {}", ioe.getMessage());
+        LOG.error("close(): failed to close input stream: {}", ioe.getMessage());
       }
 
       conn = null;

@@ -18,6 +18,8 @@ import com.adobe.platform.streaming.http.HttpException;
 import com.adobe.platform.streaming.http.HttpProducer;
 import com.adobe.platform.streaming.http.HttpUtil;
 import com.adobe.platform.streaming.sink.AbstractAEPPublisher;
+import com.adobe.platform.streaming.sink.impl.reporter.CompositeErrorReporter;
+import com.adobe.platform.streaming.sink.impl.reporter.ErrorReporter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
@@ -28,21 +30,24 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 /**
  * @author Adobe Inc.
  */
-class AEPPublisher extends AbstractAEPPublisher {
+public class AEPPublisher extends AbstractAEPPublisher {
 
   private static final Logger LOG = LoggerFactory.getLogger(AEPPublisher.class);
   private static final String MESSAGES_KEY = "messages";
 
   private int count;
   private final HttpProducer producer;
+  private final ErrorReporter<List<Future<?>>> errorReporter;
 
   AEPPublisher(Map<String, String> props) throws AEPStreamingException {
     count = 0;
     producer = getHttpProducer(props);
+    errorReporter = new CompositeErrorReporter(props);
   }
 
   @Override
@@ -69,6 +74,7 @@ class AEPPublisher extends AbstractAEPPublisher {
       LOG.debug("Successfully published data to Adobe Experience Platform: {}", response);
     } catch (HttpException httpException) {
       LOG.error("Failed to publish data to Adobe Experience Platform", httpException);
+      errorReporter.report(messages, httpException);
       if (HttpUtil.is500(httpException.getResponseCode()) || HttpUtil.isUnauthorized(httpException.getResponseCode())) {
         throw new AEPStreamingException("Failed to publish", httpException);
       }

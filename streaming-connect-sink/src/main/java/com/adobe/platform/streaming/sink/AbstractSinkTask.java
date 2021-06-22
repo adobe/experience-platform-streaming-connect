@@ -14,13 +14,19 @@ package com.adobe.platform.streaming.sink;
 
 import com.adobe.platform.streaming.AEPStreamingException;
 import com.adobe.platform.streaming.sink.utils.SinkUtils;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.kafka.common.utils.AppInfoParser;
+import org.apache.kafka.common.utils.Utils;
 import org.apache.kafka.connect.errors.ConnectException;
+import org.apache.kafka.connect.runtime.WorkerConfig;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
+import org.apache.kafka.connect.sink.SinkTaskContext;
+import org.codehaus.plexus.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Adobe Inc.
@@ -48,6 +55,7 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
   private int flushIntervalMillis;
   private int flushBytesCount;
   private long lastFlushMilliSec = System.currentTimeMillis();
+  private String bootstrapServers;
 
   @Override
   public String version() {
@@ -55,8 +63,17 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
   }
 
   @Override
+  public void initialize(SinkTaskContext context) {
+    super.initialize(context);
+    bootstrapServers = getBootstrapServers(context);
+  }
+
+  @Override
   public void start(Map<String, String> props) {
     LOG.info("Started Sink Task with props: {}", props);
+    if (Objects.nonNull(bootstrapServers)) {
+      props.put(WorkerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+    }
 
     try {
       flushIntervalMillis = SinkUtils.getProperty(props, FLUSH_INTERVAL_SECS, DEFAULT_FLUSH_INTERVAL, MILLIS_IN_A_SEC);
@@ -131,6 +148,19 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
     if (LOG.isDebugEnabled()) {
       LOG.debug("ConnectorSinkTask: {} events sent to destination", eventsToPublish.size());
     }
+  }
+
+  private String getBootstrapServers(SinkTaskContext context) {
+    try {
+      Object workerSinkTask = ReflectionUtils.getValueIncludingSuperclasses("sinkTask", context);
+      WorkerConfig workerConfig = (WorkerConfig) ReflectionUtils
+        .getValueIncludingSuperclasses("workerConfig", workerSinkTask);
+
+      return Utils.join(workerConfig.getList(WorkerConfig.BOOTSTRAP_SERVERS_CONFIG), ",");
+    } catch (IllegalAccessException exception) {
+      LOG.error("Failed to get bootstrap server.", exception);
+    }
+    return null;
   }
 
   private void reset(List<T> eventsToPublish, long tempCurrentTime) {

@@ -13,6 +13,7 @@
 package com.adobe.platform.streaming.sink.utils;
 
 import com.google.gson.Gson;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.connect.sink.SinkRecord;
 
@@ -42,6 +43,11 @@ public class SinkUtils {
     return defaultValue;
   }
 
+  public static String getProperty(Map<String, String> props, String propertyName, String defaultValue) {
+    return props != null ? (StringUtils.isNotBlank(props.get(propertyName)) ? props.get(propertyName) : defaultValue)
+      : defaultValue;
+  }
+
   public static int getProperty(Map<String, String> properties, String key, int defaultValue, int multiplier) {
     int propertyValue = getProperty(properties, key, defaultValue) * multiplier;
     if (propertyValue < 1) {
@@ -51,6 +57,7 @@ public class SinkUtils {
     return propertyValue;
   }
 
-  private SinkUtils() {}
+  private SinkUtils() {
+  }
 
 }

@@ -23,8 +23,11 @@ dependencies {
                  libraries.jackson, libraries.httpClient,
                  libraries.kafkaConnect, libraries.orgJson,
                  libraries.slf4j
+  compileOnly libraries.kafkaConnectRuntime
   jmxAgent libraries.jmxPrometheusJavaAgent
-  testImplementation libraries.jmockit, libraries.junitJupiter
+  testImplementation libraries.jmockit, libraries.junitJupiter,
+                     libraries.wiremock, libraries.kafkaConnectTest,
+                     libraries.kafkaConnectRuntime
 }
 
 task copyJmxAgent(type: Copy) {
