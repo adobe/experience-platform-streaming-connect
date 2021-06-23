@@ -154,7 +154,7 @@ public class JWTTokenProvider extends AbstractAuthProvider {
       );
       JSONObject tokenBodyJson = new JSONObject(tokenBody);
       long expiresIn = ((Number)tokenBodyJson.get(JWT_EXPIRY_KEY)).longValue();
-      return System.currentTimeMillis() <= (expiresIn - DEFAULT_JWT_TOKEN_UPDATE_THRESHOLD);
+      return System.currentTimeMillis() > (expiresIn - DEFAULT_JWT_TOKEN_UPDATE_THRESHOLD);
     } catch (UnsupportedEncodingException exception) {
       LOG.error("Exception while parsing JWT token", exception);
     }
