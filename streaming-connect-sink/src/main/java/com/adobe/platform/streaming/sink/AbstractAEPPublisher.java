@@ -57,6 +57,8 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
 
   private static final String AEP_CONNECTION_AUTH_ENABLED_VALUE = "true";
   private static final String AEP_CONNECTION_AUTH_DISABLED_VALUE = "false";
+  public static final String AEP_ERROR_LOGGER = "aep.error.logger";
+  public static final String AEP_ERROR_TOPIC = "aep.error.topic";
 
   protected HttpProducer getHttpProducer(Map<String, String> props) throws AEPStreamingException {
     return HttpProducer.newBuilder(getAepEndpoint(props.get(AEP_ENDPOINT)))

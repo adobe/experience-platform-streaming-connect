@@ -13,6 +13,7 @@
 package com.adobe.platform.streaming.sink.utils;
 
 import com.google.common.collect.ImmutableMap;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -22,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * @author Adobe Inc.
  */
+@Tag("unit")
 class SinkUtilsTest {
 
   private static final String TEST_KEY = "key";

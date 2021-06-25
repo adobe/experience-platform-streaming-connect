@@ -29,6 +29,7 @@ versions.orgJson = '20180130'
 versions.kafkaConnect = '2.8.0'
 versions.slf4j = '1.7.25'
 versions.jaxb = '2.3.0'
+versions.wiremock = '2.27.2'
 
 libraries.collections4 = [
   "org.apache.commons:commons-collections4:$versions.collections4"
@@ -70,12 +71,27 @@ libraries.junitJupiter = [
   "org.junit.jupiter:junit-jupiter-params:$versions.junitJupiter"
 ]
 
+libraries.wiremock = [
+  "com.github.tomakehurst:wiremock:$versions.wiremock"
+]
+
 libraries.jjwt = [
   "io.jsonwebtoken:jjwt:$versions.jjwt"
 ]
 
 libraries.kafkaConnect = [
   "org.apache.kafka:connect-api:$versions.kafkaConnect"
+]
+
+libraries.kafkaConnectRuntime = [
+  "org.apache.kafka:connect-runtime:$versions.kafkaConnect",
+  "org.apache.kafka:kafka_2.12:$versions.kafkaConnect",
+]
+
+libraries.kafkaConnectTest = [
+  "org.apache.kafka:connect-runtime:$versions.kafkaConnect:test",
+  "org.apache.kafka:kafka-clients:$versions.kafkaConnect:test",
+  "org.apache.kafka:kafka_2.12:$versions.kafkaConnect:test"
 ]
 
 libraries.orgJson = [
