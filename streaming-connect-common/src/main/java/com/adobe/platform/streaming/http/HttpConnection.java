@@ -21,8 +21,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,6 +46,12 @@ public class HttpConnection {
 
   private String endpoint;
   private String url;
+
+  private String proxyHost;
+  private String proxyPort;
+  private String proxyUser;
+  private String proxyPassword;
+
   private Map<String, String> headers;
   private byte[] postData;
   private int maxRetries;
@@ -71,7 +81,25 @@ public class HttpConnection {
       try {
         URL request = new URL(new URL(endpoint), url);
         LOG.debug("opening connection for: {}", request);
-        conn = (HttpURLConnection) request.openConnection();
+
+        if (isBasicProxyConfigured()) {
+          if (isProxyWithAuthenticationConfigured()) {
+            Authenticator.setDefault(
+                new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                  return new PasswordAuthentication(proxyUser, proxyPassword.toCharArray());
+                }
+              }
+            );
+          }
+
+          Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
+          conn = (HttpURLConnection) request.openConnection(proxy);
+        } else {
+          conn = (HttpURLConnection) request.openConnection();
+        }
+
         conn.setDoInput(true);
         conn.setUseCaches(false);
         conn.setConnectTimeout(connectTimeout);
@@ -176,6 +204,17 @@ public class HttpConnection {
     }
   }
 
+  public boolean isBasicProxyConfigured() {
+    return (proxyHost != null && !proxyHost.isEmpty())
+            && (proxyPort != null && !proxyPort.isEmpty());
+  }
+
+  public boolean isProxyWithAuthenticationConfigured() {
+    return isBasicProxyConfigured()
+            && (proxyUser != null && !proxyUser.isEmpty())
+            && (proxyPassword != null && !proxyPassword.isEmpty());
+  }
+
   public InputStream getInputStream() throws HttpException {
     try {
       if (isGzip()) {
@@ -202,6 +241,26 @@ public class HttpConnection {
 
     HttpConnectionBuilder withUrl(String url) {
       instance.url = url;
+      return this;
+    }
+
+    HttpConnectionBuilder withProxyHost(String proxyHost) {
+      instance.proxyHost = proxyHost;
+      return this;
+    }
+
+    HttpConnectionBuilder withProxyPort(String proxyPort) {
+      instance.proxyPort = proxyPort;
+      return this;
+    }
+
+    HttpConnectionBuilder withProxyUser(String proxyUser) {
+      instance.proxyUser = proxyUser;
+      return this;
+    }
+
+    HttpConnectionBuilder withProxyPassword(String proxyPassword) {
+      instance.proxyPassword = proxyPassword;
       return this;
     }
 
