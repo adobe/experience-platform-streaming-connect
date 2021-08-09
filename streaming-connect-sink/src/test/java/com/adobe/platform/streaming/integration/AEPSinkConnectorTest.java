@@ -42,6 +42,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
   private static final Logger LOG = LoggerFactory.getLogger(AEPSinkConnectorTest.class);
 
   private static final String AEP_CONNECTOR_CONFIG = "aep-connector.json";
+  private static final String AEP_CONNECTOR_CONFIG_WITH_PROXY = "aep-connector-with-proxy.json";
   private static final String XDM_PAYLOAD_FILE = "xdm-data.json";
 
   @BeforeEach
@@ -49,6 +50,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
   public void setup() throws JsonProcessingException {
     super.setup();
     inletSuccessfulResponse();
+    inletSuccessfulResponseViaProxy();
   }
 
   @Test
@@ -65,6 +67,23 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
 
     // Verify inlet endpoint received 1 XDM record
     getWiremockServer().verify(postRequestedFor(urlEqualTo(getRelativeUrl()))
+      .withRequestBody(equalToJson(payloadReceivedXdmData())));
+  }
+
+  @Test
+  public void aepSinkConnectorTestViaProxy() throws HttpException, JsonProcessingException, InterruptedException {
+    getConnect().kafka().createTopic(TOPIC_NAME, TOPIC_PARTITION);
+
+    LOG.info("Starting connector cluster with connector : {}", CONNECTOR_NAME);
+    getConnect().configureConnector(CONNECTOR_NAME, connectorConfigWithProxy());
+
+    // Send single XDM data to aep sink connector
+    getConnect().kafka().produce(TOPIC_NAME, xdmData());
+
+    waitForConnectorStart(CONNECTOR_NAME, 1, 1000);
+
+    // Verify inlet endpoint received 1 XDM record
+    getWiremockServerViaProxy().verify(postRequestedFor(urlEqualTo(getRelativeUrl()))
       .withRequestBody(equalToJson(payloadReceivedXdmData())));
   }
 
@@ -94,6 +113,18 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       .getResourceAsStream(AEP_CONNECTOR_CONFIG)),
       NUMBER_OF_TASKS,
       getInletUrl());
+
+    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
+      new TypeReference<Map<String, String>>() {});
+    connectorConfig.put("name", CONNECTOR_NAME);
+    return connectorConfig;
+  }
+
+  public Map<String, String> connectorConfigWithProxy() throws HttpException, JsonProcessingException {
+    String connectorProperties = String.format(HttpUtil.streamToString(this.getClass().getClassLoader()
+      .getResourceAsStream(AEP_CONNECTOR_CONFIG_WITH_PROXY)),
+      NUMBER_OF_TASKS,
+      getInletUrlViaProxy());
 
     Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
       new TypeReference<Map<String, String>>() {});

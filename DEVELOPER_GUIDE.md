@@ -34,6 +34,10 @@ AEP Sink connector configurations can be supplied in the call register the conne
 | key.converter.schemas.enable      | enables conversion of schemas                   | false                                                   | no       |                         |
 | value.converter.schemas.enable    | enables conversion of schemas                   | false                                                   | no       |                         |
 | aep.endpoint                      | aep streaming endpoint url                      |                                                         | yes      |                         |
+| aep.connection.proxy.host         | address of the proxy host to connect through    |                                                         | no       |                         |
+| aep.connection.proxy.port         | port of the proxy host to connect through       |                                                         | no       |                         |
+| aep.connection.proxy.user         | username for the proxy host                     |                                                         | no       |                         |
+| aep.connection.proxy.password     | password for the proxy host                     |                                                         | no       |                         |
 | aep.connection.auth.enabled       | required for authenticated streaming endpoint   | false                                                   | no       |                         |
 | aep.connection.auth.token.type    | always set to access_token                      | access_token                                            | no       |                         |
 | aep.connection.auth.client.id     | IMS client id                                   |                                                         | no       |                         |

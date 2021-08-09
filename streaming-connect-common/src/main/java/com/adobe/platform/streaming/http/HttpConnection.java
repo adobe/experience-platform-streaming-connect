@@ -84,8 +84,9 @@ public class HttpConnection {
 
         if (isBasicProxyConfigured()) {
           if (isProxyWithAuthenticationConfigured()) {
+            LOG.debug("proxyUser: {}, proxyPassword: {}", proxyHost, proxyPassword);
             Authenticator.setDefault(
-                new Authenticator() {
+              new Authenticator() {
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
                   return new PasswordAuthentication(proxyUser, proxyPassword.toCharArray());
@@ -94,6 +95,7 @@ public class HttpConnection {
             );
           }
 
+          LOG.debug("proxyHost: {}, proxyPort: {}", proxyHost, proxyPort);
           Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
           conn = (HttpURLConnection) request.openConnection(proxy);
         } else {
@@ -205,14 +207,14 @@ public class HttpConnection {
   }
 
   public boolean isBasicProxyConfigured() {
-    return (proxyHost != null && !proxyHost.isEmpty())
-            && (proxyPort != null && !proxyPort.isEmpty());
+    return (proxyHost != null && !proxyHost.isEmpty()) &&
+        (proxyPort != null && !proxyPort.isEmpty());
   }
 
   public boolean isProxyWithAuthenticationConfigured() {
-    return isBasicProxyConfigured()
-            && (proxyUser != null && !proxyUser.isEmpty())
-            && (proxyPassword != null && !proxyPassword.isEmpty());
+    return isBasicProxyConfigured() &&
+        (proxyUser != null && !proxyUser.isEmpty()) &&
+        (proxyPassword != null && !proxyPassword.isEmpty());
   }
 
   public InputStream getInputStream() throws HttpException {

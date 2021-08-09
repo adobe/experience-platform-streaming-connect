@@ -82,7 +82,7 @@ public class HttpProducer implements Serializable {
     return new HttpConnection.HttpConnectionBuilder()
       .withEndpoint(endpoint)
       .withProxyHost(proxyHost)
-      .withProxyPort(proxyHost)
+      .withProxyPort(proxyPort)
       .withProxyUser(proxyUser)
       .withProxyPassword(proxyPassword)
       .withConnectTimeout(connectTimeout)
