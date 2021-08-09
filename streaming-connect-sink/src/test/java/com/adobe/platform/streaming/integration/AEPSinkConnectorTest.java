@@ -124,7 +124,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
     String connectorProperties = String.format(HttpUtil.streamToString(this.getClass().getClassLoader()
       .getResourceAsStream(AEP_CONNECTOR_CONFIG_WITH_PROXY)),
       NUMBER_OF_TASKS,
-      getInletUrlViaProxy());
+      getInletUrl());
 
     Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
       new TypeReference<Map<String, String>>() {});

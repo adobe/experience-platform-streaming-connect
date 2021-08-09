@@ -145,10 +145,6 @@ public abstract class AbstractConnectorTest {
     return baseUrl.concat(relativePath);
   }
 
-  protected String getInletUrlViaProxy() {
-    return baseUrlViaProxy.concat(relativePath);
-  }
-
   public int getNumberOfWorkers() {
     return numberOfWorkers;
   }
