@@ -8,5 +8,5 @@
   "value.converter.schemas.enable": "false",
   "aep.endpoint": "%s",
   "aep.connection.proxy.host": "localhost",
-  "aep.connection.proxy.port": "8090"
+  "aep.connection.proxy.port": "%s"
 }
