@@ -79,12 +79,12 @@ public class HttpConnection {
 
     while (retries++ < maxRetries) {
       try {
-        URL request = new URL(new URL(endpoint), url);
+        final URL request = new URL(new URL(endpoint), url);
         LOG.debug("opening connection for: {}", request);
 
         if (isBasicProxyConfigured()) {
           if (isProxyWithAuthenticationConfigured()) {
-            LOG.debug("proxyUser: {}, proxyPassword: {}", proxyHost, proxyPassword);
+            LOG.debug("proxyUser: {}, proxyPassword: {}", proxyUser, proxyPassword);
             Authenticator.setDefault(
               new Authenticator() {
                 @Override
@@ -96,7 +96,7 @@ public class HttpConnection {
           }
 
           LOG.debug("proxyHost: {}, proxyPort: {}", proxyHost, proxyPort);
-          Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
+          final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
           conn = (HttpURLConnection) request.openConnection(proxy);
         } else {
           conn = (HttpURLConnection) request.openConnection();
