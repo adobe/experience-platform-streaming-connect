@@ -14,6 +14,8 @@ package com.adobe.platform.streaming.http;
 
 import com.adobe.platform.streaming.auth.AuthException;
 import com.adobe.platform.streaming.auth.AuthProvider;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +50,7 @@ public class HttpConnection {
   private String url;
 
   private String proxyHost;
-  private String proxyPort;
+  private int proxyPort;
   private String proxyUser;
   private String proxyPassword;
 
@@ -96,7 +98,7 @@ public class HttpConnection {
           }
 
           LOG.debug("proxyHost: {}, proxyPort: {}", proxyHost, proxyPort);
-          final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, Integer.parseInt(proxyPort)));
+          final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
           conn = (HttpURLConnection) request.openConnection(proxy);
         } else {
           conn = (HttpURLConnection) request.openConnection();
@@ -207,14 +209,12 @@ public class HttpConnection {
   }
 
   public boolean isBasicProxyConfigured() {
-    return (proxyHost != null && !proxyHost.isEmpty()) &&
-        (proxyPort != null && !proxyPort.isEmpty());
+    return StringUtils.isNotEmpty(proxyHost);
   }
 
   public boolean isProxyWithAuthenticationConfigured() {
-    return isBasicProxyConfigured() &&
-        (proxyUser != null && !proxyUser.isEmpty()) &&
-        (proxyPassword != null && !proxyPassword.isEmpty());
+    return StringUtils.isNotEmpty(proxyUser) &&
+           StringUtils.isNotEmpty(proxyPassword);
   }
 
   public InputStream getInputStream() throws HttpException {
@@ -251,7 +251,7 @@ public class HttpConnection {
       return this;
     }
 
-    HttpConnectionBuilder withProxyPort(String proxyPort) {
+    HttpConnectionBuilder withProxyPort(int proxyPort) {
       instance.proxyPort = proxyPort;
       return this;
     }

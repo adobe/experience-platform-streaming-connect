@@ -55,7 +55,6 @@ public abstract class AbstractConnectorTest {
   private int numberOfWorkers = 1;
   private String inletId = "876e1041c16801b8b3038ec86bb4510e8c89356152191b587367b592e79d91d5";
   private String baseUrl;
-  private String baseUrlViaProxy;
   private String relativePath;
 
   @RegisterExtension
@@ -75,7 +74,6 @@ public abstract class AbstractConnectorTest {
         .build();
     connect.start();
     baseUrl = String.format("http://localhost:%s", PORT);
-    baseUrlViaProxy = String.format("http://localhost:%s", PORT_VIA_PROXY);
     relativePath = String.format("/collection/%s", inletId);
   }
 
@@ -115,7 +113,7 @@ public abstract class AbstractConnectorTest {
       .withJsonBody(MAPPER.readTree("{\"payloadReceived\": true}"))));
   }
 
-  public void inletSuccessfulResponseViaProxy() throws JsonProcessingException {
+  public void inletSuccessfulResponseViaProxy() {
     wiremockExtensionViaProxy.getWireMockServer()
       .stubFor(WireMock
       .post(WireMock.urlEqualTo(getRelativeUrl()))

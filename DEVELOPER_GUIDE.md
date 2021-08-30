@@ -35,7 +35,7 @@ AEP Sink connector configurations can be supplied in the call register the conne
 | value.converter.schemas.enable    | enables conversion of schemas                   | false                                                   | no       |                         |
 | aep.endpoint                      | aep streaming endpoint url                      |                                                         | yes      |                         |
 | aep.connection.proxy.host         | address of the proxy host to connect through    |                                                         | no       |                         |
-| aep.connection.proxy.port         | port of the proxy host to connect through       |                                                         | no       |                         |
+| aep.connection.proxy.port         | port of the proxy host to connect through       | 443                                                     | no       |                         |
 | aep.connection.proxy.user         | username for the proxy host                     |                                                         | no       |                         |
 | aep.connection.proxy.password     | password for the proxy host                     |                                                         | no       |                         |
 | aep.connection.auth.enabled       | required for authenticated streaming endpoint   | false                                                   | no       |                         |
@@ -284,6 +284,20 @@ curl -s -X POST \
   }
 }' http://localhost:8083/connectors
 ```
+
+#### Poxy host configuration
+There are 2 ways to route request to aep endpoint through proxy server :
+1. **Using Environment Variable** : Export poxyHost and proxyPort on each kafka node, then restart kafka connect node.
+    ```
+    export KAFKA_OPTS="-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=8085 -Dhttp.proxyUser=proxyUsername -Dhttp.proxyPassword=proxyPassword"
+    ``` 
+2. **Using Connector Properties** : While creating connector set following properties, default values mentioned in [connect configurations](#configuration-options).
+    ```
+    aep.connection.proxy.host                                                          
+    aep.connection.proxy.port
+    aep.connection.proxy.user
+    aep.connection.proxy.password
+    ```
 
 #### Use the Kafka Topics UI to view your topics
 

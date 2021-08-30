@@ -85,6 +85,8 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
     // Verify inlet endpoint received 1 XDM record
     getWiremockServerViaProxy().verify(postRequestedFor(urlEqualTo(getRelativeUrl()))
       .withRequestBody(equalToJson(payloadReceivedXdmData())));
+    // Check if request from proxy server forward to AEP endpoint
+    getWiremockServer().verify(postRequestedFor(urlEqualTo(getRelativeUrl())));
   }
 
   @AfterEach

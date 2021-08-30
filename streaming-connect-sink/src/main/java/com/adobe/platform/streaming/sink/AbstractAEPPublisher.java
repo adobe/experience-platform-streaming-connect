@@ -69,7 +69,7 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
   protected HttpProducer getHttpProducer(Map<String, String> props) throws AEPStreamingException {
     return HttpProducer.newBuilder(getAepEndpoint(props.get(AEP_ENDPOINT)))
       .withProxyHost(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_HOST, null))
-      .withProxyPort(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_PORT, null))
+      .withProxyPort(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_PORT, 443))
       .withProxyUser(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_USER, null))
       .withProxyPassword(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_PASSWORD, null))
       .withConnectTimeout(SinkUtils.getProperty(props, AEP_CONNECTION_TIMEOUT, 5000))

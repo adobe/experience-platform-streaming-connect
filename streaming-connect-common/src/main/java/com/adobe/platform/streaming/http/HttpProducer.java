@@ -32,7 +32,7 @@ public class HttpProducer implements Serializable {
   private final String endpoint;
 
   private String proxyHost;
-  private String proxyPort;
+  private int proxyPort;
   private String proxyUser;
   private String proxyPassword;
 
@@ -111,7 +111,7 @@ public class HttpProducer implements Serializable {
       return this;
     }
 
-    public HttpProducerBuilder withProxyPort(String proxyPort) {
+    public HttpProducerBuilder withProxyPort(int proxyPort) {
       instance.proxyPort = proxyPort;
       return this;
     }
