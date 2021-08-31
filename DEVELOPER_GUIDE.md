@@ -288,8 +288,14 @@ curl -s -X POST \
 #### Poxy host configuration
 There are 2 ways to route request to aep endpoint through proxy server :
 1. **Using Environment Variable** : Export poxyHost and proxyPort on each kafka node, then restart kafka connect node.
+   
+    For HTTPS use following :
     ```
-    export KAFKA_OPTS="-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=8085 -Dhttp.proxyUser=proxyUsername -Dhttp.proxyPassword=proxyPassword"
+    export KAFKA_OPTS="-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=8085 -Dhttps.proxyUser=proxyUsername -Dhttps.proxyPassword=proxyPassword"
+    ``` 
+    For HTTP use following:
+    ```
+    export KAFKA_OPTS="-Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=8085 -Dhttp.proxyUser=proxyUsername -Dhttp.proxyPassword=proxyPassword"
     ``` 
 2. **Using Connector Properties** : While creating connector set following properties, default values mentioned in [connect configurations](#configuration-options).
     ```
@@ -298,6 +304,7 @@ There are 2 ways to route request to aep endpoint through proxy server :
     aep.connection.proxy.user
     aep.connection.proxy.password
     ```
+For reference, more details are in oracle documentation on configuring proxy settings in java : https://docs.oracle.com/javase/8/docs/technotes/guides/net/proxies.html
 
 #### Use the Kafka Topics UI to view your topics
 
