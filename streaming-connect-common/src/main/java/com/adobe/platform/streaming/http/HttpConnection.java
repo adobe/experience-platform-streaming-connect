@@ -14,6 +14,8 @@ package com.adobe.platform.streaming.http;
 
 import com.adobe.platform.streaming.auth.AuthException;
 import com.adobe.platform.streaming.auth.AuthProvider;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,8 +23,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,6 +48,12 @@ public class HttpConnection {
 
   private String endpoint;
   private String url;
+
+  private String proxyHost;
+  private int proxyPort;
+  private String proxyUser;
+  private String proxyPassword;
+
   private Map<String, String> headers;
   private byte[] postData;
   private int maxRetries;
@@ -69,9 +81,29 @@ public class HttpConnection {
 
     while (retries++ < maxRetries) {
       try {
-        URL request = new URL(new URL(endpoint), url);
+        final URL request = new URL(new URL(endpoint), url);
         LOG.debug("opening connection for: {}", request);
-        conn = (HttpURLConnection) request.openConnection();
+
+        if (isBasicProxyConfigured()) {
+          if (isProxyWithAuthenticationConfigured()) {
+            LOG.debug("proxyUser: {}, proxyPassword: {}", proxyUser, proxyPassword);
+            Authenticator.setDefault(
+              new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                  return new PasswordAuthentication(proxyUser, proxyPassword.toCharArray());
+                }
+              }
+            );
+          }
+
+          LOG.debug("proxyHost: {}, proxyPort: {}", proxyHost, proxyPort);
+          final Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+          conn = (HttpURLConnection) request.openConnection(proxy);
+        } else {
+          conn = (HttpURLConnection) request.openConnection();
+        }
+
         conn.setDoInput(true);
         conn.setUseCaches(false);
         conn.setConnectTimeout(connectTimeout);
@@ -176,6 +208,15 @@ public class HttpConnection {
     }
   }
 
+  public boolean isBasicProxyConfigured() {
+    return StringUtils.isNotEmpty(proxyHost);
+  }
+
+  public boolean isProxyWithAuthenticationConfigured() {
+    return StringUtils.isNotEmpty(proxyUser) &&
+           StringUtils.isNotEmpty(proxyPassword);
+  }
+
   public InputStream getInputStream() throws HttpException {
     try {
       if (isGzip()) {
@@ -202,6 +243,26 @@ public class HttpConnection {
 
     HttpConnectionBuilder withUrl(String url) {
       instance.url = url;
+      return this;
+    }
+
+    HttpConnectionBuilder withProxyHost(String proxyHost) {
+      instance.proxyHost = proxyHost;
+      return this;
+    }
+
+    HttpConnectionBuilder withProxyPort(int proxyPort) {
+      instance.proxyPort = proxyPort;
+      return this;
+    }
+
+    HttpConnectionBuilder withProxyUser(String proxyUser) {
+      instance.proxyUser = proxyUser;
+      return this;
+    }
+
+    HttpConnectionBuilder withProxyPassword(String proxyPassword) {
+      instance.proxyPassword = proxyPassword;
       return this;
     }
 

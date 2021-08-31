@@ -30,6 +30,12 @@ public class HttpProducer implements Serializable {
   private static final String CONTENT_TYPE = "Content-type";
 
   private final String endpoint;
+
+  private String proxyHost;
+  private int proxyPort;
+  private String proxyUser;
+  private String proxyPassword;
+
   private final boolean enableGzip;
   private int connectTimeout;
   private transient AuthProvider auth;
@@ -75,6 +81,10 @@ public class HttpProducer implements Serializable {
   private HttpConnection.HttpConnectionBuilder newConnectionBuilder() {
     return new HttpConnection.HttpConnectionBuilder()
       .withEndpoint(endpoint)
+      .withProxyHost(proxyHost)
+      .withProxyPort(proxyPort)
+      .withProxyUser(proxyUser)
+      .withProxyPassword(proxyPassword)
       .withConnectTimeout(connectTimeout)
       .withAuth(auth)
       .withReadTimeout(readTimeout)
@@ -94,6 +104,26 @@ public class HttpProducer implements Serializable {
 
     HttpProducerBuilder(HttpProducer instance) {
       this.instance = instance;
+    }
+
+    public HttpProducerBuilder withProxyHost(String proxyHost) {
+      instance.proxyHost = proxyHost;
+      return this;
+    }
+
+    public HttpProducerBuilder withProxyPort(int proxyPort) {
+      instance.proxyPort = proxyPort;
+      return this;
+    }
+
+    public HttpProducerBuilder withProxyUser(String proxyUser) {
+      instance.proxyUser = proxyUser;
+      return this;
+    }
+
+    public HttpProducerBuilder withProxyPassword(String proxyPassword) {
+      instance.proxyPassword = proxyPassword;
+      return this;
     }
 
     public HttpProducerBuilder withReadTimeout(int readTimeout) {

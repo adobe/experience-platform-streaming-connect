@@ -34,6 +34,10 @@ AEP Sink connector configurations can be supplied in the call register the conne
 | key.converter.schemas.enable      | enables conversion of schemas                   | false                                                   | no       |                         |
 | value.converter.schemas.enable    | enables conversion of schemas                   | false                                                   | no       |                         |
 | aep.endpoint                      | aep streaming endpoint url                      |                                                         | yes      |                         |
+| aep.connection.proxy.host         | address of the proxy host to connect through    |                                                         | no       |                         |
+| aep.connection.proxy.port         | port of the proxy host to connect through       | 443                                                     | no       |                         |
+| aep.connection.proxy.user         | username for the proxy host                     |                                                         | no       |                         |
+| aep.connection.proxy.password     | password for the proxy host                     |                                                         | no       |                         |
 | aep.connection.auth.enabled       | required for authenticated streaming endpoint   | false                                                   | no       |                         |
 | aep.connection.auth.token.type    | always set to access_token                      | access_token                                            | no       |                         |
 | aep.connection.auth.client.id     | IMS client id                                   |                                                         | no       |                         |
@@ -280,6 +284,27 @@ curl -s -X POST \
   }
 }' http://localhost:8083/connectors
 ```
+
+#### Poxy host configuration
+There are 2 ways to route request to aep endpoint through proxy server :
+1. **Using Environment Variable** : Export poxyHost and proxyPort on each kafka node, then restart kafka connect node.
+   
+    For HTTPS use following :
+    ```
+    export KAFKA_OPTS="-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=8085 -Dhttps.proxyUser=proxyUsername -Dhttps.proxyPassword=proxyPassword"
+    ``` 
+    For HTTP use following:
+    ```
+    export KAFKA_OPTS="-Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=8085 -Dhttp.proxyUser=proxyUsername -Dhttp.proxyPassword=proxyPassword"
+    ``` 
+2. **Using Connector Properties** : While creating connector set following properties, default values mentioned in [connect configurations](#configuration-options).
+    ```
+    aep.connection.proxy.host                                                          
+    aep.connection.proxy.port
+    aep.connection.proxy.user
+    aep.connection.proxy.password
+    ```
+For reference, more details are in oracle documentation on configuring proxy settings in java : https://docs.oracle.com/javase/8/docs/technotes/guides/net/proxies.html
 
 #### Use the Kafka Topics UI to view your topics
 

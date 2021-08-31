@@ -50,6 +50,7 @@ public abstract class AbstractConnectorTest {
   protected static final String CONNECTOR_NAME = "aep-sink-connector";
   protected static final String TOPIC_NAME = "connect-test";
   protected static final int PORT = 8089;
+  protected static final int PORT_VIA_PROXY = 8090;
   private EmbeddedConnectCluster connect;
   private int numberOfWorkers = 1;
   private String inletId = "876e1041c16801b8b3038ec86bb4510e8c89356152191b587367b592e79d91d5";
@@ -58,6 +59,9 @@ public abstract class AbstractConnectorTest {
 
   @RegisterExtension
   public static final WiremockExtension wiremockExtension = new WiremockExtension(PORT);
+
+  @RegisterExtension
+  public static final WiremockExtension wiremockExtensionViaProxy = new WiremockExtension(PORT_VIA_PROXY);
 
   @BeforeEach
   public void setup() throws JsonProcessingException {
@@ -109,6 +113,13 @@ public abstract class AbstractConnectorTest {
       .withJsonBody(MAPPER.readTree("{\"payloadReceived\": true}"))));
   }
 
+  public void inletSuccessfulResponseViaProxy() {
+    wiremockExtensionViaProxy.getWireMockServer()
+      .stubFor(WireMock
+      .post(WireMock.urlEqualTo(getRelativeUrl()))
+      .willReturn(ResponseDefinitionBuilder.responseDefinition().proxiedFrom(baseUrl)));
+  }
+
   public void inletFailedResponse() {
     wiremockExtension.getWireMockServer()
       .stubFor(WireMock
@@ -118,6 +129,10 @@ public abstract class AbstractConnectorTest {
 
   protected WireMockServer getWiremockServer() {
     return wiremockExtension.getWireMockServer();
+  }
+
+  protected WireMockServer getWiremockServerViaProxy() {
+    return wiremockExtensionViaProxy.getWireMockServer();
   }
 
   protected String getRelativeUrl() {

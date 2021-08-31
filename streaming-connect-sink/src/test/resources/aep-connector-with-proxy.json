@@ -1,0 +1,12 @@
+{
+  "topics": "connect-test",
+  "tasks.max": "%s",
+  "aep.flush.interval.seconds": "1",
+  "aep.flush.bytes.kb": "4",
+  "connector.class": "com.adobe.platform.streaming.sink.impl.AEPSinkConnector",
+  "key.converter.schemas.enable": "false",
+  "value.converter.schemas.enable": "false",
+  "aep.endpoint": "%s",
+  "aep.connection.proxy.host": "localhost",
+  "aep.connection.proxy.port": "%s"
+}

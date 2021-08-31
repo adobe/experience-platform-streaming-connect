@@ -38,6 +38,12 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
   private static final Logger LOG = LoggerFactory.getLogger(AbstractAEPPublisher.class);
 
   private static final String AEP_ENDPOINT = "aep.endpoint";
+
+  private static final String AEP_CONNECTION_PROXY_HOST = "aep.connection.proxy.host";
+  private static final String AEP_CONNECTION_PROXY_PORT = "aep.connection.proxy.port";
+  private static final String AEP_CONNECTION_PROXY_USER = "aep.connection.proxy.user";
+  private static final String AEP_CONNECTION_PROXY_PASSWORD = "aep.connection.proxy.password";
+
   private static final String AEP_CONNECTION_TIMEOUT = "aep.connection.timeout";
   private static final String AEP_CONNECTION_MAX_RETRIES = "aep.connection.maxRetries";
   private static final String AEP_CONNECTION_MAX_RETRIES_BACKOFF = "aep.connection.retryBackoff";
@@ -62,6 +68,10 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
 
   protected HttpProducer getHttpProducer(Map<String, String> props) throws AEPStreamingException {
     return HttpProducer.newBuilder(getAepEndpoint(props.get(AEP_ENDPOINT)))
+      .withProxyHost(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_HOST, null))
+      .withProxyPort(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_PORT, 443))
+      .withProxyUser(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_USER, null))
+      .withProxyPassword(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_PASSWORD, null))
       .withConnectTimeout(SinkUtils.getProperty(props, AEP_CONNECTION_TIMEOUT, 5000))
       .withReadTimeout(SinkUtils.getProperty(props, AEP_CONNECTION_READ_TIMEOUT, 60000))
       .withMaxRetries(SinkUtils.getProperty(props, AEP_CONNECTION_MAX_RETRIES, 3))
