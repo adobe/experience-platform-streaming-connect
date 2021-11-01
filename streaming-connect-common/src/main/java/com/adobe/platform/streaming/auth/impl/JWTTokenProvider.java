@@ -50,7 +50,7 @@ public class JWTTokenProvider extends AbstractAuthProvider {
   private static final Logger LOG = LoggerFactory.getLogger(JWTTokenProvider.class);
   private static final long JWT_TOKEN_EXPIRATION_THRESHOLD = 86400L;
   private static final long DEFAULT_JWT_TOKEN_UPDATE_THRESHOLD = 60000;
-  private static final String IMS_ENDPOINT_PATH = "/ims/exchange/jwt";
+  private static final String IMS_ENDPOINT_PATH = "/ims/exchange/jwt/";
 
   private static final String JWT_EXPIRY_KEY = "exp";
   private static final String JWT_ISS_KEY = "iss";

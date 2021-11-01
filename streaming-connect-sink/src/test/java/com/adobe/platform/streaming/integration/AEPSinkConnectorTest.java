@@ -12,10 +12,6 @@
 
 package com.adobe.platform.streaming.integration;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-
 import com.adobe.platform.streaming.http.HttpException;
 import com.adobe.platform.streaming.http.HttpUtil;
 
@@ -32,6 +28,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 
 /**
  * @author Adobe Inc.
@@ -75,7 +75,8 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
   }
 
   @Test
-  public void aepSinkConnectorIMSAuthenticationTest() throws HttpException, JsonProcessingException, InterruptedException {
+  public void aepSinkConnectorIMSAuthenticationTest() throws HttpException, JsonProcessingException,
+      InterruptedException {
     inletIMSAuthenticationSuccessfulResponse();
     getConnect().kafka().createTopic(TOPIC_NAME, TOPIC_PARTITION);
 
@@ -93,7 +94,8 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
   }
 
   @Test
-  public void aepSinkConnectorJWTAuthenticationTest() throws HttpException, JsonProcessingException, InterruptedException {
+  public void aepSinkConnectorJWTAuthenticationTest() throws HttpException, JsonProcessingException,
+      InterruptedException {
     inletJWTAuthenticationSuccessfulResponse();
     getConnect().kafka().createTopic(TOPIC_NAME, TOPIC_PARTITION);
 
@@ -111,7 +113,8 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
   }
 
   @Test
-  public void aepSinkConnectorIMSAuthenticationProxyTest() throws HttpException, JsonProcessingException, InterruptedException {
+  public void aepSinkConnectorIMSAuthenticationProxyTest() throws HttpException, JsonProcessingException,
+      InterruptedException {
     inletIMSAuthenticationSuccessfulResponse();
     inletIMSAuthenticationSuccessfulResponseViaProxy();
 
@@ -134,7 +137,8 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
   }
 
   @Test
-  public void aepSinkConnectorJWTAuthenticationProxyTest() throws HttpException, JsonProcessingException, InterruptedException {
+  public void aepSinkConnectorJWTAuthenticationProxyTest() throws HttpException, JsonProcessingException,
+      InterruptedException {
     inletJWTAuthenticationSuccessfulResponse();
     inletJWTAuthenticationSuccessfulResponseViaProxy();
 
@@ -204,7 +208,8 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       getInletUrl(),
       getBaseUrl());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, new TypeReference<>() {});
+    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
+      new TypeReference<Map<String, String>>() {});
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
@@ -217,7 +222,8 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       getBaseUrl(),
       this.getClass().getClassLoader().getResource("secret.key").getPath());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, new TypeReference<>() {});
+    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
+      new TypeReference<Map<String, String>>() {});
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
@@ -230,7 +236,8 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       PORT_VIA_PROXY,
       getBaseUrl());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, new TypeReference<>() {});
+    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
+      new TypeReference<Map<String, String>>() {});
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
@@ -244,7 +251,8 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       getBaseUrl(),
       this.getClass().getClassLoader().getResource("secret.key").getPath());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, new TypeReference<>() {});
+    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
+      new TypeReference<Map<String, String>>() {});
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
@@ -255,7 +263,8 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       NUMBER_OF_TASKS,
       getInletUrl());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, new TypeReference<>() {});
+    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
+      new TypeReference<Map<String, String>>() {});
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
@@ -267,7 +276,8 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       getInletUrl(),
       PORT_VIA_PROXY);
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, new TypeReference<>() {});
+    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
+      new TypeReference<Map<String, String>>() {});
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }

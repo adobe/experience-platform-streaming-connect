@@ -77,7 +77,8 @@ public final class AuthProviderFactory {
     String endpoint = authProperties.get(AuthUtils.AUTH_ENDPOINT);
     return StringUtils.isEmpty(endpoint) ?
       new JWTTokenProvider(clientId, clientSecret, imsOrgId, technicalAccountKey, filePath, authProxyConfiguration) :
-      new JWTTokenProvider(endpoint, clientId, clientSecret, imsOrgId, technicalAccountKey, filePath, authProxyConfiguration);
+      new JWTTokenProvider(endpoint, clientId, clientSecret, imsOrgId, technicalAccountKey, filePath,
+        authProxyConfiguration);
   }
 
   private AuthProviderFactory() {}
