@@ -27,25 +27,26 @@ import java.util.Map;
  */
 public final class AuthProviderFactory {
 
-  public static AuthProvider getAuthProvider(TokenType tokenType, Map<String, String> authProperties)
-      throws AuthException {
+  public static AuthProvider getAuthProvider(TokenType tokenType, Map<String, String> authProperties,
+    AuthProxyConfiguration authProxyConfiguration) throws AuthException {
     if (MapUtils.isEmpty(authProperties)) {
       throw new AuthException("Invalid properties to get auth provider");
     }
 
     switch (tokenType) {
       case ACCESS_TOKEN:
-        return getIMSAuthProvider(authProperties);
+        return getIMSAuthProvider(authProperties, authProxyConfiguration);
 
       case JWT_TOKEN:
-        return getJWTAuthProvider(authProperties);
+        return getJWTAuthProvider(authProperties, authProxyConfiguration);
 
       default:
         throw new AuthException("Invalid token type to get auth provider");
     }
   }
 
-  private static AuthProvider getIMSAuthProvider(Map<String, String> authProperties) {
+  private static AuthProvider getIMSAuthProvider(Map<String, String> authProperties,
+    AuthProxyConfiguration authProxyConfiguration) {
     String clientId = authProperties.get(AuthUtils.AUTH_CLIENT_ID);
     String clientCode = authProperties.get(AuthUtils.AUTH_CLIENT_CODE);
     String clientSecret = authProperties.get(AuthUtils.AUTH_CLIENT_SECRET);
@@ -56,11 +57,12 @@ public final class AuthProviderFactory {
 
     String endpoint = authProperties.get(AuthUtils.AUTH_ENDPOINT);
     return StringUtils.isEmpty(endpoint) ?
-      new IMSTokenProvider(clientId, clientCode, clientSecret) :
-      new IMSTokenProvider(endpoint, clientId, clientCode, clientSecret);
+      new IMSTokenProvider(clientId, clientCode, clientSecret, authProxyConfiguration) :
+      new IMSTokenProvider(endpoint, clientId, clientCode, clientSecret, authProxyConfiguration);
   }
 
-  private static AuthProvider getJWTAuthProvider(Map<String, String> authProperties) {
+  private static AuthProvider getJWTAuthProvider(Map<String, String> authProperties,
+    AuthProxyConfiguration authProxyConfiguration) {
     final String clientId = authProperties.get(AuthUtils.AUTH_CLIENT_ID);
     final String clientSecret = authProperties.get(AuthUtils.AUTH_CLIENT_SECRET);
     final String imsOrgId = authProperties.get(AuthUtils.AUTH_IMS_ORG_ID);
@@ -74,8 +76,8 @@ public final class AuthProviderFactory {
 
     String endpoint = authProperties.get(AuthUtils.AUTH_ENDPOINT);
     return StringUtils.isEmpty(endpoint) ?
-      new JWTTokenProvider(clientId, clientSecret, imsOrgId, technicalAccountKey, filePath) :
-      new JWTTokenProvider(endpoint, clientId, clientSecret, imsOrgId, technicalAccountKey, filePath);
+      new JWTTokenProvider(clientId, clientSecret, imsOrgId, technicalAccountKey, filePath, authProxyConfiguration) :
+      new JWTTokenProvider(endpoint, clientId, clientSecret, imsOrgId, technicalAccountKey, filePath, authProxyConfiguration);
   }
 
   private AuthProviderFactory() {}

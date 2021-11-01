@@ -18,6 +18,7 @@ import com.adobe.platform.streaming.auth.AuthProvider;
 import com.adobe.platform.streaming.auth.AuthUtils;
 import com.adobe.platform.streaming.auth.TokenType;
 import com.adobe.platform.streaming.auth.impl.AuthProviderFactory;
+import com.adobe.platform.streaming.auth.impl.AuthProxyConfiguration;
 import com.adobe.platform.streaming.http.HttpProducer;
 import com.adobe.platform.streaming.sink.utils.SinkUtils;
 import com.google.common.collect.ImmutableMap;
@@ -124,6 +125,12 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
       .put(AuthUtils.AUTH_CLIENT_ID, props.get(AEP_CONNECTION_AUTH_CLIENT_ID))
       .put(AuthUtils.AUTH_CLIENT_CODE, props.get(AEP_CONNECTION_AUTH_CLIENT_CODE))
       .put(AuthUtils.AUTH_CLIENT_SECRET, props.get(AEP_CONNECTION_AUTH_CLIENT_SECRET))
+      .put(AuthUtils.AUTH_ENDPOINT, props.get(AEP_CONNECTION_AUTH_ENDPOINT))
+      .build(), AuthProxyConfiguration.builder()
+      .proxyHost(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_HOST, null))
+      .proxyPort(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_PORT, 443))
+      .proxyUsername(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_USER, null))
+      .proxyPassword(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_PASSWORD, null))
       .build());
   }
 
@@ -135,6 +142,11 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
       .put(AuthUtils.AUTH_IMS_ORG_ID, props.get(AEP_CONNECTION_AUTH_IMS_ORG))
       .put(AuthUtils.AUTH_TECHNICAL_ACCOUNT_ID, props.get(AEP_CONNECTION_AUTH_ACCOUNT_KEY))
       .put(AuthUtils.AUTH_PRIVATE_KEY_FILE_PATH, props.get(AEP_CONNECTION_AUTH_FILE_PATH))
+      .build(), AuthProxyConfiguration.builder()
+      .proxyHost(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_HOST, null))
+      .proxyPort(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_PORT, 443))
+      .proxyUsername(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_USER, null))
+      .proxyPassword(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_PASSWORD, null))
       .build());
   }
 

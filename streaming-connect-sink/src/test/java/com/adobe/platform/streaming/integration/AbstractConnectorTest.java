@@ -44,6 +44,7 @@ public abstract class AbstractConnectorTest {
   protected static final ObjectMapper MAPPER = new ObjectMapper();
   private static final long OFFSET_COMMIT_INTERVAL_MS = TimeUnit.SECONDS.toMillis(5);
   protected static final int HTTP_SERVER_SIDE_ERROR_CODE = 500;
+  private static final String AUTH_TOKEN_RESPONSE = "{\"access_token\":\"accessToken\",\"refresh_token\":\"refreshToken\",\"token_type\":\"bearer\",\"expires_in\":82399996}";
 
   protected static final int TOPIC_PARTITION = 1;
   protected static final int NUMBER_OF_TASKS = 1;
@@ -56,6 +57,8 @@ public abstract class AbstractConnectorTest {
   private String inletId = "876e1041c16801b8b3038ec86bb4510e8c89356152191b587367b592e79d91d5";
   private String baseUrl;
   private String relativePath;
+  private String relativeImsAuthPath;
+  private String relativeJWTAuthPath;
 
   @RegisterExtension
   public static final WiremockExtension wiremockExtension = new WiremockExtension(PORT);
@@ -75,6 +78,8 @@ public abstract class AbstractConnectorTest {
     connect.start();
     baseUrl = String.format("http://localhost:%s", PORT);
     relativePath = String.format("/collection/%s", inletId);
+    relativeImsAuthPath = "/ims/token/v1";
+    relativeJWTAuthPath = "/ims/exchange/jwt/";
   }
 
   protected void waitForConnectorStart(String connector, int numberOfTask, int waitTimeMs) throws InterruptedException {
@@ -113,6 +118,36 @@ public abstract class AbstractConnectorTest {
       .withJsonBody(MAPPER.readTree("{\"payloadReceived\": true}"))));
   }
 
+  public void inletIMSAuthenticationSuccessfulResponse() throws JsonProcessingException {
+    wiremockExtension.getWireMockServer()
+      .stubFor(WireMock
+      .post(WireMock.urlEqualTo(getRelativeAuthUrl()))
+      .willReturn(ResponseDefinitionBuilder.responseDefinition()
+      .withJsonBody(MAPPER.readTree(AUTH_TOKEN_RESPONSE))));
+  }
+
+  public void inletJWTAuthenticationSuccessfulResponse() throws JsonProcessingException {
+    wiremockExtension.getWireMockServer()
+      .stubFor(WireMock
+      .post(WireMock.urlEqualTo(getRelativeJWTAuthUrl()))
+      .willReturn(ResponseDefinitionBuilder.responseDefinition()
+      .withJsonBody(MAPPER.readTree(AUTH_TOKEN_RESPONSE))));
+  }
+
+  public void inletIMSAuthenticationSuccessfulResponseViaProxy() {
+    wiremockExtensionViaProxy.getWireMockServer()
+      .stubFor(WireMock
+      .post(WireMock.urlEqualTo(getRelativeAuthUrl()))
+      .willReturn(ResponseDefinitionBuilder.responseDefinition().proxiedFrom(baseUrl)));
+  }
+
+  public void inletJWTAuthenticationSuccessfulResponseViaProxy() {
+    wiremockExtensionViaProxy.getWireMockServer()
+      .stubFor(WireMock
+      .post(WireMock.urlEqualTo(getRelativeJWTAuthUrl()))
+      .willReturn(ResponseDefinitionBuilder.responseDefinition().proxiedFrom(baseUrl)));
+  }
+
   public void inletSuccessfulResponseViaProxy() {
     wiremockExtensionViaProxy.getWireMockServer()
       .stubFor(WireMock
@@ -139,8 +174,20 @@ public abstract class AbstractConnectorTest {
     return relativePath.replace("/collection/", "/collection/batch/");
   }
 
+  protected String getRelativeAuthUrl() {
+    return relativeImsAuthPath;
+  }
+
+  protected String getRelativeJWTAuthUrl() {
+    return relativeJWTAuthPath;
+  }
+
   protected String getInletUrl() {
     return baseUrl.concat(relativePath);
+  }
+
+  public String getBaseUrl() {
+    return baseUrl;
   }
 
   public int getNumberOfWorkers() {
