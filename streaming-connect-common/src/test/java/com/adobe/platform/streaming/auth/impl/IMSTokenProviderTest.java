@@ -29,19 +29,22 @@ class IMSTokenProviderTest {
 
   @Test
   void testGetTokenInvalidClientId() {
-    IMSTokenProvider imsTokenProvider = new IMSTokenProvider(TEST_ENDPOINT, null, TEST_CLIENT_CODE, TEST_CLIENT_SECRET);
+    IMSTokenProvider imsTokenProvider = new IMSTokenProvider(TEST_ENDPOINT, null, TEST_CLIENT_CODE,
+      TEST_CLIENT_SECRET, AuthProxyConfiguration.builder().build());
     assertThrows(AuthException.class, imsTokenProvider::getToken);
   }
 
   @Test
   void testGetTokenInvalidClientCode() {
-    IMSTokenProvider imsTokenProvider = new IMSTokenProvider(TEST_ENDPOINT, TEST_CLIENT_ID, null, TEST_CLIENT_SECRET);
+    IMSTokenProvider imsTokenProvider = new IMSTokenProvider(TEST_ENDPOINT, TEST_CLIENT_ID, null,
+      TEST_CLIENT_SECRET, AuthProxyConfiguration.builder().build());
     assertThrows(AuthException.class, imsTokenProvider::getToken);
   }
 
   @Test
   void testGetTokenInvalidSecret() {
-    IMSTokenProvider imsTokenProvider = new IMSTokenProvider(TEST_ENDPOINT, TEST_CLIENT_ID, TEST_CLIENT_CODE, null);
+    IMSTokenProvider imsTokenProvider = new IMSTokenProvider(TEST_ENDPOINT, TEST_CLIENT_ID, TEST_CLIENT_CODE,
+      null, AuthProxyConfiguration.builder().build());
     assertThrows(AuthException.class, imsTokenProvider::getToken);
   }
 
@@ -51,7 +54,8 @@ class IMSTokenProviderTest {
       TEST_ENDPOINT,
       TEST_CLIENT_ID,
       TEST_CLIENT_CODE,
-      TEST_CLIENT_SECRET
+      TEST_CLIENT_SECRET,
+      AuthProxyConfiguration.builder().build()
     );
     assertThrows(AuthException.class, imsTokenProvider::getTokenResponse);
   }

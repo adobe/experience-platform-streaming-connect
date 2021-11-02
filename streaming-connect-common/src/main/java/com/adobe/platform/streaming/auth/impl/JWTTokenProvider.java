@@ -64,19 +64,33 @@ public class JWTTokenProvider extends AbstractAuthProvider {
   private final String clientSecret;
   private final String keyPath;
   private String jwtToken;
+  private HttpProducer httpProducer;
 
   JWTTokenProvider(String endpoint, String clientId, String clientSecret, String imsOrgId, String technicalAccountKey,
-    String keyPath) {
-    this(clientId, clientSecret, imsOrgId, technicalAccountKey, keyPath);
+    String keyPath, AuthProxyConfiguration authProxyConfiguration) {
+    this(clientId, clientSecret, imsOrgId, technicalAccountKey, keyPath, authProxyConfiguration);
     this.endpoint = endpoint;
+    this.httpProducer = HttpProducer.newBuilder(endpoint)
+        .withProxyHost(authProxyConfiguration.getProxyHost())
+        .withProxyPort(authProxyConfiguration.getProxyPort())
+        .withProxyUser(authProxyConfiguration.getProxyUsername())
+        .withProxyPassword(authProxyConfiguration.getProxyPassword())
+        .build();
   }
 
-  JWTTokenProvider(String clientId, String clientSecret, String imsOrgId, String technicalAccountKey, String keyPath) {
+  JWTTokenProvider(String clientId, String clientSecret, String imsOrgId, String technicalAccountKey, String keyPath,
+    AuthProxyConfiguration authProxyConfiguration) {
     this.imsOrgId = imsOrgId;
     this.clientId = clientId;
     this.clientSecret = clientSecret;
     this.technicalAccountKey = technicalAccountKey;
     this.keyPath = keyPath;
+    this.httpProducer = HttpProducer.newBuilder(endpoint)
+      .withProxyHost(authProxyConfiguration.getProxyHost())
+      .withProxyPort(authProxyConfiguration.getProxyPort())
+      .withProxyUser(authProxyConfiguration.getProxyUsername())
+      .withProxyPassword(authProxyConfiguration.getProxyPassword())
+      .build();
   }
 
   @Override
@@ -88,7 +102,7 @@ public class JWTTokenProvider extends AbstractAuthProvider {
       .append("&jwt_token=").append(getJWTToken());
 
     try {
-      return HttpProducer.newBuilder(endpoint).build().post(
+      return httpProducer.post(
         IMS_ENDPOINT_PATH,
         params.toString().getBytes(),
         ContentType.APPLICATION_FORM_URLENCODED.getMimeType(),
