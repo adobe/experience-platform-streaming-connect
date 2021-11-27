@@ -40,6 +40,6 @@ shadowJar {
   archiveClassifier.set(javaVersion)
 }
 
-jar.enabled = false
+jar.enabled = true
 build.dependsOn(copyJmxAgent)
 build.dependsOn(shadowJar)

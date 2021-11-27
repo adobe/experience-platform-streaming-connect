@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Build for ${{ matrix.Java }}
+    name: Build for 8 and 11
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 11
@@ -18,17 +18,18 @@ jobs:
           distribution: 'adopt'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Build with Gradle
-        run: |
-          export JAVA_COMPILATION_VERSION=11
-          ./gradlew build
-          export JAVA_COMPILATION_VERSION=8
-          ./gradlew build
       - name: Bump Release Version
         id: tag_version
         uses: mathieudutour/github-tag-action@v5.5
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build with Gradle
+        run: |
+          export JAVA_COMPILATION_VERSION=8
+          export PROJECT_VERSION=${{ steps.tag_version.outputs.new_version }}
+          ./gradlew build
+          export JAVA_COMPILATION_VERSION=11
+          ./gradlew build kafkaConnectPublish
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -37,7 +38,20 @@ jobs:
         with:
           tag_name: ${{ steps.tag_version.outputs.new_tag }}
           name: ${{ steps.tag_version.outputs.new_tag }}
-          body: ${{ steps.tag_version.outputs.changelog }}
+          body: |
+            ${{ steps.tag_version.outputs.changelog }}
+            ## Confluent Archive Zip
+            Attached to this release is the adobe-streaming-connect-sink-${{ steps.tag_version.outputs.new_version }}.zip confluent archive - see the [confluent documentation](https://docs.confluent.io/home/connect/install.html) about installing a connector manually for more information.
+
+            ## All-In-One Dependency JAR
+            All in one dependency JAR could be used in place of multiple jars.
+            Following all-in-one AEP sink connector JAR are attached in release :
+            1. streaming-connect-sink-${{ steps.tag_version.outputs.new_version }}-java-8.jar  : Compiled with java 8
+            2. streaming-connect-sink-${{ steps.tag_version.outputs.new_version }}-java-11.jar : Compiled with java 11
+
+            For connector properties and sample connector configuration please refer : [Developer Guide](https://github.com/adobe/experience-platform-streaming-connect/blob/master/DEVELOPER_GUIDE.md)
           draft: true
           prerelease: false
-          files: ./streaming-connect-sink/build/libs/streaming-connect-sink-*.jar
+          files: |
+            ./streaming-connect-sink/build/libs/streaming-connect-sink-*.jar
+            ./build/distributions/adobe-streaming-connect-sink-*.zip

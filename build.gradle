@@ -38,6 +38,25 @@ repositories {
   mavenCentral()
 }
 
+def connectProperties = [
+  title              : 'Adobe Experience Platform Sink Connector',
+  componentName      : 'streaming-connect-sink',
+  documentationUrl   : 'https://github.com/adobe/experience-platform-streaming-connect',
+  sourceUrl          : 'https://github.com/adobe/experience-platform-streaming-connect',
+  description        : 'Adobe Experience Platform Stream connector is based on Kafka Connect. Use this library to stream JSON events from Kafka topics in your datacenter directly into a Adobe Experience Platform in real-time.',
+  logo               : 'doc/resources/adobe.png',
+  version            : System.getenv("PROJECT_VERSION") ?: "${versionMain}${versionQualifier}",
+  ownerUsername      : 'adobe',
+  ownerName          : 'Adobe',
+  ownerLogo          : 'doc/resources/adobe.png',
+  componentType      : 'sink',
+  tags               : ['"Adobe"', '"Kafka Connect"', '"Sink"'],
+  supportProviderName: 'Adobe',
+  supportUrl         : 'https://github.com/adobe/experience-platform-streaming-connect/issues',
+  supportLogo        : 'doc/resources/adobe.png',
+  supportSummary     : 'Please file issues, suggest changes or feature requests and question at  https://github.com/adobe/experience-platform-streaming-connect/issues'
+]
+
 subprojects {
   apply plugin: 'project-report'
   apply plugin: 'base'
@@ -48,7 +67,7 @@ subprojects {
   apply plugin: 'idea'
   apply plugin: 'jacoco'
 
-  version = System.getenv("PROJECT_VERSION") ?: "${versionMain}${versionQualifier}"
+  version = connectProperties.version
 
   checkstyle {
     configFile = rootProject.file('config/checkstyle/checkstyle.xml')
@@ -186,6 +205,89 @@ sonarqube {
     property 'sonar.verbose', 'true'
     property 'sonar.sourceEncoding', 'UTF-8'
   }
+}
+
+def basePackage = "build/package"
+
+task copyDependencies(type: Copy) {
+  from subprojects.configurations.default
+  into "$basePackage/lib"
+
+  from "streaming-connect-sink/build/libs/streaming-connect-sink-${connectProperties.version}.jar"
+  into "$basePackage/lib"
+
+  doLast {
+    delete fileTree('streaming-connect-sink/build/libs/') {
+      include "streaming-connect-sink-${connectProperties.version}.jar"
+    }
+    copy {
+      from projectDir.getAbsolutePath() + "/doc/resources/adobe.png"
+      into "$basePackage/assets"
+    }
+
+    copy {
+      from projectDir.getAbsolutePath() + "/LICENSE"
+      into "$basePackage/doc"
+    }
+
+    copy {
+      from projectDir.getAbsolutePath() + "/README.md"
+      into "$basePackage/doc"
+    }
+
+    new File(projectDir, "/$basePackage/manifest.json").text = """{
+  "component_types": [ "$connectProperties.componentType" ],
+  "description": "$connectProperties.description",
+  "docker_image": {
+    "tag": "$connectProperties.version",
+    "name": "$connectProperties.componentName",
+    "namespace": "",
+    "registry": ""
+  },
+  "documentation_url": "$connectProperties.documentationUrl",
+  "features": {
+    "delivery_guarantee": [ "at_least_once"],
+    "kafka_connect_api": true,
+    "supported_encodings": [ "json" ]
+  },
+  "license": [
+    {
+      "name": "Apache License, Version 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0",
+      "logo": "assets/apache_logo.gif"
+    }
+  ],
+  "logo": "$connectProperties.logo",
+  "name": "$connectProperties.componentName",
+  "owner": {
+    "logo": "$connectProperties.ownerLogo",
+    "name": "$connectProperties.ownerName",
+    "type": "organization",
+    "username": "$connectProperties.ownerUsername"
+  },
+  "requirements": [ "AEP Platform Account" ],
+  "support": {
+    "logo": "$connectProperties.supportLogo",
+    "provider_name": "$connectProperties.supportProviderName",
+    "summary": "$connectProperties.supportSummary",
+    "url": "$connectProperties.supportUrl"
+  },
+  "tags": $connectProperties.tags,
+  "title": "$connectProperties.title",
+  "version": "$connectProperties.version"
+}
+  """
+  }
+
+}
+
+task kafkaConnectPublish(type: Zip) {
+  dependsOn(copyDependencies)
+
+  archiveName "$connectProperties.ownerUsername-$connectProperties.componentName-$connectProperties.version" + ".zip"
+  from "$basePackage/"
+  include '*'
+  include '*/*'
 }
 
 configurations.all {
