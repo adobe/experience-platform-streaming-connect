@@ -311,7 +311,7 @@ For reference, more details are in oracle documentation on configuring proxy set
 The docker setup comes with Topics UI to view the topic and messages within.
 Open a browser and go to http://localhost:8000 and view the connect-test topic
 
-![Topics UI](./docs/resources/topics-ui.png)
+![Topics UI](./doc/resources/topics-ui.png)
 
 In order to test the flow, you can use the following curl command to post a message into the Kafka topic using the
 Kafka rest proxy. Please ensure that the curl command uses your inlet endpoint, and the schema of the XDM message

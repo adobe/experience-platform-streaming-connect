@@ -22,7 +22,7 @@ Adobe Experience Platform Stream connector is based on Kafka Connect. Use this l
 
 AEP sink connector delivers data from Kafka topics to a registered endpoint of the Adobe Experience Platform.
 
-![AEP Sink Connector](./docs/resources/aep_sink_connector.png)
+![AEP Sink Connector](./doc/resources/aep_sink_connector.png)
 
 #### Features
 
@@ -58,7 +58,7 @@ We have included a quick-start script which automates configuration by creating 
 
 Following figure illustrates steps simulated by setup script.
 
-![AEP Sink Connector setup](./docs/resources/aep_sink_connector_setup.png)
+![AEP Sink Connector setup](./doc/resources/aep_sink_connector_setup.png)
 
 #### Prerequisite
 * Install [Java 8][java-8]
