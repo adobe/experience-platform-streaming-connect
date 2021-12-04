@@ -45,7 +45,7 @@ Adobe. Refer [developer guide](./DEVELOPER_GUIDE.md#run-aep-streaming-connector)
 If you have your own Kafka deployment but not Kafka Connect Instance, then you can use [docker](https://hub.docker.com/r/adobe/experience-platform-streaming-connect)
 to talk to your Kafka brokers and send data to Adobe.
 ```bash
-docker run adobe/experience-platform-streaming-connect --props connect.bootstrap.servers=<karkabrokers:port>
+docker run ghcr.io/adobe/experience-platform-streaming-connect --props connect.bootstrap.servers=<karkabrokers:port>
 ```
 
 ### Quick Start

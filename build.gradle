@@ -44,16 +44,16 @@ def connectProperties = [
   documentationUrl   : 'https://github.com/adobe/experience-platform-streaming-connect',
   sourceUrl          : 'https://github.com/adobe/experience-platform-streaming-connect',
   description        : 'Adobe Experience Platform Stream connector is based on Kafka Connect. Use this library to stream JSON events from Kafka topics in your datacenter directly into a Adobe Experience Platform in real-time.',
-  logo               : 'doc/resources/adobe.png',
+  logo               : 'assets/adobe.png',
   version            : System.getenv("PROJECT_VERSION") ?: "${versionMain}${versionQualifier}",
   ownerUsername      : 'adobeinc',
   ownerName          : 'Adobe Inc.',
-  ownerLogo          : 'doc/resources/adobe.png',
+  ownerLogo          : 'assets/adobe.png',
   componentType      : 'sink',
   tags               : ['"Adobe"', '"Kafka Connect"', '"Sink"'],
   supportProviderName: 'Adobe Inc.',
   supportUrl         : 'https://github.com/adobe/experience-platform-streaming-connect/issues',
-  supportLogo        : 'doc/resources/adobe.png',
+  supportLogo        : 'assets/adobe.png',
   supportSummary     : 'Please file issues, suggest changes or feature requests and question at  https://github.com/adobe/experience-platform-streaming-connect/issues'
 ]
 
@@ -240,9 +240,9 @@ task copyDependencies(type: Copy) {
   "description": "$connectProperties.description",
   "docker_image": {
     "tag": "$connectProperties.version",
-    "name": "$connectProperties.componentName",
-    "namespace": "",
-    "registry": ""
+    "name": "experience-platform-streaming-connect",
+    "namespace": "adobe",
+    "registry": "ghcr.io"
   },
   "documentation_url": "$connectProperties.documentationUrl",
   "features": {
@@ -256,7 +256,7 @@ task copyDependencies(type: Copy) {
     {
       "name": "Apache License, Version 2.0",
       "url": "http://www.apache.org/licenses/LICENSE-2.0",
-      "logo": "assets/apache_logo.gif"
+      "logo": "assets/apache_logo.png"
     }
   ],
   "logo": "$connectProperties.logo",
