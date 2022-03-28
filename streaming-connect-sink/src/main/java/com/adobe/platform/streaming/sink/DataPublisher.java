@@ -13,6 +13,8 @@
 package com.adobe.platform.streaming.sink;
 
 import com.adobe.platform.streaming.AEPStreamingException;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.kafka.connect.sink.SinkRecord;
 
 import java.util.List;
 
@@ -23,7 +25,7 @@ public interface DataPublisher {
 
   void start();
 
-  void publishData(List<String> messages) throws AEPStreamingException;
+  void publishData(List<Pair<String, SinkRecord>> messages) throws AEPStreamingException;
 
   void stop();
 }

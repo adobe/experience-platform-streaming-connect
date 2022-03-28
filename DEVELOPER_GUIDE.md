@@ -44,8 +44,6 @@ AEP Sink connector configurations can be supplied in the call register the conne
 | aep.connection.auth.client.code   | IMS client code                                 |                                                         | no       |                         |
 | aep.connection.auth.client.secret | IME client secret                               |                                                         | no       |                         |
 | aep.flush.bytes.kb                | bytes threshold to determine the batch          | 4                                                       | no       |                         |
-| aep.error.logger                  | put failed message to dead letter topic or log  | none                                                    | no       |  kafka, log, both, none |
-| aep.error.topic                   | deadletter topic name                           | none                                                    | no       |                         |
 
 ## Step-by-Step Workflow
 
@@ -284,6 +282,11 @@ curl -s -X POST \
   }
 }' http://localhost:8083/connectors
 ```
+
+#### Dead Letter Configuration
+To send error records to dead letter topic please use standard kafka connector error configuration.
+
+Kafka connect dead letter configurations : `https://docs.confluent.io/platform/current/connect/concepts.html#dead-letter-queue`
 
 #### Poxy host configuration
 There are 2 ways to route request to aep endpoint through proxy server :

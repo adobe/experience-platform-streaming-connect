@@ -14,8 +14,6 @@ package com.adobe.platform.streaming.integration;
 
 import com.adobe.platform.streaming.http.HttpException;
 import com.adobe.platform.streaming.http.HttpUtil;
-import com.adobe.platform.streaming.sink.impl.AEPPublisher;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,6 +22,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.common.header.Headers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -46,7 +45,12 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(AEPSinkConnectorTest.class);
   private static final String AEP_KAFKA_ERROR_CONNECTOR_CONFIG = "aep-connector-error-reporter.json";
+  private static final String AEP_KAFKA_ERROR_CONNECTOR_HEADER_CONFIG = "aep-connector-error-reporter-header.json";
   private static final String XDM_PAYLOAD_FILE = "xdm-data.json";
+  private static final String DEAD_LETTER_TOPIC = "errors.deadletterqueue.topic.name";
+  private static final String ERROR_CLASS_NAME = "__connect.errors.exception.class.name";
+  private static final String ERROR_HEADER_MESSAGE = "__connect.errors.exception.message";
+  private static final String EXPECTED_EXCEPTION_CLASS = "com.adobe.platform.streaming.http.HttpException";
 
   @BeforeEach
   @Override
@@ -60,11 +64,11 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
     getConnect().kafka().createTopic(TOPIC_NAME, TOPIC_PARTITION);
 
     // Create error topic to dump failed data
-    Map<String, String> connectorConfig = connectorConfig();
-    getConnect().kafka().createTopic(connectorConfig.get(AEPPublisher.AEP_ERROR_TOPIC), TOPIC_PARTITION);
+    Map<String, String> connectorConfig = connectorConfig(AEP_KAFKA_ERROR_CONNECTOR_CONFIG);
+    getConnect().kafka().createTopic(connectorConfig.get(DEAD_LETTER_TOPIC), TOPIC_PARTITION);
 
     LOG.info("Starting connector cluster with connector : {}", CONNECTOR_NAME);
-    getConnect().configureConnector(CONNECTOR_NAME, connectorConfig());
+    getConnect().configureConnector(CONNECTOR_NAME, connectorConfig);
 
     String xdmData = xdmData();
     getConnect().kafka().produce(TOPIC_NAME, xdmData);
@@ -72,17 +76,51 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
 
     // Check if error record sent to error topic
     ConsumerRecords<byte[], byte[]> consumerRecords = getConnect().kafka()
-      .consume(1, 8000, connectorConfig.get(AEPPublisher.AEP_ERROR_TOPIC));
+      .consume(1, 8000, connectorConfig.get(DEAD_LETTER_TOPIC));
 
     Assertions.assertEquals(1, consumerRecords.count());
 
     ConsumerRecord<byte[], byte[]> consumerRecord = consumerRecords.iterator().next();
     JsonNode record = MAPPER.readTree(consumerRecord.value());
-    JsonNode errorPayload = record.get("payload");
-    JsonNode errorContext = record.get("errorContext");
 
-    Assertions.assertEquals(MAPPER.readTree(xdmData).toString(), errorPayload.toString());
-    Assertions.assertEquals(HTTP_SERVER_SIDE_ERROR_CODE, errorContext.get("errorCode").asInt());
+    Assertions.assertEquals(MAPPER.readTree(xdmData).toString(), record.toString());
+
+    // Verify inlet endpoint received 1 XDM record
+    getWiremockServer().verify(postRequestedFor(urlEqualTo(getRelativeUrl()))
+      .withRequestBody(equalToJson(payloadReceivedXdmData())));
+  }
+
+  @Test
+  public void kafkaErrorReporterWithHeadersTest() throws HttpException, IOException, InterruptedException {
+    getConnect().kafka().createTopic(TOPIC_NAME, TOPIC_PARTITION);
+
+    // Create error topic to dump failed data
+    Map<String, String> connectorConfig = connectorConfig(AEP_KAFKA_ERROR_CONNECTOR_HEADER_CONFIG);
+    getConnect().kafka().createTopic(connectorConfig.get(DEAD_LETTER_TOPIC), TOPIC_PARTITION);
+
+    LOG.info("Starting connector cluster with connector : {}", CONNECTOR_NAME);
+    getConnect().configureConnector(CONNECTOR_NAME, connectorConfig);
+
+    String xdmData = xdmData();
+    getConnect().kafka().produce(TOPIC_NAME, xdmData);
+    waitForConnectorStart(CONNECTOR_NAME, 1, 8000);
+
+    // Check if error record sent to error topic
+    ConsumerRecords<byte[], byte[]> consumerRecords = getConnect().kafka()
+      .consume(1, 8000, connectorConfig.get(DEAD_LETTER_TOPIC));
+
+    Assertions.assertEquals(1, consumerRecords.count());
+
+    ConsumerRecord<byte[], byte[]> consumerRecord = consumerRecords.iterator().next();
+    JsonNode record = MAPPER.readTree(consumerRecord.value());
+
+    Assertions.assertEquals(MAPPER.readTree(xdmData).toString(), record.toString());
+
+    final Headers errorHeaders = consumerRecord.headers();
+    errorHeaders.headers(ERROR_CLASS_NAME)
+      .forEach(header -> Assertions.assertEquals(EXPECTED_EXCEPTION_CLASS, new String(header.value())));
+    errorHeaders.headers(ERROR_HEADER_MESSAGE).forEach(header ->
+      Assertions.assertTrue(new String(header.value()).contains(String.valueOf(HTTP_SERVER_SIDE_ERROR_CODE))));
 
     // Verify inlet endpoint received 1 XDM record
     getWiremockServer().verify(postRequestedFor(urlEqualTo(getRelativeUrl()))
@@ -103,14 +141,14 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
     return HttpUtil.streamToString(this.getClass().getClassLoader().getResourceAsStream(XDM_PAYLOAD_FILE));
   }
 
-  public Map<String, String> connectorConfig() throws HttpException, JsonProcessingException {
+  public Map<String, String> connectorConfig(String configFile) throws HttpException, JsonProcessingException {
     String connectorProperties = String.format(HttpUtil.streamToString(this.getClass().getClassLoader()
-      .getResourceAsStream(AEP_KAFKA_ERROR_CONNECTOR_CONFIG)),
+      .getResourceAsStream(configFile)),
       NUMBER_OF_TASKS,
       getInletUrl());
 
     Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
-      new TypeReference<Map<String, String>>(){});
+      new TypeReference<Map<String, String>>() {});
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }

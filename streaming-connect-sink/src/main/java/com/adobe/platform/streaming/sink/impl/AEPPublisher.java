@@ -18,11 +18,12 @@ import com.adobe.platform.streaming.http.HttpException;
 import com.adobe.platform.streaming.http.HttpProducer;
 import com.adobe.platform.streaming.http.HttpUtil;
 import com.adobe.platform.streaming.sink.AbstractAEPPublisher;
-import com.adobe.platform.streaming.sink.impl.reporter.CompositeErrorReporter;
-import com.adobe.platform.streaming.sink.impl.reporter.ErrorReporter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.entity.ContentType;
+import org.apache.kafka.connect.sink.ErrantRecordReporter;
+import org.apache.kafka.connect.sink.SinkRecord;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -30,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
+import java.util.Objects;
 
 /**
  * @author Adobe Inc.
@@ -42,24 +43,28 @@ public class AEPPublisher extends AbstractAEPPublisher {
 
   private int count;
   private final HttpProducer producer;
-  private final ErrorReporter<List<Future<?>>> errorReporter;
+  private final ErrantRecordReporter errorReporter;
 
-  AEPPublisher(Map<String, String> props) throws AEPStreamingException {
+  AEPPublisher(Map<String, String> props, ErrantRecordReporter errantRecordReporter) throws AEPStreamingException {
     count = 0;
     producer = getHttpProducer(props);
-    errorReporter = new CompositeErrorReporter(props);
+    errorReporter = errantRecordReporter;
   }
 
   @Override
-  public void publishData(List<String> messages) throws AEPStreamingException {
+  public void publishData(List<Pair<String, SinkRecord>> messages) throws AEPStreamingException {
     if (CollectionUtils.isEmpty(messages)) {
       LOG.debug("No messages to publish");
       return;
     }
 
     try {
-      JSONArray jsonMessages = new JSONArray();
-      messages.stream().map(JSONObject::new).forEach(jsonMessages::put);
+      final JSONArray jsonMessages = new JSONArray();
+      messages.stream()
+          .map(Pair::getKey)
+          .map(JSONObject::new)
+          .forEach(jsonMessages::put);
+
       JSONObject payload = new JSONObject();
       payload.put(MESSAGES_KEY, jsonMessages);
 
@@ -74,7 +79,9 @@ public class AEPPublisher extends AbstractAEPPublisher {
       LOG.debug("Successfully published data to Adobe Experience Platform: {}", response);
     } catch (HttpException httpException) {
       LOG.error("Failed to publish data to Adobe Experience Platform", httpException);
-      errorReporter.report(messages, httpException);
+      if (Objects.nonNull(errorReporter)) {
+        messages.forEach(message -> errorReporter.report(message.getValue(), httpException));
+      }
       if (HttpUtil.is500(httpException.getResponseCode()) || HttpUtil.isUnauthorized(httpException.getResponseCode())) {
         throw new AEPStreamingException("Failed to publish", httpException);
       }

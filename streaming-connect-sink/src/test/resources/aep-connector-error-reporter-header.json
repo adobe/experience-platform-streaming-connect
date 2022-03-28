@@ -8,5 +8,7 @@
   "value.converter.schemas.enable": "false",
   "aep.endpoint": "%s",
   "errors.tolerance": "all",
-  "errors.deadletterqueue.topic.name": "error-topic"
+  "errors.deadletterqueue.topic.name": "error-topic",
+  "errors.deadletterqueue.context.headers.enable": "true",
+  "errors.log.enable": "true"
 }
