@@ -73,7 +73,7 @@ services:
       - kafka-rest-proxy
 
   kafka-connect:
-    image: streaming-connect
+    image: ghcr.io/adobe/experience-platform-streaming-connect
     hostname: kafka-connect
     ports:
       - "8083:8083"
