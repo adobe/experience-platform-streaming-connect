@@ -15,6 +15,9 @@ package com.adobe.platform.streaming.sink.impl;
 import com.adobe.platform.streaming.AEPStreamingException;
 import com.adobe.platform.streaming.sink.AbstractSinkTask;
 import com.adobe.platform.streaming.sink.DataPublisher;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.kafka.connect.sink.ErrantRecordReporter;
+import org.apache.kafka.connect.sink.SinkRecord;
 
 import java.util.List;
 import java.util.Map;
@@ -22,28 +25,28 @@ import java.util.Map;
 /**
  * @author Adobe Inc.
  */
-public class AEPSinkTask extends AbstractSinkTask<String> {
+public class AEPSinkTask extends AbstractSinkTask<Pair<String, SinkRecord>> {
 
   private DataPublisher publisher;
 
   @Override
-  public void init(Map<String, String> props) throws AEPStreamingException {
-    publisher = new AEPPublisher(props);
+  public void init(Map<String, String> props, ErrantRecordReporter errantRecordReporter) throws AEPStreamingException {
+    publisher = new AEPPublisher(props, errantRecordReporter);
     publisher.start();
   }
 
   @Override
-  public String getDataToPublish(String sinkRecord) {
+  public Pair<String, SinkRecord> getDataToPublish(Pair<String, SinkRecord> sinkRecord) {
     return sinkRecord;
   }
 
   @Override
-  public int getPayloadLength(String dataToPublish) {
-    return dataToPublish.length();
+  public int getPayloadLength(Pair<String, SinkRecord> dataToPublish) {
+    return dataToPublish.getKey().length();
   }
 
   @Override
-  public void publishData(List<String> eventDataList) throws AEPStreamingException {
+  public void publishData(List<Pair<String, SinkRecord>> eventDataList) throws AEPStreamingException {
     publisher.publishData(eventDataList);
   }
 

@@ -40,4 +40,9 @@ public class HttpException extends Exception {
   public int getResponseCode() {
     return responseCode;
   }
+
+  @Override
+  public String getMessage() {
+    return String.format("Message : %s, ResponseCode : %s", super.getMessage(), this.responseCode);
+  }
 }

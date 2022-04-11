@@ -19,14 +19,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.common.utils.AppInfoParser;
-import org.apache.kafka.common.utils.Utils;
 import org.apache.kafka.connect.errors.ConnectException;
-import org.apache.kafka.connect.runtime.WorkerConfig;
+import org.apache.kafka.connect.sink.ErrantRecordReporter;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 import org.apache.kafka.connect.sink.SinkTaskContext;
-import org.codehaus.plexus.util.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * @author Adobe Inc.
@@ -55,7 +53,7 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
   private int flushIntervalMillis;
   private int flushBytesCount;
   private long lastFlushMilliSec = System.currentTimeMillis();
-  private String bootstrapServers;
+  private ErrantRecordReporter errantRecordReporter;
 
   @Override
   public String version() {
@@ -65,21 +63,18 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
   @Override
   public void initialize(SinkTaskContext context) {
     super.initialize(context);
-    bootstrapServers = getBootstrapServers(context);
+    errantRecordReporter = context.errantRecordReporter();
   }
 
   @Override
   public void start(Map<String, String> props) {
     LOG.info("Started Sink Task with props: {}", props);
-    if (Objects.nonNull(bootstrapServers)) {
-      props.put(WorkerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    }
 
     try {
       flushIntervalMillis = SinkUtils.getProperty(props, FLUSH_INTERVAL_SECS, DEFAULT_FLUSH_INTERVAL, MILLIS_IN_A_SEC);
       flushBytesCount = SinkUtils.getProperty(props, FLUSH_BYTES_KB, DEFAULT_FLUSH_BYTES_KB, BYTES_IN_A_KB);
 
-      init(props);
+      init(props, errantRecordReporter);
       LOG.info("Connection created with flush interval {} secs and flush bytes {} KB",
         flushIntervalMillis / MILLIS_IN_A_SEC, flushBytesCount / BYTES_IN_A_KB);
     } catch (AEPStreamingException aepStreamingException) {
@@ -104,7 +99,7 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
 
     List<T> eventsToPublish = new ArrayList<>();
     for (SinkRecord record : records) {
-      T dataToPublish = getDataToPublish(SinkUtils.getStringPayload(GSON, record));
+      T dataToPublish = getDataToPublish(Pair.of(SinkUtils.getStringPayload(GSON, record), record));
       eventsToPublish.add(dataToPublish);
       bytesRead += getPayloadLength(dataToPublish);
 
@@ -127,9 +122,10 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
     }
   }
 
-  public abstract void init(Map<String, String> properties) throws AEPStreamingException;
+  public abstract void init(Map<String, String> properties,
+    ErrantRecordReporter errantRecordReporter) throws AEPStreamingException;
 
-  public abstract T getDataToPublish(String sinkRecord);
+  public abstract T getDataToPublish(Pair<String, SinkRecord> sinkRecord);
 
   public abstract int getPayloadLength(T dataToPublish);
 
@@ -148,19 +144,6 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
     if (LOG.isDebugEnabled()) {
       LOG.debug("ConnectorSinkTask: {} events sent to destination", eventsToPublish.size());
     }
-  }
-
-  private String getBootstrapServers(SinkTaskContext context) {
-    try {
-      Object workerSinkTask = ReflectionUtils.getValueIncludingSuperclasses("sinkTask", context);
-      WorkerConfig workerConfig = (WorkerConfig) ReflectionUtils
-        .getValueIncludingSuperclasses("workerConfig", workerSinkTask);
-
-      return Utils.join(workerConfig.getList(WorkerConfig.BOOTSTRAP_SERVERS_CONFIG), ",");
-    } catch (IllegalAccessException exception) {
-      LOG.error("Failed to get bootstrap server.", exception);
-    }
-    return null;
   }
 
   private void reset(List<T> eventsToPublish, long tempCurrentTime) {
