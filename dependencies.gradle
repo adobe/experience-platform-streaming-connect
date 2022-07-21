@@ -30,6 +30,7 @@ versions.kafkaConnect = '2.8.0'
 versions.slf4j = '1.7.25'
 versions.jaxb = '2.3.0'
 versions.wiremock = '2.27.2'
+versions.springframework = '5.3.22'
 
 libraries.collections4 = [
   "org.apache.commons:commons-collections4:$versions.collections4"
@@ -104,4 +105,9 @@ libraries.slf4j = [
 
 libraries.jaxb = [
   "javax.xml.bind:jaxb-api:$versions.jaxb"
+]
+
+libraries.springframework = [
+        "org.springframework:spring-web:$versions.springframework",
+        "org.springframework:spring-context:$versions.springframework"
 ]

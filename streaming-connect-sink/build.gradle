@@ -27,7 +27,7 @@ dependencies {
   jmxAgent libraries.jmxPrometheusJavaAgent
   testImplementation libraries.jmockit, libraries.junitJupiter,
                      libraries.wiremock, libraries.kafkaConnectTest,
-                     libraries.kafkaConnectRuntime
+                     libraries.kafkaConnectRuntime, libraries.springframework
 }
 
 task copyJmxAgent(type: Copy) {
