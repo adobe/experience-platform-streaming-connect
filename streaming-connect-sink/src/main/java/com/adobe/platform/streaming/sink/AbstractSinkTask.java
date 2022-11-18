@@ -63,7 +63,11 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
   @Override
   public void initialize(SinkTaskContext context) {
     super.initialize(context);
-    errantRecordReporter = context.errantRecordReporter();
+    try {
+      errantRecordReporter = context.errantRecordReporter();
+    } catch (NoSuchMethodError | NoClassDefFoundError exception) {
+      LOG.warn("Error report not defined in current kafka version. Please use Apache Kafka version > 2.6.");
+    }
   }
 
   @Override
