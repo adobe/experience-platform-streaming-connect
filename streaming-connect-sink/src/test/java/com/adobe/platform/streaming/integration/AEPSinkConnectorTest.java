@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -47,6 +48,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
   private static final String AEP_CONNECTOR_JWT_AUTH_CONFIG = "aep-connector-with-jwt-token.json";
   private static final String AEP_CONNECTOR_JWT_AUTH_PROXY_CONFIG = "aep-connector-with-jwt-token-proxy.json";
   private static final String AEP_CONNECTOR_CONFIG_WITH_PROXY = "aep-connector-with-proxy.json";
+  private static final String AEP_CONNECTOR_JWT_AUTH_CONFIG_WITH_KEY = "aep-connector-with-jwt-token-with-key.json";
   private static final String XDM_PAYLOAD_FILE = "xdm-data.json";
 
   @BeforeEach
@@ -162,6 +164,26 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
   }
 
   @Test
+  public void aepSinkConnectorJWTAuthenticationProxyTestFromKeyValue() throws HttpException, JsonProcessingException,
+          InterruptedException {
+    inletJWTAuthenticationSuccessfulResponse();
+    inletJWTAuthenticationSuccessfulResponseViaProxy();
+
+    getConnect().kafka().createTopic(TOPIC_NAME, TOPIC_PARTITION);
+
+    LOG.info("Starting connector cluster with connector : {}", CONNECTOR_NAME);
+    getConnect().configureConnector(CONNECTOR_NAME, connectorConfigWithJWTConfigProxyFromKey());
+
+    // Send single XDM data to aep sink connector
+    getConnect().kafka().produce(TOPIC_NAME, xdmData());
+
+    waitForConnectorStart(CONNECTOR_NAME, 1, 1000);
+
+    // Check if request from proxy server forward to AEP endpoint
+    getWiremockServer().verify(postRequestedFor(urlEqualTo(getRelativeUrl())));
+  }
+
+  @Test
   public void aepSinkConnectorTestViaProxy() throws HttpException, JsonProcessingException, InterruptedException {
     getConnect().kafka().createTopic(TOPIC_NAME, TOPIC_PARTITION);
 
@@ -224,6 +246,23 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
 
     Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
       new TypeReference<Map<String, String>>() {});
+    connectorConfig.put("name", CONNECTOR_NAME);
+    return connectorConfig;
+  }
+
+  public Map<String, String> connectorConfigWithJWTConfigProxyFromKey() throws HttpException, JsonProcessingException {
+
+
+
+    String connectorProperties = String.format(HttpUtil.streamToString(this.getClass().getClassLoader()
+                    .getResourceAsStream(AEP_CONNECTOR_JWT_AUTH_CONFIG_WITH_KEY)),
+            NUMBER_OF_TASKS,
+            getInletUrl(),
+            getBaseUrl());
+
+
+    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
+            new TypeReference<Map<String, String>>() {});
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }

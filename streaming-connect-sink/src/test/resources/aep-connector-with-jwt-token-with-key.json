@@ -1,0 +1,18 @@
+{
+  "topics": "connect-test",
+  "tasks.max": "%s",
+  "aep.flush.interval.seconds": "1",
+  "aep.flush.bytes.kb": "4",
+  "connector.class": "com.adobe.platform.streaming.sink.impl.AEPSinkConnector",
+  "key.converter.schemas.enable": "false",
+  "value.converter.schemas.enable": "false",
+  "aep.endpoint": "%s",
+  "aep.connection.auth.enabled": true,
+  "aep.connection.auth.endpoint": "%s",
+  "aep.connection.auth.token.type": "jwt_token",
+  "aep.connection.auth.client.id": "client_id",
+  "aep.connection.auth.client.secret": "client_secret",
+  "aep.connection.auth.imsOrg": "imsOrg@AdobeOrg",
+  "aep.connection.auth.accountKey": "technical-account-id",
+  "aep.connection.auth.keyValue":"MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDQ0YKnFrgZ47UK3wVm3YCJBAH/2hf0MTyRK1D+K/ycB46sKzhSC2sFXPsaQ9fiHzYKtqKZNEw6Jt9tgycSXZz49LfFeg4rdEot1RGvRo2A6Lof6ej5OVNRHnG7Hc31zblSrVPyMpRGY+l/BlJ1JWIIlQI7pvv+b0DgxJYXgbPc16k2zfAFJuKxA6dmD3mmMWuWAUO0kUhyIyYNf9PYEmp6lkRZ6F9HGT+zj4SI8FDhYey8GM2PurnEBLsbc2R10YFbS7bwsB1lI4CBiSYU74B9CVoQfGdkwDSt3trVPE8NfZemHAli+s1JWG/x70CU2gsMKvK0M310g3uk2dv7MwRxAgMBAAECggEAU/VI4MGDt/UT35EX7On2OiDAZQxdQTNitMODxw4MfPeU56hg9qvclcVyuHa6oBIIenpAGfUrCN6EStXGqd21tWs/UEjo1ZPmF1Npzt1BG6l23EoB/+KKmzzwYVl0a/YRIyrJa8HmV/7n7Miv8qXbKrQut6lF/GDi5vxjlIPzu0DItfqCe0s0DTlOzLjiuw7tnqNQzxdwivO+v7IDb+GA4inuttOhETc8qQZzGsnRbt7/eSnCKQ6MKtMNbKC4+iT1d/EJo+PtwP4wol/hvRWs5jPO7sgmGgDnxs5Nyz84GvV9OkHpx5msd2OPDF203BgCQacqaABTpIctFd954tsgAQKBgQDrdQ34fp7NujcEbEhRTnpccgPX42TtIjYsWelTO9QPIWJcT3xhsyh5WRWSug4/7z98acDrPJdDhTyuWU1g7KJD01vtq2gnAKiUnJoerGnXh7WnmwHO8QwHx6qeCL5CCTYUR1MYxooAbR3KhtSiG/oahOjHSta2fkZ8vcag5L9RAQKBgQDjCXnvHSlm+iDUbTgTLt/+PXRcsi3HV+O1uAK9cvGx9FlrK+DUH7jpoxkA2tzlPUnXSJi2K5IWsOLmlIEW61loqJNMyc2NYTxbrIB3iKCcT2GtHBZEGgVq3d4TZXD68cQK/9DZC9ye6mnM4gg+vSVcuNT33rKRPztKINZWU41DcQKBgA3V7AM9FYHLPm5hGoLElMYX4Qfvkb+pcft7MQ22B0j4UjpQZWOsTmWLCYx8qFezbEyYPkDUZ6MNEjrAfp6CaSqJIe6+Urlv/Xf2F8xTn0iN7euyXRHW8jkGz4zHwL5KokXgxw4+pF9QCh8beyUndbPXOYJ0cFd65hNwZ1qO9nsBAoGBAJfnej8DavUsfBTFctRa86G+6oEu8jRDWOb31FV/d7lSPRXYyNgE1Yr1BkCtL0juBd7WAt84Lcmi1l3ilLCKDUtaJxwklbR3j5Piyh2wO436CudxOHCeXGuRQQoHQF2Wr02QteLS7e0h+GIOBeg8U6hDPrMNvLoz7W5+pAokYwrxAoGBAJw+1kMFJEX8T1r1kj/3E+36Txg0Riac9zjA3FmE5DqW8MYSyiA0j3nJCqyAlyetUIh8r2QqdbfsXoiZS6o5ULA3I8pe/N2Yvw/s0WZBILtFyuq2Z6TP45Z4lm7YgnXA0jcs4Kaa7SU8yc7Bxw4MWRGz7LdX4ShRHkBR0HhwkcKD"
+}

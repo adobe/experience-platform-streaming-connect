@@ -64,6 +64,7 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
 
   private static final String AEP_CONNECTION_AUTH_ENABLED_VALUE = "true";
   private static final String AEP_CONNECTION_AUTH_DISABLED_VALUE = "false";
+  private static final String AEP_CONNECTION_AUTH_KEY_VALUE = "aep.connection.auth.keyValue";
 
   protected HttpProducer getHttpProducer(Map<String, String> props) throws AEPStreamingException {
     return HttpProducer.newBuilder(getAepEndpoint(props.get(AEP_ENDPOINT)))
@@ -133,13 +134,15 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
   }
 
   private AuthProvider getJWTTokenProvider(Map<String, String> props) throws AuthException {
+
     return AuthProviderFactory.getAuthProvider(TokenType.JWT_TOKEN, ImmutableMap.<String, String>builder()
       .put(AuthUtils.AUTH_CLIENT_ID, props.get(AEP_CONNECTION_AUTH_CLIENT_ID))
       .put(AuthUtils.AUTH_CLIENT_SECRET, props.get(AEP_CONNECTION_AUTH_CLIENT_SECRET))
       .put(AuthUtils.AUTH_ENDPOINT, props.get(AEP_CONNECTION_AUTH_ENDPOINT))
       .put(AuthUtils.AUTH_IMS_ORG_ID, props.get(AEP_CONNECTION_AUTH_IMS_ORG))
       .put(AuthUtils.AUTH_TECHNICAL_ACCOUNT_ID, props.get(AEP_CONNECTION_AUTH_ACCOUNT_KEY))
-      .put(AuthUtils.AUTH_PRIVATE_KEY_FILE_PATH, props.get(AEP_CONNECTION_AUTH_FILE_PATH))
+      .put(AuthUtils.AUTH_PRIVATE_KEY_FILE_PATH, AuthUtils.getProperty(props, AEP_CONNECTION_AUTH_FILE_PATH, ""))
+      .put(AuthUtils.AUTH_PRIVATE_KEY_VALUE, AuthUtils.getProperty(props, AEP_CONNECTION_AUTH_KEY_VALUE, ""))
       .build(), AuthProxyConfiguration.builder()
       .proxyHost(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_HOST, null))
       .proxyPort(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_PORT, 443))

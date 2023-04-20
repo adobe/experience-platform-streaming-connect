@@ -30,40 +30,49 @@ class JWTTokenProviderTest {
     JWTTokenProviderTest.class.getClassLoader().getResource("secret.key").getPath();
   private static final String TEST_INVALID_FILE_PATH =
     JWTTokenProviderTest.class.getClassLoader().getResource("secret_invalid.key").getPath();
+  private static final String TEST_KEY_VALUE = "test-key";
 
   @Test
   void testGetTokenWithInvalidIMSOrg() {
     JWTTokenProvider tokenProvider = new JWTTokenProvider(ENDPOINT, null, TEST_CLIENT, TEST_ACCOUNT_ID,
-      TEST_FILE_PATH, AuthProxyConfiguration.builder().build());
+      TEST_FILE_PATH, TEST_KEY_VALUE, AuthProxyConfiguration.builder().build());
     assertThrows(AuthException.class, tokenProvider::getToken);
   }
 
   @Test
   void testGetTokenWithInvalidClientId() {
     JWTTokenProvider tokenProvider = new JWTTokenProvider(ENDPOINT, TEST_ORG, null, TEST_ACCOUNT_ID,
-      TEST_FILE_PATH, AuthProxyConfiguration.builder().build());
+      TEST_FILE_PATH, TEST_KEY_VALUE, AuthProxyConfiguration.builder().build());
     assertThrows(AuthException.class, tokenProvider::getToken);
   }
 
   @Test
   void testGetTokenWithInvalidAccountId() {
     JWTTokenProvider tokenProvider = new JWTTokenProvider(ENDPOINT, TEST_ORG, TEST_CLIENT, null,
-      TEST_FILE_PATH, AuthProxyConfiguration.builder().build());
+      TEST_FILE_PATH, TEST_KEY_VALUE, AuthProxyConfiguration.builder().build());
     assertThrows(AuthException.class, tokenProvider::getToken);
   }
 
   @Test
   void testGetTokenInvalidPath() {
     JWTTokenProvider tokenProvider = new JWTTokenProvider(ENDPOINT, TEST_ORG, TEST_CLIENT,
-      TEST_ACCOUNT_ID, TEST_INVALID_FILE_PATH, AuthProxyConfiguration.builder().build());
+      TEST_ACCOUNT_ID, TEST_INVALID_FILE_PATH, TEST_KEY_VALUE, AuthProxyConfiguration.builder().build());
     assertThrows(AuthException.class, tokenProvider::getToken);
   }
 
   @Test
   void testGetTokenValidPath() {
     JWTTokenProvider tokenProvider = new JWTTokenProvider(ENDPOINT, TEST_ORG, TEST_CLIENT,
-      TEST_ACCOUNT_ID, TEST_FILE_PATH, AuthProxyConfiguration.builder().build());
+      TEST_ACCOUNT_ID, TEST_FILE_PATH, TEST_KEY_VALUE, AuthProxyConfiguration.builder().build());
     assertThrows(AuthException.class, tokenProvider::getToken);
   }
+
+  @Test
+  void testGetTokenValidKeyValueNoPath() {
+    JWTTokenProvider tokenProvider = new JWTTokenProvider(ENDPOINT, TEST_ORG, TEST_CLIENT,
+            TEST_ACCOUNT_ID, TEST_FILE_PATH, TEST_KEY_VALUE, AuthProxyConfiguration.builder().build());
+    assertThrows(AuthException.class, tokenProvider::getToken);
+  }
+
 
 }

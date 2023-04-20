@@ -14,5 +14,5 @@
   "aep.connection.auth.client.secret": "client_secret",
   "aep.connection.auth.imsOrg": "imsOrg@AdobeOrg",
   "aep.connection.auth.accountKey": "technical-account-id",
-  "aep.connection.auth.filePath": "%s"
+  "aep.connection.auth.filePath": "C:/Users/u207754/Documents/git/ba-experience-platform-streaming-connect/BA-experience-platform-streaming-connect/streaming-connect-sink/build/resources/test/secret.key"
 }

@@ -63,12 +63,13 @@ public class JWTTokenProvider extends AbstractAuthProvider {
   private final String clientId;
   private final String clientSecret;
   private final String keyPath;
+  private final String keyValue;
   private String jwtToken;
   private HttpProducer httpProducer;
 
   JWTTokenProvider(String endpoint, String clientId, String clientSecret, String imsOrgId, String technicalAccountKey,
-    String keyPath, AuthProxyConfiguration authProxyConfiguration) {
-    this(clientId, clientSecret, imsOrgId, technicalAccountKey, keyPath, authProxyConfiguration);
+    String keyPath, String keyValue, AuthProxyConfiguration authProxyConfiguration) {
+    this(clientId, clientSecret, imsOrgId, technicalAccountKey, keyPath, keyValue, authProxyConfiguration);
     this.endpoint = endpoint;
     this.httpProducer = HttpProducer.newBuilder(endpoint)
         .withProxyHost(authProxyConfiguration.getProxyHost())
@@ -78,13 +79,14 @@ public class JWTTokenProvider extends AbstractAuthProvider {
         .build();
   }
 
-  JWTTokenProvider(String clientId, String clientSecret, String imsOrgId, String technicalAccountKey, String keyPath,
+  JWTTokenProvider(String clientId, String clientSecret, String imsOrgId, String technicalAccountKey, String keyPath, String keyValue,
     AuthProxyConfiguration authProxyConfiguration) {
     this.imsOrgId = imsOrgId;
     this.clientId = clientId;
     this.clientSecret = clientSecret;
     this.technicalAccountKey = technicalAccountKey;
     this.keyPath = keyPath;
+    this.keyValue = keyValue;
     this.httpProducer = HttpProducer.newBuilder(endpoint)
       .withProxyHost(authProxyConfiguration.getProxyHost())
       .withProxyPort(authProxyConfiguration.getProxyPort())
@@ -122,9 +124,14 @@ public class JWTTokenProvider extends AbstractAuthProvider {
   }
 
   private void refreshJWTToken() throws AuthException {
-    File file = new File(keyPath);
-    if (file.exists()) {
-      try {
+
+    try {
+    KeySpec ks;
+    if(keyPath.isEmpty() && !keyValue.isEmpty()){
+       ks = new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(keyValue));
+    } else{
+      File file = new File(keyPath);
+      if (file.exists()) {
         Path path = Paths.get(keyPath);
         long size = Files.size(path);
         // Files.readAllBytes throws out of memory exception if the file size exceeds 2GB,
@@ -132,7 +139,11 @@ public class JWTTokenProvider extends AbstractAuthProvider {
         if (size > 1024 * 1024) {
           throw new AuthException("Size of private file is greater than 1 MB, file path : " + keyPath);
         }
-
+       ks = new PKCS8EncodedKeySpec(Files.readAllBytes(path));
+      } else {
+        throw new AuthException("File does not exist at location : " + keyPath);
+      }
+    }
         // Create JWT payload
         Map<String, Object> jwtClaims = new HashMap<>();
         jwtClaims.put(JWT_ISS_KEY, imsOrgId);
@@ -143,15 +154,11 @@ public class JWTTokenProvider extends AbstractAuthProvider {
           jwtClaims.put(endpoint + "/s/" + metaScope, TRUE);
         }
 
-        KeySpec ks = new PKCS8EncodedKeySpec(Files.readAllBytes(path));
         RSAPrivateKey privateKey = (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(ks);
         jwtToken = Jwts.builder().setClaims(jwtClaims).signWith(SignatureAlgorithm.RS256, privateKey).compact();
       } catch (Exception ex) {
         throw new AuthException(ex.getMessage(), ex);
       }
-    } else {
-      throw new AuthException("File does not exist at location : " + keyPath);
-    }
   }
 
   private boolean isJWTExpired() {
