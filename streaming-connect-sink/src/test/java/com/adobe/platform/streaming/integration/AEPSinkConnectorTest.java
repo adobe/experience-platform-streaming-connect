@@ -165,7 +165,8 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
 
   @Test
   public void aepSinkConnectorJWTAuthenticationProxyTestFromKeyValue() throws HttpException, JsonProcessingException,
-          InterruptedException {
+      InterruptedException {
+
     inletJWTAuthenticationSuccessfulResponse();
     inletJWTAuthenticationSuccessfulResponseViaProxy();
 
@@ -251,18 +252,13 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
   }
 
   public Map<String, String> connectorConfigWithJWTConfigProxyFromKey() throws HttpException, JsonProcessingException {
-
-
-
     String connectorProperties = String.format(HttpUtil.streamToString(this.getClass().getClassLoader()
-                    .getResourceAsStream(AEP_CONNECTOR_JWT_AUTH_CONFIG_WITH_KEY)),
-            NUMBER_OF_TASKS,
-            getInletUrl(),
-            getBaseUrl());
-
-
+      .getResourceAsStream(AEP_CONNECTOR_JWT_AUTH_CONFIG_WITH_KEY)),
+      NUMBER_OF_TASKS,
+      getInletUrl(),
+      getBaseUrl());
     Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
-            new TypeReference<Map<String, String>>() {});
+      new TypeReference<Map<String, String>>() {});
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }

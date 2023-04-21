@@ -70,9 +70,8 @@ class JWTTokenProviderTest {
   @Test
   void testGetTokenValidKeyValueNoPath() {
     JWTTokenProvider tokenProvider = new JWTTokenProvider(ENDPOINT, TEST_ORG, TEST_CLIENT,
-            TEST_ACCOUNT_ID, TEST_FILE_PATH, TEST_KEY_VALUE, AuthProxyConfiguration.builder().build());
+      TEST_ACCOUNT_ID, TEST_FILE_PATH, TEST_KEY_VALUE, AuthProxyConfiguration.builder().build());
     assertThrows(AuthException.class, tokenProvider::getToken);
   }
-
 
 }

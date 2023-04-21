@@ -79,8 +79,8 @@ public class JWTTokenProvider extends AbstractAuthProvider {
         .build();
   }
 
-  JWTTokenProvider(String clientId, String clientSecret, String imsOrgId, String technicalAccountKey, String keyPath, String keyValue,
-    AuthProxyConfiguration authProxyConfiguration) {
+  JWTTokenProvider(String clientId, String clientSecret, String imsOrgId, String technicalAccountKey,
+    String keyPath, String keyValue, AuthProxyConfiguration authProxyConfiguration) {
     this.imsOrgId = imsOrgId;
     this.clientId = clientId;
     this.clientSecret = clientSecret;
@@ -126,39 +126,40 @@ public class JWTTokenProvider extends AbstractAuthProvider {
   private void refreshJWTToken() throws AuthException {
 
     try {
-    KeySpec ks;
-    if(keyPath.isEmpty() && !keyValue.isEmpty()){
-       ks = new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(keyValue));
-    } else{
-      File file = new File(keyPath);
-      if (file.exists()) {
-        Path path = Paths.get(keyPath);
-        long size = Files.size(path);
-        // Files.readAllBytes throws out of memory exception if the file size exceeds 2GB,
-        // We want to ensure that size of private file does not exceeds the expected 1MB.
-        if (size > 1024 * 1024) {
-          throw new AuthException("Size of private file is greater than 1 MB, file path : " + keyPath);
-        }
-       ks = new PKCS8EncodedKeySpec(Files.readAllBytes(path));
+      KeySpec ks;
+      if (keyPath.isEmpty() && !keyValue.isEmpty()) {
+        ks = new PKCS8EncodedKeySpec(Base64.getMimeDecoder().decode(keyValue));
       } else {
-        throw new AuthException("File does not exist at location : " + keyPath);
-      }
-    }
-        // Create JWT payload
-        Map<String, Object> jwtClaims = new HashMap<>();
-        jwtClaims.put(JWT_ISS_KEY, imsOrgId);
-        jwtClaims.put(JWT_SUB_KEY, technicalAccountKey);
-        jwtClaims.put(JWT_EXPIRY_KEY, System.currentTimeMillis() / 1000 + JWT_TOKEN_EXPIRATION_THRESHOLD);
-        jwtClaims.put(JWT_AUD_KEY, endpoint + "/c/" + clientId);
-        for (String metaScope : new String[]{ "ent_dataservices_sdk" }) {
-          jwtClaims.put(endpoint + "/s/" + metaScope, TRUE);
+        File file = new File(keyPath);
+        if (file.exists()) {
+          Path path = Paths.get(keyPath);
+          long size = Files.size(path);
+          // Files.readAllBytes throws out of memory exception if the file size exceeds 2GB,
+          // We want to ensure that size of private file does not exceeds the expected 1MB.
+          if (size > 1024 * 1024) {
+            throw new AuthException("Size of private file is greater than 1 MB, file path : " + keyPath);
+          }
+          ks = new PKCS8EncodedKeySpec(Files.readAllBytes(path));
+        } else {
+          throw new AuthException("File does not exist at location : " + keyPath);
         }
-
-        RSAPrivateKey privateKey = (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(ks);
-        jwtToken = Jwts.builder().setClaims(jwtClaims).signWith(SignatureAlgorithm.RS256, privateKey).compact();
-      } catch (Exception ex) {
-        throw new AuthException(ex.getMessage(), ex);
       }
+
+      // Create JWT payload
+      Map<String, Object> jwtClaims = new HashMap<>();
+      jwtClaims.put(JWT_ISS_KEY, imsOrgId);
+      jwtClaims.put(JWT_SUB_KEY, technicalAccountKey);
+      jwtClaims.put(JWT_EXPIRY_KEY, System.currentTimeMillis() / 1000 + JWT_TOKEN_EXPIRATION_THRESHOLD);
+      jwtClaims.put(JWT_AUD_KEY, endpoint + "/c/" + clientId);
+      for (String metaScope : new String[]{ "ent_dataservices_sdk" }) {
+        jwtClaims.put(endpoint + "/s/" + metaScope, TRUE);
+      }
+
+      RSAPrivateKey privateKey = (RSAPrivateKey) KeyFactory.getInstance("RSA").generatePrivate(ks);
+      jwtToken = Jwts.builder().setClaims(jwtClaims).signWith(SignatureAlgorithm.RS256, privateKey).compact();
+    } catch (Exception ex) {
+      throw new AuthException(ex.getMessage(), ex);
+    }
   }
 
   private boolean isJWTExpired() {

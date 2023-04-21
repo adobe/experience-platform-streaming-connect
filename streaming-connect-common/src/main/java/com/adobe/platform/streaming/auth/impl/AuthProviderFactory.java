@@ -75,12 +75,12 @@ public final class AuthProviderFactory {
     Preconditions.checkNotNull(imsOrgId, "Invalid IMS Org");
     Preconditions.checkNotNull(technicalAccountKey, "Invalid technical account Id");
 
-
     String endpoint = authProperties.get(AuthUtils.AUTH_ENDPOINT);
     return StringUtils.isEmpty(endpoint) ?
-      new JWTTokenProvider(clientId, clientSecret, imsOrgId, technicalAccountKey, filePath, keyValue, authProxyConfiguration) :
-      new JWTTokenProvider(endpoint, clientId, clientSecret, imsOrgId, technicalAccountKey, filePath, keyValue,
-        authProxyConfiguration);
+      new JWTTokenProvider(clientId, clientSecret, imsOrgId, technicalAccountKey,
+              filePath, keyValue, authProxyConfiguration) :
+      new JWTTokenProvider(endpoint, clientId, clientSecret, imsOrgId, technicalAccountKey,
+              filePath, keyValue, authProxyConfiguration);
   }
 
   private AuthProviderFactory() {}
