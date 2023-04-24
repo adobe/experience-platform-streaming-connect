@@ -242,7 +242,7 @@ task copyDependencies(type: Copy) {
     "tag": "$connectProperties.version",
     "name": "experience-platform-streaming-connect",
     "namespace": "adobe",
-    "registry": "ghcr.io"
+    "registry": ["ghcr.io"]
   },
   "documentation_url": "$connectProperties.documentationUrl",
   "features": {
