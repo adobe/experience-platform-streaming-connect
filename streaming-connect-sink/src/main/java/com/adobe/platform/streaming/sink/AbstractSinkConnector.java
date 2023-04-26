@@ -13,7 +13,6 @@
 package com.adobe.platform.streaming.sink;
 
 import com.google.common.collect.ImmutableMap;
-import kafka.server.ConfigType;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.utils.AppInfoParser;
 import org.apache.kafka.connect.sink.SinkConnector;
