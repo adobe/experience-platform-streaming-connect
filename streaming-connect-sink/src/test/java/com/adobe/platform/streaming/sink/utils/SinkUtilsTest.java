@@ -12,7 +12,11 @@
 
 package com.adobe.platform.streaming.sink.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+
+import org.apache.kafka.connect.data.SchemaBuilder;
+import org.apache.kafka.connect.sink.SinkRecord;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -58,6 +62,15 @@ class SinkUtilsTest {
       TEST_DEFAULT_VALUE,
       TEST_MULTIPLIER
     ));
+  }
+
+  static class PayloadTest {
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Test
+    void testRecordPayloadThrowsException() {
+      SinkRecord r = new SinkRecord("test", 0, null, null, SchemaBuilder.struct().build(), )
+      SinkUtils.getStringPayload(objectMapper, )
+    }
   }
 }
 

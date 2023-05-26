@@ -17,7 +17,6 @@ ext {
 
 versions.collections4 = '4.4'
 versions.commonslang = '3.9'
-versions.gson = '2.10'
 versions.guava = '31.1-jre'
 versions.httpClient = '4.5.13'
 versions.jackson = '2.14.0'
@@ -25,7 +24,6 @@ versions.jmockit = '1.41'
 versions.jmxPrometheusJavaAgent = '0.12.0'
 versions.junitJupiter = '5.2.0'
 versions.jjwt = '0.9.0'
-versions.orgJson = '20230227'
 versions.jsonPatch = '0.4.4'
 versions.kafkaConnect = '2.8.0'
 versions.slf4j = '1.7.25'
@@ -38,10 +36,6 @@ libraries.collections4 = [
 
 libraries.commonslang = [
   "org.apache.commons:commons-lang3:$versions.commonslang"
-]
-
-libraries.gson = [
-  "com.google.code.gson:gson:$versions.gson"
 ]
 
 libraries.guava = [
@@ -86,17 +80,13 @@ libraries.kafkaConnect = [
 
 libraries.kafkaConnectRuntime = [
   "org.apache.kafka:connect-runtime:$versions.kafkaConnect",
-  "org.apache.kafka:kafka_2.12:$versions.kafkaConnect",
 ]
 
 libraries.kafkaConnectTest = [
   "org.apache.kafka:connect-runtime:$versions.kafkaConnect:test",
   "org.apache.kafka:kafka-clients:$versions.kafkaConnect:test",
-  "org.apache.kafka:kafka_2.12:$versions.kafkaConnect:test"
-]
-
-libraries.orgJson = [
-  "org.json:json:$versions.orgJson"
+  "org.apache.kafka:kafka_2.12:$versions.kafkaConnect:test",
+  "org.apache.kafka:kafka_2.12:$versions.kafkaConnect",
 ]
 
 libraries.jsonPatch = [

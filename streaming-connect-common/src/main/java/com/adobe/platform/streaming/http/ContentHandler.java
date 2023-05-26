@@ -12,7 +12,10 @@
 
 package com.adobe.platform.streaming.http;
 
-import org.json.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.apache.http.entity.ContentType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,21 +25,34 @@ import java.io.InputStream;
  */
 public abstract class ContentHandler<T> {
 
-  private static ContentHandler<Void> NULL_HANDLER = new ContentHandler<Void>() {
+  private static ContentHandler<Void> NULL_HANDLER = new ContentHandler<>() {
     @Override
     public Void getContent(HttpConnection conn) {
       return null;
     }
+
+    @Override
+    public String getContentType() {
+      return null;
+    }
   };
 
-  private static ContentHandler<JSONObject> JSON_HANDLER = new ContentHandler<JSONObject>() {
+  private static ContentHandler<JsonNode> JSON_HANDLER = new ContentHandler<>() {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @Override
-    public JSONObject getContent(HttpConnection conn) throws HttpException {
+    public JsonNode getContent(HttpConnection conn) throws HttpException {
       try (InputStream in = conn.getInputStream()) {
-        return new JSONObject(HttpUtil.streamToString(in));
+        return objectMapper.readTree(in);
       } catch (IOException e) {
         throw new HttpException("Error parsing content", e, 405);
       }
+    }
+
+    @Override
+    public String getContentType() {
+      return ContentType.APPLICATION_JSON.getMimeType();
     }
   };
 
@@ -44,10 +60,12 @@ public abstract class ContentHandler<T> {
     return NULL_HANDLER;
   }
 
-  public static ContentHandler<JSONObject> jsonHandler() {
+  public static ContentHandler<JsonNode> jsonHandler() {
     return JSON_HANDLER;
   }
 
   public abstract T getContent(HttpConnection conn) throws HttpException;
+
+  public abstract String getContentType();
 
 }

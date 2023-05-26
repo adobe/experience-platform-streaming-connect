@@ -12,9 +12,12 @@
 
 package com.adobe.platform.streaming.sink.utils;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.sink.SinkRecord;
 
 import java.util.Map;
@@ -24,12 +27,20 @@ import java.util.Map;
  */
 public class SinkUtils {
 
-  public static String getStringPayload(Gson gson, SinkRecord record) {
-    if (record.value() instanceof String) {
-      return (String) record.value();
+  public static String getStringPayload(ObjectMapper objectMapper, SinkRecord record) throws JsonProcessingException {
+    final Object value = record.value();
+    if (value instanceof String) {
+      return (String) value;
     }
-
-    return gson.toJson(record.value());
+    final Schema valueSchema = record.valueSchema();
+    if (valueSchema == null) {
+      return objectMapper.writeValueAsString(value);
+    }
+    if (valueSchema.equals(Schema.STRING_SCHEMA)) {
+        return value.toString();
+    } else {
+      throw new ConnectException("Value must be a plain-string or value schema must be non-optional string-type");
+    }
   }
 
   public static int getProperty(Map<String, String> props, String propertyName, int defaultValue) {

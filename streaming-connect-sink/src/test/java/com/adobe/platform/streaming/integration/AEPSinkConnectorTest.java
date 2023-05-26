@@ -47,6 +47,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
   private static final String AEP_CONNECTOR_JWT_AUTH_CONFIG = "aep-connector-with-jwt-token.json";
   private static final String AEP_CONNECTOR_JWT_AUTH_PROXY_CONFIG = "aep-connector-with-jwt-token-proxy.json";
   private static final String AEP_CONNECTOR_CONFIG_WITH_PROXY = "aep-connector-with-proxy.json";
+  private static final String AEP_CONNECTOR_CONFIG_WITH_SCHEMAS_ENABLED = "aep-connector-with-schemas-enabled.json";
   private static final String XDM_PAYLOAD_FILE = "xdm-data.json";
 
   @BeforeEach

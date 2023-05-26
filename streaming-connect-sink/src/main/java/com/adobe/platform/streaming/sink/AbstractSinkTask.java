@@ -15,8 +15,8 @@ package com.adobe.platform.streaming.sink;
 import com.adobe.platform.streaming.AEPStreamingException;
 import com.adobe.platform.streaming.sink.utils.SinkUtils;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -40,7 +40,7 @@ import java.util.Map;
 public abstract class AbstractSinkTask<T> extends SinkTask {
 
   private static final Logger LOG = LoggerFactory.getLogger(AbstractSinkConnector.class);
-  public static final Gson GSON = new GsonBuilder().create();
+  public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private static final String FLUSH_INTERVAL_SECS = "aep.flush.interval.seconds";
   private static final String FLUSH_BYTES_KB = "aep.flush.bytes.kb";
@@ -103,10 +103,14 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
 
     List<T> eventsToPublish = new ArrayList<>();
     for (SinkRecord record : records) {
-      T dataToPublish = getDataToPublish(Pair.of(SinkUtils.getStringPayload(GSON, record), record));
-      eventsToPublish.add(dataToPublish);
-      bytesRead += getPayloadLength(dataToPublish);
-
+      try {
+        T dataToPublish = getDataToPublish(Pair.of(SinkUtils.getStringPayload(OBJECT_MAPPER, record), record));
+        eventsToPublish.add(dataToPublish);
+        bytesRead += getPayloadLength(dataToPublish);
+      } catch (JsonProcessingException e) {
+        LOG.warn("ConnectorSinkTask: Exception while converting data to JSON string.", e);
+        continue;
+      }
       long tempCurrTime = System.currentTimeMillis();
       if (flushNow(tempCurrTime)) {
         publishAndLogIfRequired(eventsToPublish);

@@ -22,11 +22,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.entity.ContentType;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -42,12 +42,16 @@ import java.util.Map;
 
 import static java.lang.Boolean.TRUE;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * @author Adobe Inc.
  */
 public class JWTTokenProvider extends AbstractAuthProvider {
 
   private static final Logger LOG = LoggerFactory.getLogger(JWTTokenProvider.class);
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final long JWT_TOKEN_EXPIRATION_THRESHOLD = 86400L;
   private static final long DEFAULT_JWT_TOKEN_UPDATE_THRESHOLD = 60000;
   private static final String IMS_ENDPOINT_PATH = "/ims/exchange/jwt/";
@@ -94,7 +98,7 @@ public class JWTTokenProvider extends AbstractAuthProvider {
   }
 
   @Override
-  protected TokenResponse getTokenResponse() throws AuthException {
+  protected TokenResponse getTokenResponse() throws AuthException, IOException {
     LOG.debug("refreshing expired jwtToken: {}", clientId);
     StringBuilder params = new StringBuilder()
       .append("&client_id=").append(clientId)
@@ -105,7 +109,6 @@ public class JWTTokenProvider extends AbstractAuthProvider {
       return httpProducer.post(
         IMS_ENDPOINT_PATH,
         params.toString().getBytes(),
-        ContentType.APPLICATION_FORM_URLENCODED.getMimeType(),
         getContentHandler()
       );
     } catch (HttpException httpException) {
@@ -113,7 +116,7 @@ public class JWTTokenProvider extends AbstractAuthProvider {
     }
   }
 
-  private String getJWTToken() throws AuthException {
+  private String getJWTToken() throws AuthException, IOException {
     if (isJWTExpired()) {
       refreshJWTToken();
     }
@@ -154,26 +157,17 @@ public class JWTTokenProvider extends AbstractAuthProvider {
     }
   }
 
-  private boolean isJWTExpired() {
+  private boolean isJWTExpired() throws IOException {
     if (StringUtils.isEmpty(jwtToken)) {
       return true;
     }
 
-    try {
-      String[] parts = jwtToken.split("\\.");
-      Base64.Decoder base64Decoder = Base64.getDecoder();
-      String tokenBody = new String(
-        base64Decoder.decode(parts[1].getBytes(StandardCharsets.UTF_8.name())),
-        StandardCharsets.UTF_8.name()
-      );
-      JSONObject tokenBodyJson = new JSONObject(tokenBody);
-      long expiresIn = ((Number)tokenBodyJson.get(JWT_EXPIRY_KEY)).longValue();
-      return System.currentTimeMillis() > (expiresIn - DEFAULT_JWT_TOKEN_UPDATE_THRESHOLD);
-    } catch (UnsupportedEncodingException exception) {
-      LOG.error("Exception while parsing JWT token", exception);
-    }
-
-    return true;
+    String[] parts = jwtToken.split("\\.");
+    Base64.Decoder base64Decoder = Base64.getDecoder();
+    byte[] tokenBodyBytes = base64Decoder.decode(parts[1].getBytes(StandardCharsets.UTF_8));
+    final JsonNode tokenBodyJson = OBJECT_MAPPER.readTree(tokenBodyBytes);
+    long expiresIn = tokenBodyJson.get(JWT_EXPIRY_KEY).asLong();
+    return System.currentTimeMillis() > (expiresIn - DEFAULT_JWT_TOKEN_UPDATE_THRESHOLD);
   }
 
 }

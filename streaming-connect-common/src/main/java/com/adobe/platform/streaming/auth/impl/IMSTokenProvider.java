@@ -75,7 +75,6 @@ public class IMSTokenProvider extends AbstractAuthProvider {
       return httpProducer.post(
         IMS_ENDPOINT_PATH,
         params.toString().getBytes(),
-        ContentType.APPLICATION_FORM_URLENCODED.getMimeType(),
         getContentHandler()
       );
     } catch (HttpException httpException) {

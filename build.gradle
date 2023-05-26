@@ -12,7 +12,6 @@
 
 buildscript {
   repositories {
-    jcenter()
     mavenCentral()
   }
 
@@ -34,7 +33,6 @@ plugins {
 description 'Adobe Experience Platform Streaming Connect'
 
 repositories {
-  jcenter()
   mavenCentral()
 }
 
@@ -91,7 +89,6 @@ subprojects {
   }
 
   repositories {
-    jcenter()
     mavenCentral()
 
     publishing {

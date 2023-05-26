@@ -18,17 +18,23 @@ import com.adobe.platform.streaming.http.HttpException;
 import com.adobe.platform.streaming.http.HttpProducer;
 import com.adobe.platform.streaming.http.HttpUtil;
 import com.adobe.platform.streaming.sink.AbstractAEPPublisher;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.entity.ContentType;
 import org.apache.kafka.connect.sink.ErrantRecordReporter;
 import org.apache.kafka.connect.sink.SinkRecord;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,6 +45,9 @@ import java.util.Objects;
 public class AEPPublisher extends AbstractAEPPublisher {
 
   private static final Logger LOG = LoggerFactory.getLogger(AEPPublisher.class);
+
+  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
   private static final String MESSAGES_KEY = "messages";
 
   private int count;
@@ -58,20 +67,27 @@ public class AEPPublisher extends AbstractAEPPublisher {
       return;
     }
 
+    final ArrayNode jsonMessages = OBJECT_MAPPER.createArrayNode();
     try {
-      final JSONArray jsonMessages = new JSONArray();
       messages.stream()
           .map(Pair::getKey)
-          .map(JSONObject::new)
-          .forEach(jsonMessages::put);
+          .map(key -> {
+            try {
+              return OBJECT_MAPPER.readTree(key);
+            } catch (JsonProcessingException e) {
+              LOG.debug("Found invalid JSON record in messages: {}", key);
+              return null;
+            }
+          })
+          .filter(Objects::nonNull)
+          .forEach(jsonMessages::add);
 
-      JSONObject payload = new JSONObject();
-      payload.put(MESSAGES_KEY, jsonMessages);
+      final JsonNode payload = OBJECT_MAPPER.createObjectNode()
+          .set(MESSAGES_KEY, jsonMessages);
 
-      JSONObject response = producer.post(
+      final JsonNode response = producer.post(
         StringUtils.EMPTY,
-        payload.toString().getBytes(),
-        ContentType.APPLICATION_JSON.getMimeType(),
+        payload.toString().getBytes(StandardCharsets.UTF_8),
         ContentHandler.jsonHandler()
       );
 
@@ -82,7 +98,8 @@ public class AEPPublisher extends AbstractAEPPublisher {
       if (Objects.nonNull(errorReporter)) {
         messages.forEach(message -> errorReporter.report(message.getValue(), httpException));
       }
-      if (HttpUtil.is500(httpException.getResponseCode()) || HttpUtil.isUnauthorized(httpException.getResponseCode())) {
+      final int responseCode = httpException.getResponseCode();
+      if (HttpUtil.is500(responseCode) || HttpUtil.isUnauthorized(responseCode)) {
         throw new AEPStreamingException("Failed to publish", httpException);
       }
     }

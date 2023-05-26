@@ -17,6 +17,8 @@ import com.adobe.platform.streaming.http.HttpConnection;
 import com.adobe.platform.streaming.http.HttpException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.apache.http.entity.ContentType;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.locks.Lock;
@@ -36,7 +38,7 @@ public abstract class AbstractAuthProvider implements AuthProvider {
   private transient volatile long expireTime;
 
   @Override
-  public String getToken() throws AuthException {
+  public String getToken() throws AuthException, HttpException {
     if (isExpired()) {
       refreshTokenIfNecessary();
     } else if (requiresUpdate()) {
@@ -53,7 +55,7 @@ public abstract class AbstractAuthProvider implements AuthProvider {
   }
 
   protected ContentHandler<TokenResponse> getContentHandler() {
-    return new ContentHandler<TokenResponse>() {
+    return new ContentHandler<>() {
       @Override
       public TokenResponse getContent(HttpConnection conn) throws HttpException {
         try (InputStream in = conn.getInputStream()) {
@@ -61,6 +63,11 @@ public abstract class AbstractAuthProvider implements AuthProvider {
         } catch (IOException e) {
           throw new HttpException("Error parsing response", e);
         }
+      }
+
+      @Override
+      public String getContentType() {
+        return ContentType.APPLICATION_FORM_URLENCODED.getMimeType();
       }
     };
   }
@@ -73,14 +80,18 @@ public abstract class AbstractAuthProvider implements AuthProvider {
     return System.currentTimeMillis() > (expireTime - DEFAULT_TOKEN_UPDATE_THRESHOLD);
   }
 
-  private synchronized void refreshTokenIfNecessary() throws AuthException {
+  private synchronized void refreshTokenIfNecessary() throws AuthException, HttpException {
     if (requiresUpdate()) {
-      TokenResponse tokenResponse = getTokenResponse();
-      expireTime = System.currentTimeMillis() + tokenResponse.getExpiresIn() - TOKEN_EXPIRATION_THRESHOLD;
-      accessToken = tokenResponse.getAccessToken();
+      try {
+        TokenResponse tokenResponse = getTokenResponse();
+        expireTime = System.currentTimeMillis() + tokenResponse.getExpiresIn() - TOKEN_EXPIRATION_THRESHOLD;
+        accessToken = tokenResponse.getAccessToken();
+      } catch (IOException e) {
+        throw new HttpException("Error parsing JWT Token", e);
+      }
     }
   }
 
-  protected abstract TokenResponse getTokenResponse() throws AuthException;
+  protected abstract TokenResponse getTokenResponse() throws AuthException, IOException;
 
 }
