@@ -23,6 +23,7 @@ import com.adobe.platform.streaming.http.HttpProducer;
 import com.adobe.platform.streaming.sink.utils.SinkUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.ImmutableMap;
@@ -43,6 +44,8 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
   private static final Logger LOG = LoggerFactory.getLogger(AbstractAEPPublisher.class);
 
   private static final MapType HEADER_MAP_TYPE = TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, String.class);
+
+  protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private static final String AEP_ENDPOINT = "aep.endpoint";
 

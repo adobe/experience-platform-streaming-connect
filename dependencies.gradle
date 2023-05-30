@@ -75,7 +75,8 @@ libraries.jjwt = [
 ]
 
 libraries.kafkaConnect = [
-  "org.apache.kafka:connect-api:$versions.kafkaConnect"
+  "org.apache.kafka:connect-api:$versions.kafkaConnect",
+  "org.apache.kafka:connect-json:$versions.kafkaConnect"
 ]
 
 libraries.kafkaConnectRuntime = [

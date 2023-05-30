@@ -15,17 +15,20 @@ package com.adobe.platform.streaming.sink;
 import com.adobe.platform.streaming.AEPStreamingException;
 import com.adobe.platform.streaming.sink.utils.SinkUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.common.utils.AppInfoParser;
 import org.apache.kafka.connect.errors.ConnectException;
+import org.apache.kafka.connect.json.JsonConverter;
+import org.apache.kafka.connect.json.JsonConverterConfig;
 import org.apache.kafka.connect.sink.ErrantRecordReporter;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 import org.apache.kafka.connect.sink.SinkTaskContext;
+import org.apache.kafka.connect.storage.ConverterConfig;
+import org.apache.kafka.connect.storage.ConverterType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +43,7 @@ import java.util.Map;
 public abstract class AbstractSinkTask<T> extends SinkTask {
 
   private static final Logger LOG = LoggerFactory.getLogger(AbstractSinkConnector.class);
-  public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
+  protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final String FLUSH_INTERVAL_SECS = "aep.flush.interval.seconds";
   private static final String FLUSH_BYTES_KB = "aep.flush.bytes.kb";
   private static final int DEFAULT_FLUSH_INTERVAL = 1;
@@ -54,6 +56,7 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
   private int flushBytesCount;
   private long lastFlushMilliSec = System.currentTimeMillis();
   private ErrantRecordReporter errantRecordReporter;
+  protected JsonConverter jsonValueConverter;
 
   @Override
   public String version() {
@@ -68,11 +71,18 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
     } catch (NoSuchMethodError | NoClassDefFoundError exception) {
       LOG.warn("Error report not defined in current kafka version. Please use Apache Kafka version > 2.6.");
     }
+    jsonValueConverter = new JsonConverter();
   }
 
   @Override
   public void start(Map<String, String> props) {
     LOG.info("Started Sink Task with props: {}", props);
+
+    jsonValueConverter.configure(Map.of(
+        ConverterConfig.TYPE_CONFIG, ConverterType.VALUE.toString().toLowerCase(),
+        // ensure outbound payloads do not have schema+payload fields
+        JsonConverterConfig.SCHEMAS_ENABLE_CONFIG, false
+    ));
 
     try {
       flushIntervalMillis = SinkUtils.getProperty(props, FLUSH_INTERVAL_SECS, DEFAULT_FLUSH_INTERVAL, MILLIS_IN_A_SEC);
@@ -103,14 +113,9 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
 
     List<T> eventsToPublish = new ArrayList<>();
     for (SinkRecord record : records) {
-      try {
-        T dataToPublish = getDataToPublish(Pair.of(SinkUtils.getStringPayload(OBJECT_MAPPER, record), record));
-        eventsToPublish.add(dataToPublish);
-        bytesRead += getPayloadLength(dataToPublish);
-      } catch (JsonProcessingException e) {
-        LOG.warn("ConnectorSinkTask: Exception while converting data to JSON string.", e);
-        continue;
-      }
+      T dataToPublish = getDataToPublish(Pair.of(SinkUtils.getStringPayload(jsonValueConverter, record), record));
+      eventsToPublish.add(dataToPublish);
+      bytesRead += getPayloadLength(dataToPublish);
       long tempCurrTime = System.currentTimeMillis();
       if (flushNow(tempCurrTime)) {
         publishAndLogIfRequired(eventsToPublish);

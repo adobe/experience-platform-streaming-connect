@@ -12,14 +12,13 @@
 
 package com.adobe.platform.streaming.sink.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.connect.data.Schema;
-import org.apache.kafka.connect.errors.ConnectException;
+import org.apache.kafka.connect.errors.DataException;
+import org.apache.kafka.connect.json.JsonConverter;
 import org.apache.kafka.connect.sink.SinkRecord;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -27,20 +26,18 @@ import java.util.Map;
  */
 public class SinkUtils {
 
-  public static String getStringPayload(ObjectMapper objectMapper, SinkRecord record) throws JsonProcessingException {
+  public static String getStringPayload(JsonConverter jsonConverter, SinkRecord record) {
+    final Schema valueSchema = record.valueSchema();
     final Object value = record.value();
-    if (value instanceof String) {
+    if (valueSchema == null && value instanceof String) {
       return (String) value;
     }
-    final Schema valueSchema = record.valueSchema();
-    if (valueSchema == null) {
-      return objectMapper.writeValueAsString(value);
+    byte[] payload = jsonConverter.fromConnectData(record.topic(), valueSchema, value);
+    if (payload == null) {
+      throw new DataException("Unable to parse Connect data with schema. "
+                              + "If you are trying to deserialize plain JSON data, set schemas.enable=false in your converter configuration.");
     }
-    if (valueSchema.equals(Schema.STRING_SCHEMA)) {
-        return value.toString();
-    } else {
-      throw new ConnectException("Value must be a plain-string or value schema must be non-optional string-type");
-    }
+    return new String(payload, StandardCharsets.UTF_8);
   }
 
   public static int getProperty(Map<String, String> props, String propertyName, int defaultValue) {

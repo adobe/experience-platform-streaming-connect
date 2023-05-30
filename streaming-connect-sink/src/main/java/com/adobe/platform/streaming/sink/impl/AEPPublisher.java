@@ -21,10 +21,7 @@ import com.adobe.platform.streaming.sink.AbstractAEPPublisher;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,8 +42,6 @@ import java.util.Objects;
 public class AEPPublisher extends AbstractAEPPublisher {
 
   private static final Logger LOG = LoggerFactory.getLogger(AEPPublisher.class);
-
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private static final String MESSAGES_KEY = "messages";
 

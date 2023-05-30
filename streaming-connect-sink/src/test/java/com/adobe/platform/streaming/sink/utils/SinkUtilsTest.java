@@ -12,17 +12,32 @@
 
 package com.adobe.platform.streaming.sink.utils;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 
+import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
+import org.apache.kafka.connect.data.Struct;
+import org.apache.kafka.connect.json.JsonConverter;
+import org.apache.kafka.connect.json.JsonConverterConfig;
 import org.apache.kafka.connect.sink.SinkRecord;
+import org.apache.kafka.connect.storage.ConverterConfig;
+import org.apache.kafka.connect.storage.ConverterType;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * @author Adobe Inc.
@@ -64,12 +79,65 @@ class SinkUtilsTest {
     ));
   }
 
+
   static class PayloadTest {
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    @Test
-    void testRecordPayloadThrowsException() {
-      SinkRecord r = new SinkRecord("test", 0, null, null, SchemaBuilder.struct().build(), )
-      SinkUtils.getStringPayload(objectMapper, )
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    private static JsonConverter jsonConverter;
+
+    @BeforeAll
+    static void setup() {
+      jsonConverter = new JsonConverter();
+      jsonConverter.configure(Map.of(
+          JsonConverterConfig.SCHEMAS_ENABLE_CONFIG, false,
+          ConverterConfig.TYPE_CONFIG, ConverterType.VALUE.getName()
+      ));
+    }
+
+    @ParameterizedTest(name = "[{index}] {2}")
+    @MethodSource({"primitiveSchemaPayloads", "objectSchemaPayloads"})
+    void testPrimitiveValueSchemaAsJSON(Schema valueSchema, Object value, String expectedJSON) {
+      SinkRecord sr = getSinkRecordWithValue(valueSchema, value);
+      assertDoesNotThrow(() -> assertEquals(expectedJSON, SinkUtils.getStringPayload(jsonConverter, sr)));
+    }
+
+    static Stream<Object[]> primitiveSchemaPayloads() throws JsonProcessingException {
+      byte[] bytes = "secret".getBytes(StandardCharsets.UTF_8);
+      return Stream.of(
+          // returns null string
+          new Object[]{Schema.OPTIONAL_STRING_SCHEMA, null, "null"},
+          // will encode strings with surrounding with quotes
+          new Object[]{Schema.STRING_SCHEMA, "test", OBJECT_MAPPER.writeValueAsString("test")},
+          // preserves boolean JSON types
+          new Object[]{Schema.BOOLEAN_SCHEMA, Boolean.TRUE, "true"},
+          new Object[]{Schema.OPTIONAL_BOOLEAN_SCHEMA, null, "null"},
+          // preserves byte types
+          new Object[]{Schema.BYTES_SCHEMA, bytes, OBJECT_MAPPER.writeValueAsString(bytes)},
+          new Object[]{Schema.OPTIONAL_BYTES_SCHEMA, null, "null"}
+      );
+    }
+
+    static Stream<Object[]> objectSchemaPayloads() {
+      final Schema nameValueStructSchema = SchemaBuilder.struct()
+          .name("KeyValuePair")
+          .field("name", Schema.STRING_SCHEMA)
+          .field("value", Schema.OPTIONAL_STRING_SCHEMA)
+          .build();
+      // NOTE: expected, written JSON is compact
+      return Stream.of(
+          // array schemas must be Collection subclasses
+          new Object[]{SchemaBuilder.array(Schema.INT32_SCHEMA).build(), List.of(1, 2, 3), "[1,2,3]"},
+          new Object[]{nameValueStructSchema,
+                       new Struct(nameValueStructSchema)
+                           .put("name", "hello")
+                           .put("value", null),
+                       "{\"name\":\"hello\",\"value\":null}"}
+      );
+    }
+
+    private SinkRecord getSinkRecordWithValue(Schema valueSchema, Object value) {
+      return new SinkRecord("test", 0, null, null, valueSchema, value, 0L);
     }
   }
 }
