@@ -29,13 +29,21 @@ public class SinkUtils {
   public static String getStringPayload(JsonConverter jsonConverter, SinkRecord record) {
     final Schema valueSchema = record.valueSchema();
     final Object value = record.value();
-    if (valueSchema == null && value instanceof String) {
+    if (value == null) {
+      return null;
+    }
+    if (valueSchema == null) {
+      if (value instanceof String) {
+        return (String) value;
+      }
+    } else if (Schema.STRING_SCHEMA.type().equals(valueSchema.type())) {
       return (String) value;
     }
     byte[] payload = jsonConverter.fromConnectData(record.topic(), valueSchema, value);
     if (payload == null) {
-      throw new DataException("Unable to parse Connect data with schema. "
-                              + "If you are trying to deserialize plain JSON data, set schemas.enable=false in your converter configuration.");
+      throw new DataException("Unable to parse Connect data with schema. " +
+                              "If you are trying to deserialize plain JSON data, " +
+                              "set schemas.enable=false in your converter configuration.");
     }
     return new String(payload, StandardCharsets.UTF_8);
   }

@@ -15,7 +15,6 @@ package com.adobe.platform.streaming.integration;
 import com.adobe.platform.streaming.http.HttpException;
 import com.adobe.platform.streaming.http.HttpUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -147,8 +146,7 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
       NUMBER_OF_TASKS,
       getInletUrl());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
-      new TypeReference<Map<String, String>>() {});
+    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }

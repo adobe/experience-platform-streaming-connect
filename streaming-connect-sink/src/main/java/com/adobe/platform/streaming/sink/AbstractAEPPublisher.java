@@ -25,7 +25,6 @@ import com.adobe.platform.streaming.sink.utils.SinkUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.ImmutableMap;
 
 import org.apache.commons.lang3.StringUtils;
@@ -33,20 +32,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author Adobe Inc.
  */
 public abstract class AbstractAEPPublisher implements DataPublisher {
-
   private static final Logger LOG = LoggerFactory.getLogger(AbstractAEPPublisher.class);
-
-  private static final MapType HEADER_MAP_TYPE = TypeFactory.defaultInstance().constructMapType(HashMap.class, String.class, String.class);
-
   protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
+  private static final MapType HEADER_MAP_TYPE = OBJECT_MAPPER
+    .getTypeFactory().constructMapType(TreeMap.class, String.class, String.class);
   private static final String AEP_ENDPOINT = "aep.endpoint";
 
   private static final String AEP_CONNECTION_PROXY_HOST = "aep.connection.proxy.host";
@@ -107,7 +103,8 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
   }
 
   private Map<String, String> getHeaders(String header) throws JsonProcessingException {
-    return StringUtils.isEmpty(header) ? Collections.emptyMap() : AbstractSinkTask.OBJECT_MAPPER.readValue(header, HEADER_MAP_TYPE);
+    return StringUtils.isEmpty(header) ? Collections.emptyMap() :
+           AbstractSinkTask.OBJECT_MAPPER.readValue(header, HEADER_MAP_TYPE);
   }
 
   private AuthProvider getAuthProvider(Map<String, String> props) {

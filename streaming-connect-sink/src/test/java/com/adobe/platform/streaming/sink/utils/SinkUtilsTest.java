@@ -12,13 +12,9 @@
 
 package com.adobe.platform.streaming.sink.utils;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
@@ -38,6 +34,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Adobe Inc.
@@ -79,7 +78,6 @@ class SinkUtilsTest {
     ));
   }
 
-
   static class PayloadTest {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -90,43 +88,42 @@ class SinkUtilsTest {
     static void setup() {
       jsonConverter = new JsonConverter();
       jsonConverter.configure(Map.of(
-          JsonConverterConfig.SCHEMAS_ENABLE_CONFIG, false,
-          ConverterConfig.TYPE_CONFIG, ConverterType.VALUE.getName()
+        JsonConverterConfig.SCHEMAS_ENABLE_CONFIG, false,
+        ConverterConfig.TYPE_CONFIG, ConverterType.VALUE.getName()
       ));
     }
 
     @ParameterizedTest(name = "[{index}] {2}")
     @MethodSource({"primitiveSchemaPayloads", "objectSchemaPayloads"})
-    void testPrimitiveValueSchemaAsJSON(Schema valueSchema, Object value, String expectedJSON) {
+    void testPrimitiveValueSchemaAsJson(Schema valueSchema, Object value, String expectedJson) {
       SinkRecord sr = getSinkRecordWithValue(valueSchema, value);
-      assertDoesNotThrow(() -> assertEquals(expectedJSON, SinkUtils.getStringPayload(jsonConverter, sr)));
+      assertDoesNotThrow(() -> assertEquals(expectedJson, SinkUtils.getStringPayload(jsonConverter, sr)));
     }
 
     static Stream<Object[]> primitiveSchemaPayloads() throws JsonProcessingException {
       byte[] bytes = "secret".getBytes(StandardCharsets.UTF_8);
       return Stream.of(
+          new Object[]{Schema.STRING_SCHEMA, "test", "test"},
           // returns null string
-          new Object[]{Schema.OPTIONAL_STRING_SCHEMA, null, "null"},
-          // will encode strings with surrounding with quotes
-          new Object[]{Schema.STRING_SCHEMA, "test", OBJECT_MAPPER.writeValueAsString("test")},
+          new Object[]{Schema.OPTIONAL_STRING_SCHEMA, null, null},
           // preserves boolean JSON types
           new Object[]{Schema.BOOLEAN_SCHEMA, Boolean.TRUE, "true"},
-          new Object[]{Schema.OPTIONAL_BOOLEAN_SCHEMA, null, "null"},
+          new Object[]{Schema.OPTIONAL_BOOLEAN_SCHEMA, null, null},
           // preserves byte types
           new Object[]{Schema.BYTES_SCHEMA, bytes, OBJECT_MAPPER.writeValueAsString(bytes)},
-          new Object[]{Schema.OPTIONAL_BYTES_SCHEMA, null, "null"}
+          new Object[]{Schema.OPTIONAL_BYTES_SCHEMA, null, null}
       );
     }
 
     static Stream<Object[]> objectSchemaPayloads() {
       final Schema nameValueStructSchema = SchemaBuilder.struct()
-          .name("KeyValuePair")
-          .field("name", Schema.STRING_SCHEMA)
-          .field("value", Schema.OPTIONAL_STRING_SCHEMA)
-          .build();
+        .name("KeyValuePair")
+        .field("name", Schema.STRING_SCHEMA)
+        .field("value", Schema.OPTIONAL_STRING_SCHEMA)
+        .build();
       // NOTE: expected, written JSON is compact
       return Stream.of(
-          // array schemas must be Collection subclasses
+          // array schema values must be Collection subclasses
           new Object[]{SchemaBuilder.array(Schema.INT32_SCHEMA).build(), List.of(1, 2, 3), "[1,2,3]"},
           new Object[]{nameValueStructSchema,
                        new Struct(nameValueStructSchema)

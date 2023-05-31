@@ -79,9 +79,9 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
     LOG.info("Started Sink Task with props: {}", props);
 
     jsonValueConverter.configure(Map.of(
-        ConverterConfig.TYPE_CONFIG, ConverterType.VALUE.toString().toLowerCase(),
-        // ensure outbound payloads do not have schema+payload fields
-        JsonConverterConfig.SCHEMAS_ENABLE_CONFIG, false
+      ConverterConfig.TYPE_CONFIG, ConverterType.VALUE.toString().toLowerCase(),
+      // ensure outbound payloads do not have schema+payload fields
+      JsonConverterConfig.SCHEMAS_ENABLE_CONFIG, false
     ));
 
     try {

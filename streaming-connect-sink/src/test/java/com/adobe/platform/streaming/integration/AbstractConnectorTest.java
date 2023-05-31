@@ -17,6 +17,7 @@ import com.adobe.platform.streaming.integration.extension.WiremockExtension;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.MapLikeType;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.kafka.connect.runtime.WorkerConfig.CONNECTOR_CLIENT_POLICY_CLASS_CONFIG;
@@ -42,6 +44,8 @@ import static org.apache.kafka.connect.runtime.WorkerConfig.OFFSET_COMMIT_INTERV
 public abstract class AbstractConnectorTest {
 
   protected static final ObjectMapper MAPPER = new ObjectMapper();
+  protected static final MapLikeType MAP_TYPE_JSON = MAPPER.getTypeFactory()
+    .constructMapLikeType(TreeMap.class, String.class, String.class);
   private static final long OFFSET_COMMIT_INTERVAL_MS = TimeUnit.SECONDS.toMillis(5);
   protected static final int HTTP_SERVER_SIDE_ERROR_CODE = 500;
   private static final String AUTH_TOKEN_RESPONSE = "{\"access_token\":\"accessToken\"," +
@@ -54,6 +58,7 @@ public abstract class AbstractConnectorTest {
   protected static final int PORT = 8089;
   protected static final int PORT_VIA_PROXY = 8090;
   private EmbeddedConnectCluster connect;
+
   private int numberOfWorkers = 1;
   private String inletId = "876e1041c16801b8b3038ec86bb4510e8c89356152191b587367b592e79d91d5";
   private String baseUrl;

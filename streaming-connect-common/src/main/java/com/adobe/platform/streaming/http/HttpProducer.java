@@ -14,7 +14,7 @@ package com.adobe.platform.streaming.http;
 
 import com.adobe.platform.streaming.auth.AuthProvider;
 
-import com.google.common.net.HttpHeaders;
+import org.apache.http.HttpHeaders;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

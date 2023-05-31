@@ -20,6 +20,7 @@ import com.adobe.platform.streaming.http.HttpUtil;
 import com.adobe.platform.streaming.sink.AbstractAEPPublisher;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
@@ -32,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -78,16 +80,22 @@ public class AEPPublisher extends AbstractAEPPublisher {
           .forEach(jsonMessages::add);
 
       final JsonNode payload = OBJECT_MAPPER.createObjectNode()
-          .set(MESSAGES_KEY, jsonMessages);
+        .set(MESSAGES_KEY, jsonMessages);
 
       final JsonNode response = producer.post(
         StringUtils.EMPTY,
-        payload.toString().getBytes(StandardCharsets.UTF_8),
+        OBJECT_MAPPER.writeValueAsBytes(payload),
         ContentHandler.jsonHandler()
       );
 
       count++;
       LOG.debug("Successfully published data to Adobe Experience Platform: {}", response);
+    } catch (JsonProcessingException jsonException) {
+      LOG.error("Failed to publish data to Adobe Experience Platform", jsonException);
+      if (Objects.nonNull(errorReporter)) {
+        messages.forEach(message -> errorReporter.report(message.getValue(), jsonException));
+      }
+      throw new AEPStreamingException("Failed to publish invalid JSON", jsonException);
     } catch (HttpException httpException) {
       LOG.error("Failed to publish data to Adobe Experience Platform", httpException);
       if (Objects.nonNull(errorReporter)) {

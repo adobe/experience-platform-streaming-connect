@@ -16,7 +16,6 @@ import com.adobe.platform.streaming.http.HttpException;
 import com.adobe.platform.streaming.http.HttpUtil;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -47,7 +46,6 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
   private static final String AEP_CONNECTOR_JWT_AUTH_CONFIG = "aep-connector-with-jwt-token.json";
   private static final String AEP_CONNECTOR_JWT_AUTH_PROXY_CONFIG = "aep-connector-with-jwt-token-proxy.json";
   private static final String AEP_CONNECTOR_CONFIG_WITH_PROXY = "aep-connector-with-proxy.json";
-  private static final String AEP_CONNECTOR_CONFIG_WITH_SCHEMAS_ENABLED = "aep-connector-with-schemas-enabled.json";
   private static final String XDM_PAYLOAD_FILE = "xdm-data.json";
 
   @BeforeEach
@@ -209,8 +207,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       getInletUrl(),
       getBaseUrl());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
-      new TypeReference<Map<String, String>>() {});
+    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
@@ -223,8 +220,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       getBaseUrl(),
       this.getClass().getClassLoader().getResource("secret.key").getPath());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
-      new TypeReference<Map<String, String>>() {});
+    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
@@ -237,8 +233,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       PORT_VIA_PROXY,
       getBaseUrl());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
-      new TypeReference<Map<String, String>>() {});
+    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
@@ -252,8 +247,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       getBaseUrl(),
       this.getClass().getClassLoader().getResource("secret.key").getPath());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
-      new TypeReference<Map<String, String>>() {});
+    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
@@ -264,8 +258,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       NUMBER_OF_TASKS,
       getInletUrl());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
-      new TypeReference<Map<String, String>>() {});
+    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
@@ -277,8 +270,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       getInletUrl(),
       PORT_VIA_PROXY);
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
-      new TypeReference<Map<String, String>>() {});
+    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
