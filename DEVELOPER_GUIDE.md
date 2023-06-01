@@ -46,9 +46,6 @@ AEP Sink connector configurations can be supplied in the call register the conne
 
 ## Step-by-Step Workflow
 
-### Build
-```./gradlew clean build```
-
 ### Build docker
 
 ```docker build -t streaming-connect .```
