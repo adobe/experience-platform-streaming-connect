@@ -14,7 +14,6 @@ your local docker kafka topic.
 
 ## Build Docker locally and Run
 ```bash
-./gradlew clean build
 docker build -t streaming-connect .
 docker-compose up -d
 ```
