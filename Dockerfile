@@ -10,10 +10,19 @@
  # governing permissions and limitations under the License.
 ##
 
-FROM adoptopenjdk/openjdk11:jre-11.0.11_9-alpine
+FROM gradle:7.6.1-jdk11-alpine AS builder
 
-ENV SCALA_VERSION="2.12" \
-    KAFKA_VERSION="2.8.0"
+WORKDIR /work
+
+COPY . /work
+RUN ["gradle", "clean", "build"]
+
+FROM alpine AS kafka_deps
+
+ARG SCALA_VERSION="2.12"
+ARG KAFKA_VERSION="2.8.0"
+ENV SCALA_VERSION=$SCALA_VERSION \
+    KAFKA_VERSION=$KAFKA_VERSION
 ENV KAFKA_HOME=/opt/kafka_${SCALA_VERSION}-${KAFKA_VERSION}
 
 ARG KAFKA_DIST=kafka_${SCALA_VERSION}-${KAFKA_VERSION}
@@ -30,8 +39,22 @@ RUN set -x && \
     mv ${KAFKA_DIST_TGZ} /tmp && \
     tar xfz /tmp/${KAFKA_DIST_TGZ} -C /opt && \
     rm /tmp/${KAFKA_DIST_TGZ} && \
-    apk del unzip ca-certificates gnupg && \
-    apk add bash
+    apk del unzip ca-certificates gnupg
+
+FROM adoptopenjdk/openjdk11:jre-11.0.11_9-alpine
+
+ARG SCALA_VERSION="2.12"
+ARG KAFKA_VERSION="2.8.0"
+ENV SCALA_VERSION=$SCALA_VERSION \
+    KAFKA_VERSION=$KAFKA_VERSION
+
+COPY --from=kafka_deps /opt /opt
+
+RUN apk add --no-cache bash
+
+ENV KAFKA_HOME=/opt/kafka_${SCALA_VERSION}-${KAFKA_VERSION}
+
+WORKDIR $KAFKA_HOME
 
 ENV PATH=$PATH:/${KAFKA_HOME}/bin \
     CONNECT_CFG=${KAFKA_HOME}/config/connect-distributed.properties \
@@ -44,7 +67,6 @@ ENV EXTRA_ARGS="-javaagent:$KAFKA_HOME/connectors/jmx_prometheus_javaagent-0.12.
 EXPOSE 9999
 EXPOSE ${CONNECT_PORT}
 
-WORKDIR $KAFKA_HOME
 COPY prometheus-agent.yml ${KAFKA_HOME}/config/prometheus.yml
 COPY start-connect.sh $KAFKA_HOME/start-connect.sh
 
@@ -55,8 +77,8 @@ COPY application.conf $KAFKA_HOME/application.conf
 COPY docker-entrypoint.sh /
 RUN mkdir -p $KAFKA_HOME/connectors
 
-COPY streaming-connect-sink/build/libs/jmx_prometheus_javaagent-*.jar $KAFKA_HOME/connectors
-COPY streaming-connect-sink/build/libs/streaming-connect-sink-*.jar $KAFKA_HOME/connectors
+COPY --from=builder /work/streaming-connect-sink/build/libs/jmx_prometheus_javaagent-*.jar $KAFKA_HOME/connectors
+COPY --from=builder /work/streaming-connect-sink/build/libs/streaming-connect-sink-*.jar $KAFKA_HOME/connectors
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
