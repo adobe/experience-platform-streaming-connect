@@ -104,7 +104,7 @@ class SinkUtilsTest {
       byte[] bytes = "secret".getBytes(StandardCharsets.UTF_8);
       return Stream.of(
           new Object[]{Schema.STRING_SCHEMA, "test", "test"},
-          // returns null string
+          // does not return "null" as string
           new Object[]{Schema.OPTIONAL_STRING_SCHEMA, null, null},
           // preserves boolean JSON types
           new Object[]{Schema.BOOLEAN_SCHEMA, Boolean.TRUE, "true"},
