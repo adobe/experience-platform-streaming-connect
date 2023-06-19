@@ -57,4 +57,8 @@ public class SerializerDeserializerUtil {
   public static ObjectNode createObjectNode() {
     return MAPPER.createObjectNode();
   }
+
+  public static ObjectMapper getMapper() {
+    return MAPPER;
+  }
 }

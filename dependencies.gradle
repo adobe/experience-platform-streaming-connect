@@ -26,6 +26,7 @@ versions.jmxPrometheusJavaAgent = '0.12.0'
 versions.junitJupiter = '5.2.0'
 versions.jjwt = '0.9.0'
 versions.orgJson = '20230227'
+versions.jsonPatch = '0.4.4'
 versions.kafkaConnect = '2.8.0'
 versions.slf4j = '1.7.25'
 versions.jaxb = '2.3.0'
@@ -96,6 +97,10 @@ libraries.kafkaConnectTest = [
 
 libraries.orgJson = [
   "org.json:json:$versions.orgJson"
+]
+
+libraries.jsonPatch = [
+  "com.flipkart.zjsonpatch:zjsonpatch:$versions.jsonPatch"
 ]
 
 libraries.slf4j = [

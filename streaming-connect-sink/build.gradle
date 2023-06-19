@@ -23,6 +23,7 @@ dependencies {
                  libraries.jackson, libraries.httpClient,
                  libraries.kafkaConnect, libraries.orgJson,
                  libraries.slf4j
+  implementation libraries.jsonPatch
   compileOnly libraries.kafkaConnectRuntime
   jmxAgent libraries.jmxPrometheusJavaAgent
   testImplementation libraries.jmockit, libraries.junitJupiter,
