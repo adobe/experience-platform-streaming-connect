@@ -44,6 +44,9 @@ AEP Sink connector configurations can be supplied in the call register the conne
 | aep.connection.auth.client.code   | IMS client code                                 |                                                         | no       |                         |
 | aep.connection.auth.client.secret | IME client secret                               |                                                         | no       |                         |
 | aep.flush.bytes.kb                | bytes threshold to determine the batch          | 4                                                       | no       |                         |
+| aep.connection.maxRetries         | maxNumber of retries in case of failure from aep streaming endpoint | 3                                   | no       |                         |
+| aep.connection.retryBackoff       | retryBackoff in millis while retrying aep streaming endpoint        | 300                                 | no       |                         |
+
 
 ## Step-by-Step Workflow
 
