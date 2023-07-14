@@ -12,10 +12,12 @@
 
 package com.adobe.platform.streaming.auth;
 
+import com.adobe.platform.streaming.utils.AbstractStreamingUtils;
+
 /**
  * @author Adobe Inc.
  */
-public final class AuthUtils {
+public final class AuthUtils extends AbstractStreamingUtils {
 
   public static final String AUTH_ENDPOINT = "AUTH_ENDPOINT";
   public static final String AUTH_CLIENT_ID = "auth.client.id";
@@ -26,6 +28,7 @@ public final class AuthUtils {
   public static final String AUTH_TECHNICAL_ACCOUNT_ID = "auth.client.technicalAccountKey";
   public static final String AUTH_META_SCOPE = "auth.client.metaScope";
   public static final String AUTH_PRIVATE_KEY_FILE_PATH = "auth.client.filePath";
+  public static final String AUTH_PRIVATE_KEY_VALUE = "auth.client.keyValue";
 
   private AuthUtils() {}
 }

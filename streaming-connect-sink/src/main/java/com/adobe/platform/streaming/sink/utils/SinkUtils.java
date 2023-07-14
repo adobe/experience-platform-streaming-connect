@@ -12,6 +12,7 @@
 
 package com.adobe.platform.streaming.sink.utils;
 
+import com.adobe.platform.streaming.utils.AbstractStreamingUtils;
 import com.google.gson.Gson;
 
 import org.apache.commons.lang3.StringUtils;
@@ -22,7 +23,7 @@ import java.util.Map;
 /**
  * @author Adobe Inc.
  */
-public class SinkUtils {
+public class SinkUtils extends AbstractStreamingUtils {
 
   public static String getStringPayload(Gson gson, SinkRecord record) {
     if (record.value() instanceof String) {
@@ -32,30 +33,7 @@ public class SinkUtils {
     return gson.toJson(record.value());
   }
 
-  public static int getProperty(Map<String, String> props, String propertyName, int defaultValue) {
-    if (props != null) {
-      String propertyValue = props.get(propertyName);
-      if (StringUtils.isNotBlank(propertyValue)) {
-        return Integer.parseInt(propertyValue);
-      }
-    }
 
-    return defaultValue;
-  }
-
-  public static String getProperty(Map<String, String> props, String propertyName, String defaultValue) {
-    return props != null ? (StringUtils.isNotBlank(props.get(propertyName)) ? props.get(propertyName) : defaultValue)
-      : defaultValue;
-  }
-
-  public static int getProperty(Map<String, String> properties, String key, int defaultValue, int multiplier) {
-    int propertyValue = getProperty(properties, key, defaultValue) * multiplier;
-    if (propertyValue < 1) {
-      return defaultValue * multiplier;
-    }
-
-    return propertyValue;
-  }
 
   private SinkUtils() {
   }

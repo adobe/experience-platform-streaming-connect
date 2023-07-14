@@ -48,6 +48,7 @@ public abstract class AbstractSinkConnector extends SinkConnector {
     List<Map<String, String>> configs = new ArrayList<>();
     for (int i = 0; i < maxTasks; i++) {
       configs.add(new ImmutableMap.Builder<String, String>().putAll(connectorProps).build());
+
     }
 
     return configs;
@@ -60,6 +61,11 @@ public abstract class AbstractSinkConnector extends SinkConnector {
 
   @Override
   public ConfigDef config() {
+
+
+
+    ConfigDef configDef = new ConfigDef();
+    configDef.define("aep.connection.auth.keyValue", ConfigDef.Type.PASSWORD,null,null,"");
     return new ConfigDef();
   }
 
