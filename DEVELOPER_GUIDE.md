@@ -1,28 +1,27 @@
 # Developer Guide
 
-The docker setup comes with a full stack of Kafka tools and utilities including Kafka Connect
+The Docker setup comes with a full stack of Kafka tools and utilities including Kafka Connect
 
 * Kafka broker
 * Zookeeper
-* Kafka Rest proxy
+* Kafka REST Proxy
 * Kafka Topics UI
 * Kafka Connect, with the AEP Sink Connector installed.
 
-Once the docker is running, you should be able to test the entire setup using a rest api to insert the message into
-your local docker kafka topic.
+Once the container is running, you should be able to test the entire setup using a REST api to insert the message into
+your local Docker Kafka topic.
 
 
 ## Build Docker locally and Run
 ```bash
-./gradlew clean build
 docker build -t streaming-connect .
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Configuration Options
 
 The AEP connector is a uber jar containing all the classfiles and its third-party dependencies.
-To install the connector, drop the jar file into the plug in directory of Kafka connect installation.
+To install the connector, drop the jar file into the plug in directory of Kafka Connect installation.
 
 AEP Sink connector configurations can be supplied in the call register the connector.
 
@@ -33,7 +32,7 @@ AEP Sink connector configurations can be supplied in the call register the conne
 | connector.class                   | classname of impl                               | com.adobe.platform.streaming.sink.impl.AEPSinkConnector | yes      |                         |
 | key.converter.schemas.enable      | enables conversion of schemas                   | false                                                   | no       |                         |
 | value.converter.schemas.enable    | enables conversion of schemas                   | false                                                   | no       |                         |
-| aep.endpoint                      | aep streaming endpoint url                      |                                                         | yes      |                         |
+| aep.endpoint                      | AEP streaming endpoint url                      |                                                         | yes      |                         |
 | aep.connection.proxy.host         | address of the proxy host to connect through    |                                                         | no       |                         |
 | aep.connection.proxy.port         | port of the proxy host to connect through       | 443                                                     | no       |                         |
 | aep.connection.proxy.user         | username for the proxy host                     |                                                         | no       |                         |
@@ -50,23 +49,20 @@ AEP Sink connector configurations can be supplied in the call register the conne
 
 ## Step-by-Step Workflow
 
-### Build
-```./gradlew clean build```
-
-### Build docker
+### Build Docker
 
 ```docker build -t streaming-connect .```
 
 ### Running Docker
-```docker-compose up -d```
+```docker compose up -d```
 
-### Tail Docker logs
+### Tail Container logs
 ```docker logs experience-platform-streaming-connect_kafka-connect_1 -f```
 
 ### Manage running connectors
 
 Kafka Connect exposes a set of [REST APIs][connect-apis] to manage
-connect instances.
+Connect instances.
 
 #### List of running connectors
 
@@ -287,13 +283,13 @@ curl -s -X POST \
 ```
 
 #### Dead Letter Configuration
-To send error records to dead letter topic please use standard kafka connector error configuration.
+To send error records to dead letter topic please use standard Kafka connector error configuration.
 
-Kafka connect dead letter configurations : `https://docs.confluent.io/platform/current/connect/concepts.html#dead-letter-queue`
+Kafka Connect dead letter configurations : `https://docs.confluent.io/platform/current/connect/concepts.html#dead-letter-queue`
 
 #### Poxy host configuration
-There are 2 ways to route request to aep endpoint through proxy server :
-1. **Using Environment Variable** : Export poxyHost and proxyPort on each kafka node, then restart kafka connect node.
+There are 2 ways to route request to AEP endpoint through proxy server :
+1. **Using Environment Variable** : Export poxyHost and proxyPort on each Kafka node, then restart Kafka Connect node.
    
     For HTTPS use following :
     ```
@@ -303,24 +299,24 @@ There are 2 ways to route request to aep endpoint through proxy server :
     ```
     export KAFKA_OPTS="-Dhttp.proxyHost=127.0.0.1 -Dhttp.proxyPort=8085 -Dhttp.proxyUser=proxyUsername -Dhttp.proxyPassword=proxyPassword"
     ``` 
-2. **Using Connector Properties** : While creating connector set following properties, default values mentioned in [connect configurations](#configuration-options).
+2. **Using Connector Properties** : While creating connector set following properties, default values mentioned in [Connect configurations](#configuration-options).
     ```
     aep.connection.proxy.host                                                          
     aep.connection.proxy.port
     aep.connection.proxy.user
     aep.connection.proxy.password
     ```
-For reference, more details are in oracle documentation on configuring proxy settings in java : https://docs.oracle.com/javase/8/docs/technotes/guides/net/proxies.html
+For reference, more details are in Oracle documentation on configuring proxy settings in Java : https://docs.oracle.com/javase/8/docs/technotes/guides/net/proxies.html
 
 #### Use the Kafka Topics UI to view your topics
 
-The docker setup comes with Topics UI to view the topic and messages within.
+The Docker setup comes with Topics UI to view the topic and messages within.
 Open a browser and go to http://localhost:8000 and view the connect-test topic
 
 ![Topics UI](./doc/resources/topics-ui.png)
 
 In order to test the flow, you can use the following curl command to post a message into the Kafka topic using the
-Kafka rest proxy. Please ensure that the curl command uses your inlet endpoint, and the schema of the XDM message
+Kafka REST Proxy. Please ensure that the curl command uses your inlet endpoint, and the schema of the XDM message
 corresponding to your setup.
 
 ```bash
