@@ -13,11 +13,10 @@
 package com.adobe.platform.streaming.sink.transformation;
 
 import com.adobe.platform.streaming.AEPStreamingRuntimeException;
-import com.adobe.platform.streaming.http.serializer.SerializerDeserializerUtil;
+import com.adobe.platform.streaming.JacksonFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.flipkart.zjsonpatch.InvalidJsonPatchException;
 import com.flipkart.zjsonpatch.JsonPatch;
@@ -38,8 +37,7 @@ import java.util.Objects;
 public class JsonPatchTransform<R extends ConnectRecord<R>> implements Transformation<R> {
 
   private static final Logger LOG = LoggerFactory.getLogger(JsonPatchTransform.class);
-  private static final ObjectMapper MAPPER = SerializerDeserializerUtil.getMapper();
-  private static final ObjectNodeConverter objectNodeConverter = new ObjectNodeConverter(MAPPER);
+  private static final ObjectNodeConverter objectNodeConverter = new ObjectNodeConverter(JacksonFactory.OBJECT_MAPPER);
   private static final String JSON_PATCH_CONFIG = "operations";
   private static final String JSON_PATHS_DOC = "Json pointers to evaluate for filtering";
   private static final ConfigDef CONFIG_DEF = new ConfigDef().define(
@@ -64,7 +62,7 @@ public class JsonPatchTransform<R extends ConnectRecord<R>> implements Transform
     try {
       final ObjectNode jsonValue = objectNodeConverter.convert(value);
       final JsonNode transformedValue = JsonPatch.apply(jsonPatch, jsonValue);
-      Object out = MAPPER.writeValueAsString(transformedValue);
+      Object out = JacksonFactory.OBJECT_MAPPER.writeValueAsString(transformedValue);
       if (LOG.isDebugEnabled()) {
         LOG.debug("Transformed record {}", jsonValue);
       }
@@ -92,7 +90,7 @@ public class JsonPatchTransform<R extends ConnectRecord<R>> implements Transform
   public void configure(Map<String, ?> configs) {
     final SimpleConfig config = new SimpleConfig(CONFIG_DEF, configs);
     try {
-      jsonPatch = MAPPER.readTree(config.getString(JSON_PATCH_CONFIG));
+      jsonPatch = JacksonFactory.OBJECT_MAPPER.readTree(config.getString(JSON_PATCH_CONFIG));
     } catch (JsonProcessingException e) {
       throw new AEPStreamingRuntimeException("Failed to read json patch config.", e);
     }

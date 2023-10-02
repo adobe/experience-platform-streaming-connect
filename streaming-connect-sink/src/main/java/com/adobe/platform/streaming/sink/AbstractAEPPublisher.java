@@ -13,6 +13,7 @@
 package com.adobe.platform.streaming.sink;
 
 import com.adobe.platform.streaming.AEPStreamingException;
+import com.adobe.platform.streaming.JacksonFactory;
 import com.adobe.platform.streaming.auth.AuthException;
 import com.adobe.platform.streaming.auth.AuthProvider;
 import com.adobe.platform.streaming.auth.AuthUtils;
@@ -23,7 +24,6 @@ import com.adobe.platform.streaming.http.HttpProducer;
 import com.adobe.platform.streaming.sink.utils.SinkUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.google.common.collect.ImmutableMap;
 
@@ -40,8 +40,7 @@ import java.util.TreeMap;
  */
 public abstract class AbstractAEPPublisher implements DataPublisher {
   private static final Logger LOG = LoggerFactory.getLogger(AbstractAEPPublisher.class);
-  protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-  private static final MapType HEADER_MAP_TYPE = OBJECT_MAPPER
+  private static final MapType HEADER_MAP_TYPE = JacksonFactory.OBJECT_MAPPER
     .getTypeFactory().constructMapType(TreeMap.class, String.class, String.class);
   private static final String AEP_ENDPOINT = "aep.endpoint";
 
@@ -104,7 +103,7 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
 
   private Map<String, String> getHeaders(String header) throws JsonProcessingException {
     return StringUtils.isEmpty(header) ? Collections.emptyMap() :
-           AbstractSinkTask.OBJECT_MAPPER.readValue(header, HEADER_MAP_TYPE);
+           JacksonFactory.OBJECT_MAPPER.readValue(header, HEADER_MAP_TYPE);
   }
 
   private AuthProvider getAuthProvider(Map<String, String> props) {

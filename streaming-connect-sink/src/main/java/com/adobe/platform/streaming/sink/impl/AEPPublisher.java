@@ -13,6 +13,7 @@
 package com.adobe.platform.streaming.sink.impl;
 
 import com.adobe.platform.streaming.AEPStreamingException;
+import com.adobe.platform.streaming.JacksonFactory;
 import com.adobe.platform.streaming.http.ContentHandler;
 import com.adobe.platform.streaming.http.HttpException;
 import com.adobe.platform.streaming.http.HttpProducer;
@@ -20,7 +21,6 @@ import com.adobe.platform.streaming.http.HttpUtil;
 import com.adobe.platform.streaming.sink.AbstractAEPPublisher;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
@@ -32,8 +32,6 @@ import org.apache.kafka.connect.sink.SinkRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -64,13 +62,13 @@ public class AEPPublisher extends AbstractAEPPublisher {
       return;
     }
 
-    final ArrayNode jsonMessages = OBJECT_MAPPER.createArrayNode();
+    final ArrayNode jsonMessages = JacksonFactory.OBJECT_MAPPER.createArrayNode();
     try {
       messages.stream()
           .map(Pair::getKey)
           .map(key -> {
             try {
-              return OBJECT_MAPPER.readTree(key);
+              return JacksonFactory.OBJECT_MAPPER.readTree(key);
             } catch (JsonProcessingException e) {
               LOG.debug("Found invalid JSON record in messages: {}", key);
               return null;
@@ -79,12 +77,12 @@ public class AEPPublisher extends AbstractAEPPublisher {
           .filter(Objects::nonNull)
           .forEach(jsonMessages::add);
 
-      final JsonNode payload = OBJECT_MAPPER.createObjectNode()
+      final JsonNode payload = JacksonFactory.OBJECT_MAPPER.createObjectNode()
         .set(MESSAGES_KEY, jsonMessages);
 
       final JsonNode response = producer.post(
         StringUtils.EMPTY,
-        OBJECT_MAPPER.writeValueAsBytes(payload),
+        JacksonFactory.OBJECT_MAPPER.writeValueAsBytes(payload),
         ContentHandler.jsonHandler()
       );
 

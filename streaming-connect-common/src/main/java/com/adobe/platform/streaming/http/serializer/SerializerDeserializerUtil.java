@@ -13,10 +13,10 @@
 package com.adobe.platform.streaming.http.serializer;
 
 import com.adobe.platform.streaming.AEPStreamingRuntimeException;
+import com.adobe.platform.streaming.JacksonFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.slf4j.Logger;
@@ -30,11 +30,10 @@ import java.io.IOException;
 public class SerializerDeserializerUtil {
 
   private static final Logger errorLogger = LoggerFactory.getLogger(SerializerDeserializerUtil.class);
-  private static final ObjectMapper MAPPER = new ObjectMapper();
 
   public static String serialize(Object value) {
     try {
-      return MAPPER.writeValueAsString(value);
+      return JacksonFactory.OBJECT_MAPPER.writeValueAsString(value);
     } catch (JsonProcessingException e) {
       errorLogger.error("Failed to serialize value : {}", value);
       throw new AEPStreamingRuntimeException("Failed to serialize value", value);
@@ -42,12 +41,12 @@ public class SerializerDeserializerUtil {
   }
 
   public static JsonNode convertToJsonNode(Object value) {
-    return MAPPER.convertValue(value, JsonNode.class);
+    return JacksonFactory.OBJECT_MAPPER.convertValue(value, JsonNode.class);
   }
 
   public static JsonNode convertStringToJsonNode(Object value) {
     try {
-      return MAPPER.readTree(value.toString());
+      return JacksonFactory.OBJECT_MAPPER.readTree(value.toString());
     } catch (IOException e) {
       errorLogger.error("Failed to serialize value : {}", value);
       throw new AEPStreamingRuntimeException("Failed to serialize value", value);
@@ -55,10 +54,7 @@ public class SerializerDeserializerUtil {
   }
 
   public static ObjectNode createObjectNode() {
-    return MAPPER.createObjectNode();
+    return JacksonFactory.OBJECT_MAPPER.createObjectNode();
   }
 
-  public static ObjectMapper getMapper() {
-    return MAPPER;
-  }
 }

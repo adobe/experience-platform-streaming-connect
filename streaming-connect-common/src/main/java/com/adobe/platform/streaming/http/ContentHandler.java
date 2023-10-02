@@ -12,8 +12,9 @@
 
 package com.adobe.platform.streaming.http;
 
+import com.adobe.platform.streaming.JacksonFactory;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.http.entity.ContentType;
 
@@ -37,14 +38,12 @@ public abstract class ContentHandler<T> {
     }
   };
 
-  private static ContentHandler<JsonNode> JSON_HANDLER = new ContentHandler<>() {
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
+  private static final ContentHandler<JsonNode> JSON_HANDLER = new ContentHandler<>() {
 
     @Override
     public JsonNode getContent(HttpConnection conn) throws HttpException {
       try (InputStream in = conn.getInputStream()) {
-        return objectMapper.readTree(in);
+        return JacksonFactory.OBJECT_MAPPER.readTree(in);
       } catch (IOException e) {
         throw new HttpException("Error parsing content", e, 405);
       }

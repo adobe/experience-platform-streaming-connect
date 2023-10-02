@@ -15,8 +15,6 @@ package com.adobe.platform.streaming.sink;
 import com.adobe.platform.streaming.AEPStreamingException;
 import com.adobe.platform.streaming.sink.utils.SinkUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.common.utils.AppInfoParser;
@@ -43,7 +41,6 @@ import java.util.Map;
 public abstract class AbstractSinkTask<T> extends SinkTask {
 
   private static final Logger LOG = LoggerFactory.getLogger(AbstractSinkConnector.class);
-  protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final String FLUSH_INTERVAL_SECS = "aep.flush.interval.seconds";
   private static final String FLUSH_BYTES_KB = "aep.flush.bytes.kb";
   private static final int DEFAULT_FLUSH_INTERVAL = 1;

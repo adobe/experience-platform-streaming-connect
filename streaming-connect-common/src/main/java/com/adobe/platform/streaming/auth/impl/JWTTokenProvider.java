@@ -12,6 +12,7 @@
 
 package com.adobe.platform.streaming.auth.impl;
 
+import com.adobe.platform.streaming.JacksonFactory;
 import com.adobe.platform.streaming.auth.AbstractAuthProvider;
 import com.adobe.platform.streaming.auth.AuthException;
 import com.adobe.platform.streaming.auth.AuthUtils;
@@ -19,7 +20,6 @@ import com.adobe.platform.streaming.auth.TokenResponse;
 import com.adobe.platform.streaming.http.HttpException;
 import com.adobe.platform.streaming.http.HttpProducer;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.apache.commons.lang3.StringUtils;
@@ -48,7 +48,6 @@ import static java.lang.Boolean.TRUE;
 public class JWTTokenProvider extends AbstractAuthProvider {
 
   private static final Logger LOG = LoggerFactory.getLogger(JWTTokenProvider.class);
-  private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
   private static final long JWT_TOKEN_EXPIRATION_THRESHOLD = 86400L;
   private static final long DEFAULT_JWT_TOKEN_UPDATE_THRESHOLD = 60000;
   private static final String IMS_ENDPOINT_PATH = "/ims/exchange/jwt/";
@@ -162,7 +161,7 @@ public class JWTTokenProvider extends AbstractAuthProvider {
     String[] parts = jwtToken.split("\\.");
     Base64.Decoder base64Decoder = Base64.getDecoder();
     byte[] tokenBodyBytes = base64Decoder.decode(parts[1].getBytes(StandardCharsets.UTF_8));
-    final JsonNode tokenBodyJson = OBJECT_MAPPER.readTree(tokenBodyBytes);
+    final JsonNode tokenBodyJson = JacksonFactory.OBJECT_MAPPER.readTree(tokenBodyBytes);
     long expiresIn = tokenBodyJson.get(JWT_EXPIRY_KEY).asLong();
     return System.currentTimeMillis() > (expiresIn - DEFAULT_JWT_TOKEN_UPDATE_THRESHOLD);
   }

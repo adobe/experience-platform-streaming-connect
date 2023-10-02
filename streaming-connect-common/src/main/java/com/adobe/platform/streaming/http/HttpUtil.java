@@ -12,8 +12,6 @@
 
 package com.adobe.platform.streaming.http;
 
-import com.google.common.annotations.VisibleForTesting;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;

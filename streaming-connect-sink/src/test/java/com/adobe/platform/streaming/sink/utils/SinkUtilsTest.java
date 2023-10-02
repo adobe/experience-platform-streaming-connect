@@ -12,8 +12,9 @@
 
 package com.adobe.platform.streaming.sink.utils;
 
+import com.adobe.platform.streaming.JacksonFactory;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
@@ -80,8 +81,6 @@ class SinkUtilsTest {
 
   static class PayloadTest {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
     private static JsonConverter jsonConverter;
 
     @BeforeAll
@@ -110,7 +109,7 @@ class SinkUtilsTest {
           new Object[]{Schema.BOOLEAN_SCHEMA, Boolean.TRUE, "true"},
           new Object[]{Schema.OPTIONAL_BOOLEAN_SCHEMA, null, null},
           // preserves byte types
-          new Object[]{Schema.BYTES_SCHEMA, bytes, OBJECT_MAPPER.writeValueAsString(bytes)},
+          new Object[]{Schema.BYTES_SCHEMA, bytes, JacksonFactory.OBJECT_MAPPER.writeValueAsString(bytes)},
           new Object[]{Schema.OPTIONAL_BYTES_SCHEMA, null, null}
       );
     }

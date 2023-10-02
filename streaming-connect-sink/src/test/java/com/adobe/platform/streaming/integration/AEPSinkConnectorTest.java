@@ -12,6 +12,7 @@
 
 package com.adobe.platform.streaming.integration;
 
+import com.adobe.platform.streaming.JacksonFactory;
 import com.adobe.platform.streaming.http.HttpException;
 import com.adobe.platform.streaming.http.HttpUtil;
 
@@ -39,7 +40,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 public class AEPSinkConnectorTest extends AbstractConnectorTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(AEPSinkConnectorTest.class);
-
   private static final String AEP_CONNECTOR_CONFIG = "aep-connector.json";
   private static final String AEP_CONNECTOR_IMS_AUTH_CONFIG = "aep-connector-with-ims-auth.json";
   private static final String AEP_CONNECTOR_IMS_AUTH_PROXY_CONFIG = "aep-connector-with-ims-auth-proxy.json";
@@ -192,12 +192,12 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
 
   public String payloadReceivedXdmData() throws HttpException, JsonProcessingException {
     String xdmData = xdmData();
-    ObjectNode messageNode = MAPPER.createObjectNode();
-    ArrayNode xdmDataValues = MAPPER.createArrayNode();
-    xdmDataValues.add(MAPPER.readTree(xdmData));
+    ObjectNode messageNode = JacksonFactory.OBJECT_MAPPER.createObjectNode();
+    ArrayNode xdmDataValues = JacksonFactory.OBJECT_MAPPER.createArrayNode();
+    xdmDataValues.add(JacksonFactory.OBJECT_MAPPER.readTree(xdmData));
 
     messageNode.set("messages", xdmDataValues);
-    return MAPPER.writeValueAsString(messageNode);
+    return JacksonFactory.OBJECT_MAPPER.writeValueAsString(messageNode);
   }
 
   public Map<String, String> connectorConfigWithIMSConfig() throws HttpException, JsonProcessingException {
@@ -207,7 +207,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       getInletUrl(),
       getBaseUrl());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
+    Map<String, String> connectorConfig = JacksonFactory.OBJECT_MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
@@ -220,7 +220,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       getBaseUrl(),
       this.getClass().getClassLoader().getResource("secret.key").getPath());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
+    Map<String, String> connectorConfig = JacksonFactory.OBJECT_MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
@@ -233,7 +233,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       PORT_VIA_PROXY,
       getBaseUrl());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
+    Map<String, String> connectorConfig = JacksonFactory.OBJECT_MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
@@ -247,7 +247,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       getBaseUrl(),
       this.getClass().getClassLoader().getResource("secret.key").getPath());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
+    Map<String, String> connectorConfig = JacksonFactory.OBJECT_MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
@@ -258,7 +258,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       NUMBER_OF_TASKS,
       getInletUrl());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
+    Map<String, String> connectorConfig = JacksonFactory.OBJECT_MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
@@ -270,7 +270,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
       getInletUrl(),
       PORT_VIA_PROXY);
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
+    Map<String, String> connectorConfig = JacksonFactory.OBJECT_MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }

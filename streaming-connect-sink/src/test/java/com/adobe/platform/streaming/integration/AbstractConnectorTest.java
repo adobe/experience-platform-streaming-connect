@@ -12,11 +12,11 @@
 
 package com.adobe.platform.streaming.integration;
 
+import com.adobe.platform.streaming.JacksonFactory;
 import com.adobe.platform.streaming.integration.extension.AEPConnectorTestWatcher;
 import com.adobe.platform.streaming.integration.extension.WiremockExtension;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapLikeType;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
@@ -43,8 +43,7 @@ import static org.apache.kafka.connect.runtime.WorkerConfig.OFFSET_COMMIT_INTERV
 @ExtendWith(AEPConnectorTestWatcher.class)
 public abstract class AbstractConnectorTest {
 
-  protected static final ObjectMapper MAPPER = new ObjectMapper();
-  protected static final MapLikeType MAP_TYPE_JSON = MAPPER.getTypeFactory()
+  protected static final MapLikeType MAP_TYPE_JSON = JacksonFactory.OBJECT_MAPPER.getTypeFactory()
     .constructMapLikeType(TreeMap.class, String.class, String.class);
   private static final long OFFSET_COMMIT_INTERVAL_MS = TimeUnit.SECONDS.toMillis(5);
   protected static final int HTTP_SERVER_SIDE_ERROR_CODE = 500;
@@ -121,7 +120,7 @@ public abstract class AbstractConnectorTest {
       .stubFor(WireMock
       .post(WireMock.urlEqualTo(getRelativeUrl()))
       .willReturn(ResponseDefinitionBuilder.responseDefinition()
-      .withJsonBody(MAPPER.readTree("{\"payloadReceived\": true}"))));
+      .withJsonBody(JacksonFactory.OBJECT_MAPPER.readTree("{\"payloadReceived\": true}"))));
   }
 
   public void inletIMSAuthenticationSuccessfulResponse() throws JsonProcessingException {
@@ -129,7 +128,7 @@ public abstract class AbstractConnectorTest {
       .stubFor(WireMock
       .post(WireMock.urlEqualTo(getRelativeAuthUrl()))
       .willReturn(ResponseDefinitionBuilder.responseDefinition()
-      .withJsonBody(MAPPER.readTree(AUTH_TOKEN_RESPONSE))));
+      .withJsonBody(JacksonFactory.OBJECT_MAPPER.readTree(AUTH_TOKEN_RESPONSE))));
   }
 
   public void inletJWTAuthenticationSuccessfulResponse() throws JsonProcessingException {
@@ -137,7 +136,7 @@ public abstract class AbstractConnectorTest {
       .stubFor(WireMock
       .post(WireMock.urlEqualTo(getRelativeJWTAuthUrl()))
       .willReturn(ResponseDefinitionBuilder.responseDefinition()
-      .withJsonBody(MAPPER.readTree(AUTH_TOKEN_RESPONSE))));
+      .withJsonBody(JacksonFactory.OBJECT_MAPPER.readTree(AUTH_TOKEN_RESPONSE))));
   }
 
   public void inletIMSAuthenticationSuccessfulResponseViaProxy() {

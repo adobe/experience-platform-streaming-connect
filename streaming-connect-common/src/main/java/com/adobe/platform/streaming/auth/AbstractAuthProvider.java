@@ -12,10 +12,10 @@
 
 package com.adobe.platform.streaming.auth;
 
+import com.adobe.platform.streaming.JacksonFactory;
 import com.adobe.platform.streaming.http.ContentHandler;
 import com.adobe.platform.streaming.http.HttpConnection;
 import com.adobe.platform.streaming.http.HttpException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.http.entity.ContentType;
 
@@ -31,7 +31,6 @@ public abstract class AbstractAuthProvider implements AuthProvider {
 
   private static final long TOKEN_EXPIRATION_THRESHOLD = 30000;
   private static final long DEFAULT_TOKEN_UPDATE_THRESHOLD = 60000;
-  private static final ObjectMapper mapper = new ObjectMapper();
 
   private final transient Lock tokenUpdateLock = new ReentrantLock();
   private transient String accessToken;
@@ -59,7 +58,7 @@ public abstract class AbstractAuthProvider implements AuthProvider {
       @Override
       public TokenResponse getContent(HttpConnection conn) throws HttpException {
         try (InputStream in = conn.getInputStream()) {
-          return mapper.readValue(in, TokenResponse.class);
+          return JacksonFactory.OBJECT_MAPPER.readValue(in, TokenResponse.class);
         } catch (IOException e) {
           throw new HttpException("Error parsing response", e);
         }
