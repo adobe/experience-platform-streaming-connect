@@ -26,7 +26,7 @@ import java.io.InputStream;
  */
 public abstract class ContentHandler<T> {
 
-  private static ContentHandler<Void> NULL_HANDLER = new ContentHandler<>() {
+  private static final ContentHandler<Void> NULL_HANDLER = new ContentHandler<Void>() {
     @Override
     public Void getContent(HttpConnection conn) {
       return null;
@@ -38,7 +38,7 @@ public abstract class ContentHandler<T> {
     }
   };
 
-  private static final ContentHandler<JsonNode> JSON_HANDLER = new ContentHandler<>() {
+  private static final ContentHandler<JsonNode> JSON_HANDLER = new ContentHandler<JsonNode>() {
 
     @Override
     public JsonNode getContent(HttpConnection conn) throws HttpException {
