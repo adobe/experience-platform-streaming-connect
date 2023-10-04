@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -74,12 +75,11 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
   @Override
   public void start(Map<String, String> props) {
     LOG.info("Started Sink Task with props: {}", props);
+    final Map<String, Object> configs = new HashMap<>();
+    configs.put(ConverterConfig.TYPE_CONFIG, ConverterType.VALUE.toString().toLowerCase());
+    configs.put(JsonConverterConfig.SCHEMAS_ENABLE_CONFIG, false);
 
-    jsonValueConverter.configure(Map.of(
-      ConverterConfig.TYPE_CONFIG, ConverterType.VALUE.toString().toLowerCase(),
-      // ensure outbound payloads do not have schema+payload fields
-      JsonConverterConfig.SCHEMAS_ENABLE_CONFIG, false
-    ));
+    jsonValueConverter.configure(configs);
 
     try {
       flushIntervalMillis = SinkUtils.getProperty(props, FLUSH_INTERVAL_SECS, DEFAULT_FLUSH_INTERVAL, MILLIS_IN_A_SEC);

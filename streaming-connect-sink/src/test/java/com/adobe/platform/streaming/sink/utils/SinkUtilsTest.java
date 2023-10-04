@@ -31,8 +31,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -86,10 +86,11 @@ class SinkUtilsTest {
     @BeforeAll
     static void setup() {
       jsonConverter = new JsonConverter();
-      jsonConverter.configure(Map.of(
-        JsonConverterConfig.SCHEMAS_ENABLE_CONFIG, false,
-        ConverterConfig.TYPE_CONFIG, ConverterType.VALUE.getName()
-      ));
+      final Map<String, Object> configs = new HashMap<>();
+      configs.put(JsonConverterConfig.SCHEMAS_ENABLE_CONFIG, false);
+      configs.put(ConverterConfig.TYPE_CONFIG, ConverterType.VALUE.getName());
+
+      jsonConverter.configure(configs);
     }
 
     @ParameterizedTest(name = "[{index}] {2}")
@@ -123,7 +124,7 @@ class SinkUtilsTest {
       // NOTE: expected, written JSON is compact
       return Stream.of(
           // array schema values must be Collection subclasses
-          new Object[]{SchemaBuilder.array(Schema.INT32_SCHEMA).build(), List.of(1, 2, 3), "[1,2,3]"},
+          new Object[]{SchemaBuilder.array(Schema.INT32_SCHEMA).build(), Arrays.asList(1, 2, 3), "[1,2,3]"},
           new Object[]{nameValueStructSchema,
                        new Struct(nameValueStructSchema)
                            .put("name", "hello")
