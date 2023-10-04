@@ -306,6 +306,34 @@ To send error records to dead letter topic please use standard kafka connector e
 
 Kafka connect dead letter configurations : `https://docs.confluent.io/platform/current/connect/concepts.html#dead-letter-queue`
 
+#### Avro data ingestion
+Ingest avro data using confluent schema registry and avro converter.
+Steps to ingest avro data :
+1. Install confluent avro converter by following document - https://www.confluent.io/hub/confluentinc/kafka-connect-avro-converter/
+2. Upload schema registry rest endpoint to add or update avro schema. Please follow documentation to add schema - https://docs.confluent.io/platform/7.5/schema-registry/schema_registry_onprem_tutorial.html#auto-schema-registration:~:text=the%20command%20below.-,curl%20%2DX%20POST%20%2DH,-%22Content%2DType%3A%20application
+3. Create connector with following configuration :
+    ```shell
+    curl -s -X POST \
+    -H 'Content-Type: application/json' \
+    --data '{
+    "name": "aep-sink-connector",
+    "config": {
+        "topics": "connect-test",
+        "tasks.max": 1,
+        "connector.class": "com.adobe.platform.streaming.sink.impl.AEPSinkConnector",
+        "key.converter": "io.confluent.connect.avro.AvroConverter",
+        "key.converter.schema.registry.url": "{SCHEMA_REGISTRY_URL}",
+        "value.converter": "io.confluent.connect.avro.AvroConverter",
+        "value.converter.schema.registry.url": "{SCHEMA_REGISTRY_URL}",
+        "aep.endpoint": "https://dcs.adobedc.net/collection/{DATA_INLET_ID}",
+        "aep.flush.interval.seconds": 1,
+        "aep.flush.bytes.kb": 20
+    }
+    }' http://localhost:8083/connectors
+    ```
+    Replace `{SCHEMA_REGISTRY_URL}` with schema registry rest endpoint.
+4. Once connector is up, post avro data to topic `connect-test` to send data to AEP.
+
 #### Poxy host configuration
 There are 2 ways to route request to aep endpoint through proxy server :
 1. **Using Environment Variable** : Export poxyHost and proxyPort on each kafka node, then restart kafka connect node.

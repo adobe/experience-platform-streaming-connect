@@ -103,14 +103,14 @@ class SinkUtilsTest {
       byte[] bytes = "secret".getBytes(StandardCharsets.UTF_8);
       return Stream.of(
           new Object[]{Schema.STRING_SCHEMA, "test", "test"},
-          // does not return "null" as string
-          new Object[]{Schema.OPTIONAL_STRING_SCHEMA, null, null},
+          new Object[]{SchemaBuilder.string().defaultValue("defaultValue").build(), null, "\"defaultValue\""},
+          new Object[]{Schema.OPTIONAL_STRING_SCHEMA, null, "null"},
           // preserves boolean JSON types
           new Object[]{Schema.BOOLEAN_SCHEMA, Boolean.TRUE, "true"},
-          new Object[]{Schema.OPTIONAL_BOOLEAN_SCHEMA, null, null},
+          new Object[]{Schema.OPTIONAL_BOOLEAN_SCHEMA, null, "null"},
           // preserves byte types
           new Object[]{Schema.BYTES_SCHEMA, bytes, JacksonFactory.OBJECT_MAPPER.writeValueAsString(bytes)},
-          new Object[]{Schema.OPTIONAL_BYTES_SCHEMA, null, null}
+          new Object[]{Schema.OPTIONAL_BYTES_SCHEMA, null, "null"}
       );
     }
 

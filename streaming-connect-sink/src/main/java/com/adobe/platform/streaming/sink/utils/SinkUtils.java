@@ -29,15 +29,8 @@ public class SinkUtils {
   public static String getStringPayload(JsonConverter jsonConverter, SinkRecord record) {
     final Schema valueSchema = record.valueSchema();
     final Object value = record.value();
-    if (value == null) {
-      return null;
-    }
-    if (valueSchema == null) {
-      if (value instanceof String) {
-        return (String) value;
-      }
-    } else if (Schema.STRING_SCHEMA.type().equals(valueSchema.type())) {
-      return (String) value;
+    if (record.value() instanceof String) {
+      return (String) record.value();
     }
     byte[] payload = jsonConverter.fromConnectData(record.topic(), valueSchema, value);
     if (payload == null) {
