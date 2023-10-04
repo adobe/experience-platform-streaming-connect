@@ -18,7 +18,6 @@ import com.adobe.platform.streaming.auth.AuthUtils;
 import com.adobe.platform.streaming.auth.TokenResponse;
 import com.adobe.platform.streaming.http.HttpException;
 import com.adobe.platform.streaming.http.HttpProducer;
-import org.apache.http.entity.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +74,6 @@ public class IMSTokenProvider extends AbstractAuthProvider {
       return httpProducer.post(
         IMS_ENDPOINT_PATH,
         params.toString().getBytes(),
-        ContentType.APPLICATION_FORM_URLENCODED.getMimeType(),
         getContentHandler()
       );
     } catch (HttpException httpException) {

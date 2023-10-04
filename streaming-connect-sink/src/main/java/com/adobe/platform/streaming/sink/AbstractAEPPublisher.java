@@ -13,6 +13,7 @@
 package com.adobe.platform.streaming.sink;
 
 import com.adobe.platform.streaming.AEPStreamingException;
+import com.adobe.platform.streaming.JacksonFactory;
 import com.adobe.platform.streaming.auth.AuthException;
 import com.adobe.platform.streaming.auth.AuthProvider;
 import com.adobe.platform.streaming.auth.AuthUtils;
@@ -21,8 +22,10 @@ import com.adobe.platform.streaming.auth.impl.AuthProviderFactory;
 import com.adobe.platform.streaming.auth.impl.AuthProxyConfiguration;
 import com.adobe.platform.streaming.http.HttpProducer;
 import com.adobe.platform.streaming.sink.utils.SinkUtils;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.type.MapType;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.reflect.TypeToken;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -30,14 +33,15 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author Adobe Inc.
  */
 public abstract class AbstractAEPPublisher implements DataPublisher {
-
   private static final Logger LOG = LoggerFactory.getLogger(AbstractAEPPublisher.class);
-
+  private static final MapType HEADER_MAP_TYPE = JacksonFactory.OBJECT_MAPPER
+    .getTypeFactory().constructMapType(TreeMap.class, String.class, String.class);
   private static final String AEP_ENDPOINT = "aep.endpoint";
 
   private static final String AEP_CONNECTION_PROXY_HOST = "aep.connection.proxy.host";
@@ -66,7 +70,7 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
   private static final String AEP_CONNECTION_AUTH_DISABLED_VALUE = "false";
 
   protected HttpProducer getHttpProducer(Map<String, String> props) throws AEPStreamingException {
-    return HttpProducer.newBuilder(getAepEndpoint(props.get(AEP_ENDPOINT)))
+    HttpProducer.HttpProducerBuilder builder = HttpProducer.newBuilder(getAepEndpoint(props.get(AEP_ENDPOINT)))
       .withProxyHost(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_HOST, null))
       .withProxyPort(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_PORT, 443))
       .withProxyUser(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_USER, null))
@@ -75,9 +79,13 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
       .withReadTimeout(SinkUtils.getProperty(props, AEP_CONNECTION_READ_TIMEOUT, 60000))
       .withMaxRetries(SinkUtils.getProperty(props, AEP_CONNECTION_MAX_RETRIES, 3))
       .withRetryBackoff(SinkUtils.getProperty(props, AEP_CONNECTION_MAX_RETRIES_BACKOFF, 300))
-      .withHeaders(getHeaders(props.get(AEP_CONNECTION_OPTIONAL_HEADER)))
-      .withAuth(getAuthProvider(props))
-      .build();
+      .withAuth(getAuthProvider(props));
+    try {
+      builder = builder.withHeaders(getHeaders(props.get(AEP_CONNECTION_OPTIONAL_HEADER)));
+    } catch (JsonProcessingException e) {
+      LOG.error("Unable to add HTTP Headers from '{}'", AEP_CONNECTION_OPTIONAL_HEADER, e);
+    }
+    return builder.build();
   }
 
   @Override
@@ -93,9 +101,9 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
     return aepEndpoint.replace("/collection/", "/collection/batch/");
   }
 
-  private Map<String, String> getHeaders(String header) {
-    return StringUtils.isEmpty(header) ? Collections.emptyMap() : AbstractSinkTask.GSON.fromJson(header,
-      new TypeToken<Map<String,String>>(){}.getType());
+  private Map<String, String> getHeaders(String header) throws JsonProcessingException {
+    return StringUtils.isEmpty(header) ? Collections.emptyMap() :
+           JacksonFactory.OBJECT_MAPPER.readValue(header, HEADER_MAP_TYPE);
   }
 
   private AuthProvider getAuthProvider(Map<String, String> props) {

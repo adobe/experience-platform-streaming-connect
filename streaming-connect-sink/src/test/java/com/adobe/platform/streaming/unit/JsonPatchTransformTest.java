@@ -12,7 +12,7 @@
 
 package com.adobe.platform.streaming.unit;
 
-import com.adobe.platform.streaming.http.serializer.SerializerDeserializerUtil;
+import com.adobe.platform.streaming.JacksonFactory;
 import com.adobe.platform.streaming.sink.transformation.JsonPatchTransform;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -75,7 +75,7 @@ public class JsonPatchTransformTest {
   @Test
   public void testJsonPatch() throws JsonProcessingException {
     final ConnectRecord transformedRecord = jsonPatchTransform.apply(record);
-    final JsonNode recordValueNode = SerializerDeserializerUtil.getMapper()
+    final JsonNode recordValueNode = JacksonFactory.OBJECT_MAPPER
       .readTree(transformedRecord.value().toString());
     final JsonNode operations = recordValueNode.get("header").get("operations");
     final JsonNode dataNode = operations.get("data");

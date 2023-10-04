@@ -15,22 +15,24 @@ package com.adobe.platform.streaming.sink;
 import com.adobe.platform.streaming.AEPStreamingException;
 import com.adobe.platform.streaming.sink.utils.SinkUtils;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.common.utils.AppInfoParser;
 import org.apache.kafka.connect.errors.ConnectException;
+import org.apache.kafka.connect.json.JsonConverter;
+import org.apache.kafka.connect.json.JsonConverterConfig;
 import org.apache.kafka.connect.sink.ErrantRecordReporter;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 import org.apache.kafka.connect.sink.SinkTaskContext;
+import org.apache.kafka.connect.storage.ConverterConfig;
+import org.apache.kafka.connect.storage.ConverterType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,8 +42,6 @@ import java.util.Map;
 public abstract class AbstractSinkTask<T> extends SinkTask {
 
   private static final Logger LOG = LoggerFactory.getLogger(AbstractSinkConnector.class);
-  public static final Gson GSON = new GsonBuilder().create();
-
   private static final String FLUSH_INTERVAL_SECS = "aep.flush.interval.seconds";
   private static final String FLUSH_BYTES_KB = "aep.flush.bytes.kb";
   private static final int DEFAULT_FLUSH_INTERVAL = 1;
@@ -54,6 +54,7 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
   private int flushBytesCount;
   private long lastFlushMilliSec = System.currentTimeMillis();
   private ErrantRecordReporter errantRecordReporter;
+  protected JsonConverter jsonValueConverter;
 
   @Override
   public String version() {
@@ -68,11 +69,17 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
     } catch (NoSuchMethodError | NoClassDefFoundError exception) {
       LOG.warn("Error report not defined in current kafka version. Please use Apache Kafka version > 2.6.");
     }
+    jsonValueConverter = new JsonConverter();
   }
 
   @Override
   public void start(Map<String, String> props) {
     LOG.info("Started Sink Task with props: {}", props);
+    final Map<String, Object> configs = new HashMap<>();
+    configs.put(ConverterConfig.TYPE_CONFIG, ConverterType.VALUE.toString().toLowerCase());
+    configs.put(JsonConverterConfig.SCHEMAS_ENABLE_CONFIG, false);
+
+    jsonValueConverter.configure(configs);
 
     try {
       flushIntervalMillis = SinkUtils.getProperty(props, FLUSH_INTERVAL_SECS, DEFAULT_FLUSH_INTERVAL, MILLIS_IN_A_SEC);
@@ -103,10 +110,9 @@ public abstract class AbstractSinkTask<T> extends SinkTask {
 
     List<T> eventsToPublish = new ArrayList<>();
     for (SinkRecord record : records) {
-      T dataToPublish = getDataToPublish(Pair.of(SinkUtils.getStringPayload(GSON, record), record));
+      T dataToPublish = getDataToPublish(Pair.of(SinkUtils.getStringPayload(jsonValueConverter, record), record));
       eventsToPublish.add(dataToPublish);
       bytesRead += getPayloadLength(dataToPublish);
-
       long tempCurrTime = System.currentTimeMillis();
       if (flushNow(tempCurrTime)) {
         publishAndLogIfRequired(eventsToPublish);

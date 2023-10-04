@@ -12,11 +12,13 @@
 
 package com.adobe.platform.streaming.auth;
 
+import com.adobe.platform.streaming.http.HttpException;
+
 /**
  * @author Adobe Inc.
  */
 public interface AuthProvider {
 
-  String getToken() throws AuthException;
+  String getToken() throws AuthException, HttpException;
 
 }

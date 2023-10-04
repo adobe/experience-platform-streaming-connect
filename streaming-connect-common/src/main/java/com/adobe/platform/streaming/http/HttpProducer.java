@@ -13,6 +13,9 @@
 package com.adobe.platform.streaming.http;
 
 import com.adobe.platform.streaming.auth.AuthProvider;
+
+import org.apache.http.HttpHeaders;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +30,6 @@ import java.util.Map;
 public class HttpProducer implements Serializable {
 
   private static final Logger LOG = LoggerFactory.getLogger(HttpProducer.class);
-  private static final String CONTENT_TYPE = "Content-type";
 
   private final String endpoint;
 
@@ -55,9 +57,11 @@ public class HttpProducer implements Serializable {
     this.endpointHeaders = Collections.emptyMap();
   }
 
-  public <T> T post(String url, byte[] postData, String contentType, ContentHandler<T> handler) throws HttpException {
-    Map<String, String> headers = new HashMap<>(Collections.singletonMap(CONTENT_TYPE, contentType));
-    headers.putAll(endpointHeaders);
+  public <T> T post(String url, byte[] postData, ContentHandler<T> handler) throws HttpException {
+    Map<String, String> headers = new HashMap<>(endpointHeaders);
+    if (handler.getContentType() != null) {
+      headers.put(HttpHeaders.CONTENT_TYPE, handler.getContentType());
+    }
     return post(url, postData, headers, handler);
   }
 

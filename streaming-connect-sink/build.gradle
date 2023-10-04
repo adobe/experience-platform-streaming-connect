@@ -19,9 +19,9 @@ configurations {
 dependencies {
   implementation project(':streaming-connect-common')
   implementation libraries.collections4, libraries.commonslang,
-                 libraries.gson, libraries.guava,
+                 libraries.guava,
                  libraries.jackson, libraries.httpClient,
-                 libraries.kafkaConnect, libraries.orgJson,
+                 libraries.kafkaConnect,
                  libraries.slf4j
   implementation libraries.jsonPatch
   compileOnly libraries.kafkaConnectRuntime

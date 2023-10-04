@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Adobe. All rights reserved.
+ * Copyright 2023 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License. You may obtain a copy
  * of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -8,13 +8,20 @@
  * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
-*/
+ */
 
-apply from: '../dependencies.gradle'
+package com.adobe.platform.streaming;
 
-dependencies {
-    implementation libraries.collections4, libraries.commonslang, libraries.guava,
-                   libraries.httpClient, libraries.jackson,
-                   libraries.jjwt, libraries.slf4j, libraries.jaxb
-    testImplementation libraries.jmockit, libraries.junitJupiter
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+/**
+ * @author Adobe Inc.
+ */
+public final class JacksonFactory {
+
+  public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+  private JacksonFactory() {
+  }
+
 }

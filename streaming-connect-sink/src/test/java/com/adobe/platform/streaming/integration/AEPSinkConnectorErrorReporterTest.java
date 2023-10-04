@@ -12,10 +12,10 @@
 
 package com.adobe.platform.streaming.integration;
 
+import com.adobe.platform.streaming.JacksonFactory;
 import com.adobe.platform.streaming.http.HttpException;
 import com.adobe.platform.streaming.http.HttpUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -81,9 +81,9 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
     Assertions.assertEquals(1, consumerRecords.count());
 
     ConsumerRecord<byte[], byte[]> consumerRecord = consumerRecords.iterator().next();
-    JsonNode record = MAPPER.readTree(consumerRecord.value());
+    JsonNode record = JacksonFactory.OBJECT_MAPPER.readTree(consumerRecord.value());
 
-    Assertions.assertEquals(MAPPER.readTree(xdmData).toString(), record.toString());
+    Assertions.assertEquals(JacksonFactory.OBJECT_MAPPER.readTree(xdmData).toString(), record.toString());
 
     // Verify inlet endpoint received 1 XDM record
     getWiremockServer().verify(postRequestedFor(urlEqualTo(getRelativeUrl()))
@@ -112,9 +112,9 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
     Assertions.assertEquals(1, consumerRecords.count());
 
     ConsumerRecord<byte[], byte[]> consumerRecord = consumerRecords.iterator().next();
-    JsonNode record = MAPPER.readTree(consumerRecord.value());
+    JsonNode record = JacksonFactory.OBJECT_MAPPER.readTree(consumerRecord.value());
 
-    Assertions.assertEquals(MAPPER.readTree(xdmData).toString(), record.toString());
+    Assertions.assertEquals(JacksonFactory.OBJECT_MAPPER.readTree(xdmData).toString(), record.toString());
 
     final Headers errorHeaders = consumerRecord.headers();
     errorHeaders.headers(ERROR_CLASS_NAME)
@@ -129,12 +129,12 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
 
   public String payloadReceivedXdmData() throws HttpException, JsonProcessingException {
     String xdmData = xdmData();
-    ObjectNode messageNode = MAPPER.createObjectNode();
-    ArrayNode xdmDataValues = MAPPER.createArrayNode();
-    xdmDataValues.add(MAPPER.readTree(xdmData));
+    ObjectNode messageNode = JacksonFactory.OBJECT_MAPPER.createObjectNode();
+    ArrayNode xdmDataValues = JacksonFactory.OBJECT_MAPPER.createArrayNode();
+    xdmDataValues.add(JacksonFactory.OBJECT_MAPPER.readTree(xdmData));
 
     messageNode.set("messages", xdmDataValues);
-    return MAPPER.writeValueAsString(messageNode);
+    return JacksonFactory.OBJECT_MAPPER.writeValueAsString(messageNode);
   }
 
   public String xdmData() throws HttpException {
@@ -147,8 +147,7 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
       NUMBER_OF_TASKS,
       getInletUrl());
 
-    Map<String, String> connectorConfig = MAPPER.readValue(connectorProperties,
-      new TypeReference<Map<String, String>>() {});
+    Map<String, String> connectorConfig = JacksonFactory.OBJECT_MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
     connectorConfig.put("name", CONNECTOR_NAME);
     return connectorConfig;
   }
