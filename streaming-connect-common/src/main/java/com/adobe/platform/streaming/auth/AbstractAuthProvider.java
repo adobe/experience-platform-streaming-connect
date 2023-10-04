@@ -54,7 +54,7 @@ public abstract class AbstractAuthProvider implements AuthProvider {
   }
 
   protected ContentHandler<TokenResponse> getContentHandler() {
-    return new ContentHandler<>() {
+    return new ContentHandler<TokenResponse>() {
       @Override
       public TokenResponse getContent(HttpConnection conn) throws HttpException {
         try (InputStream in = conn.getInputStream()) {
