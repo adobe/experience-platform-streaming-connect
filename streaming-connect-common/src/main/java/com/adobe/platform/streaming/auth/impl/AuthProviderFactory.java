@@ -40,6 +40,9 @@ public final class AuthProviderFactory {
       case JWT_TOKEN:
         return getJWTAuthProvider(authProperties, authProxyConfiguration);
 
+      case OAUTH2_ACCESS_TOKEN:
+        return getOAuth2IMSProvider(authProperties, authProxyConfiguration);
+
       default:
         throw new AuthException("Invalid token type to get auth provider");
     }
@@ -59,6 +62,20 @@ public final class AuthProviderFactory {
     return StringUtils.isEmpty(endpoint) ?
       new IMSTokenProvider(clientId, clientCode, clientSecret, authProxyConfiguration) :
       new IMSTokenProvider(endpoint, clientId, clientCode, clientSecret, authProxyConfiguration);
+  }
+
+  private static AuthProvider getOAuth2IMSProvider(final Map<String, String> authProperties,
+    final AuthProxyConfiguration authProxyConfiguration) {
+    final String clientId = authProperties.get(AuthUtils.AUTH_CLIENT_ID);
+    final String clientSecret = authProperties.get(AuthUtils.AUTH_CLIENT_SECRET);
+
+    Preconditions.checkNotNull(clientId, "Invalid client Id");
+    Preconditions.checkNotNull(clientSecret, "Invalid client secret");
+
+    final String endpoint = authProperties.get(AuthUtils.AUTH_ENDPOINT);
+    return StringUtils.isEmpty(endpoint) ?
+            new OAuth2IMSTokenProvider(clientId, clientSecret, authProxyConfiguration) :
+            new OAuth2IMSTokenProvider(endpoint, clientId, clientSecret, authProxyConfiguration);
   }
 
   private static AuthProvider getJWTAuthProvider(Map<String, String> authProperties,

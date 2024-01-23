@@ -45,6 +45,10 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
   private static final String AEP_CONNECTOR_IMS_AUTH_PROXY_CONFIG = "aep-connector-with-ims-auth-proxy.json";
   private static final String AEP_CONNECTOR_JWT_AUTH_CONFIG = "aep-connector-with-jwt-token.json";
   private static final String AEP_CONNECTOR_JWT_AUTH_PROXY_CONFIG = "aep-connector-with-jwt-token-proxy.json";
+  private static final String AEP_CONNECTOR_OAUTH2_IMS_AUTH_CONFIG = "aep-connector-with-oauth2-ims-auth.json";
+  private static final String AEP_CONNECTOR_OAUTH2_IMS_AUTH_PROXY_CONFIG =
+    "aep-connector-with-oauth2-ims-auth-proxy.json";
+
   private static final String AEP_CONNECTOR_CONFIG_WITH_PROXY = "aep-connector-with-proxy.json";
   private static final String XDM_PAYLOAD_FILE = "xdm-data.json";
 
@@ -109,6 +113,49 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
     // Verify inlet endpoint received 1 XDM record
     getWiremockServer().verify(postRequestedFor(urlEqualTo(getRelativeUrl()))
       .withRequestBody(equalToJson(payloadReceivedXdmData())));
+  }
+
+  @Test
+  public void aepSinkConnectorOAuth2IMSAuthenticationTest() throws HttpException, JsonProcessingException,
+      InterruptedException {
+    inletOAuth2IMSAuthenticationSuccessfulResponse();
+    getConnect().kafka().createTopic(TOPIC_NAME, TOPIC_PARTITION);
+
+    LOG.info("Starting connector cluster with connector : {}", CONNECTOR_NAME);
+    getConnect().configureConnector(CONNECTOR_NAME, connectorConfigWithOAuth2IMSConfig());
+
+    // Send single XDM data to aep sink connector
+    getConnect().kafka().produce(TOPIC_NAME, xdmData());
+
+    waitForConnectorStart(CONNECTOR_NAME, 1, 1000);
+
+    // Verify inlet endpoint received 1 XDM record
+    getWiremockServer().verify(postRequestedFor(urlEqualTo(getRelativeUrl()))
+      .withRequestBody(equalToJson(payloadReceivedXdmData())));
+  }
+
+  @Test
+  public void aepSinkConnectorOAuth2IMSAuthenticationProxyTest() throws HttpException, JsonProcessingException,
+      InterruptedException {
+    inletOAuth2IMSAuthenticationSuccessfulResponse();
+    inletOAuth2IMSAuthenticationSuccessfulResponseViaProxy();
+
+    getConnect().kafka().createTopic(TOPIC_NAME, TOPIC_PARTITION);
+
+    LOG.info("Starting connector cluster with connector : {}", CONNECTOR_NAME);
+    getConnect().configureConnector(CONNECTOR_NAME, connectorConfigWithOAuth2IMSConfigProxy());
+
+    // Send single XDM data to aep sink connector
+    getConnect().kafka().produce(TOPIC_NAME, xdmData());
+
+    waitForConnectorStart(CONNECTOR_NAME, 1, 1000);
+
+    getWiremockServerViaProxy().verify(postRequestedFor(urlEqualTo(getRelativeOAuth2IMSAuthUrl())));
+    // Verify inlet endpoint received 1 XDM record
+    getWiremockServerViaProxy().verify(postRequestedFor(urlEqualTo(getRelativeUrl()))
+      .withRequestBody(equalToJson(payloadReceivedXdmData())));
+    // Check if request from proxy server forward to AEP endpoint
+    getWiremockServer().verify(postRequestedFor(urlEqualTo(getRelativeUrl())));
   }
 
   @Test
@@ -212,6 +259,18 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
     return connectorConfig;
   }
 
+  public Map<String, String> connectorConfigWithOAuth2IMSConfig() throws HttpException, JsonProcessingException {
+    String connectorProperties = String.format(HttpUtil.streamToString(this.getClass().getClassLoader()
+      .getResourceAsStream(AEP_CONNECTOR_OAUTH2_IMS_AUTH_CONFIG)),
+      NUMBER_OF_TASKS,
+      getInletUrl(),
+      getBaseUrl());
+
+    Map<String, String> connectorConfig = JacksonFactory.OBJECT_MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
+    connectorConfig.put("name", CONNECTOR_NAME);
+    return connectorConfig;
+  }
+
   public Map<String, String> connectorConfigWithJWTConfig() throws HttpException, JsonProcessingException {
     String connectorProperties = String.format(HttpUtil.streamToString(this.getClass().getClassLoader()
       .getResourceAsStream(AEP_CONNECTOR_JWT_AUTH_CONFIG)),
@@ -228,6 +287,19 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
   public Map<String, String> connectorConfigWithIMSConfigProxy() throws HttpException, JsonProcessingException {
     String connectorProperties = String.format(HttpUtil.streamToString(this.getClass().getClassLoader()
       .getResourceAsStream(AEP_CONNECTOR_IMS_AUTH_PROXY_CONFIG)),
+      NUMBER_OF_TASKS,
+      getInletUrl(),
+      PORT_VIA_PROXY,
+      getBaseUrl());
+
+    Map<String, String> connectorConfig = JacksonFactory.OBJECT_MAPPER.readValue(connectorProperties, MAP_TYPE_JSON);
+    connectorConfig.put("name", CONNECTOR_NAME);
+    return connectorConfig;
+  }
+
+  public Map<String, String> connectorConfigWithOAuth2IMSConfigProxy() throws HttpException, JsonProcessingException {
+    String connectorProperties = String.format(HttpUtil.streamToString(this.getClass().getClassLoader()
+      .getResourceAsStream(AEP_CONNECTOR_OAUTH2_IMS_AUTH_PROXY_CONFIG)),
       NUMBER_OF_TASKS,
       getInletUrl(),
       PORT_VIA_PROXY,

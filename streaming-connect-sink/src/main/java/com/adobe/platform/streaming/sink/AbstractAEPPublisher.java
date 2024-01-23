@@ -112,12 +112,25 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
         .equals(AEP_CONNECTION_AUTH_ENABLED_VALUE);
       LOG.info("Auth Enabled for DCS Published: {}", isAuthEnabled);
       if (isAuthEnabled) {
-        TokenType tokenType = TokenType.getTokenType(props.getOrDefault(
+        LOG.info("Auth Token Type = {%s}", AEP_CONNECTION_AUTH_TOKEN_TYPE);
+        final TokenType tokenType = TokenType.getTokenType(props.getOrDefault(
           AEP_CONNECTION_AUTH_TOKEN_TYPE,
           TokenType.JWT_TOKEN.getName())
         );
 
-        return tokenType == TokenType.ACCESS_TOKEN ? getIMSTokenProvider(props) : getJWTTokenProvider(props);
+        switch (tokenType) {
+          case ACCESS_TOKEN:
+            return getIMSTokenProvider(props);
+
+          case JWT_TOKEN:
+            return getJWTTokenProvider(props);
+
+          case OAUTH2_ACCESS_TOKEN:
+            return getOAuth2IMSTokenProvider(props);
+
+          default:
+            throw new AuthException("Invalid token type to get auth provider");
+        }
       }
     } catch (AuthException authException) {
       throw new IllegalArgumentException("Exception while instantiating the auth provider", authException);
@@ -140,6 +153,22 @@ public abstract class AbstractAEPPublisher implements DataPublisher {
       .build());
   }
 
+  private AuthProvider getOAuth2IMSTokenProvider(final Map<String, String> props) throws AuthException {
+    LOG.info("Get auth token for type oauth2_access_token");
+
+    return AuthProviderFactory.getAuthProvider(TokenType.OAUTH2_ACCESS_TOKEN, ImmutableMap.<String, String>builder()
+      .put(AuthUtils.AUTH_CLIENT_ID, props.get(AEP_CONNECTION_AUTH_CLIENT_ID))
+      .put(AuthUtils.AUTH_CLIENT_SECRET, props.get(AEP_CONNECTION_AUTH_CLIENT_SECRET))
+      .put(AuthUtils.AUTH_ENDPOINT, props.get(AEP_CONNECTION_AUTH_ENDPOINT))
+      .build(), AuthProxyConfiguration.builder()
+      .proxyHost(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_HOST, null))
+      .proxyPort(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_PORT, 443))
+      .proxyUsername(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_USER, null))
+      .proxyPassword(SinkUtils.getProperty(props, AEP_CONNECTION_PROXY_PASSWORD, null))
+      .build());
+  }
+
+  @Deprecated
   private AuthProvider getJWTTokenProvider(Map<String, String> props) throws AuthException {
     return AuthProviderFactory.getAuthProvider(TokenType.JWT_TOKEN, ImmutableMap.<String, String>builder()
       .put(AuthUtils.AUTH_CLIENT_ID, props.get(AEP_CONNECTION_AUTH_CLIENT_ID))
