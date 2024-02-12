@@ -22,11 +22,13 @@ import java.util.Map;
 public enum TokenType {
 
   ACCESS_TOKEN("access_token"),
-  JWT_TOKEN("jwt_token");
+  JWT_TOKEN("jwt_token"),
+  OAUTH2_ACCESS_TOKEN("oauth2_access_token");
 
   private static final Map<String, TokenType> TOKEN_TYPES = ImmutableMap.<String, TokenType>builder()
     .put(ACCESS_TOKEN.name, ACCESS_TOKEN)
     .put(JWT_TOKEN.name, JWT_TOKEN)
+    .put(OAUTH2_ACCESS_TOKEN.name, OAUTH2_ACCESS_TOKEN)
     .build();
 
   private String name;

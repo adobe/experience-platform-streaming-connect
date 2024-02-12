@@ -247,7 +247,7 @@ task copyDependencies(type: Copy) {
     "delivery_guarantee": [ "at_least_once"],
     "kafka_connect_api": true,
     "single_message_transforms": true,
-    "supported_encodings": [ "json" ]
+    "supported_encodings": [ "any" ]
   },
   "license": [
     {

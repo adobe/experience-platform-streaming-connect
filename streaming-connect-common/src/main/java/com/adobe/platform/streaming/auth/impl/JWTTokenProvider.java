@@ -45,6 +45,7 @@ import static java.lang.Boolean.TRUE;
 /**
  * @author Adobe Inc.
  */
+@Deprecated
 public class JWTTokenProvider extends AbstractAuthProvider {
 
   private static final Logger LOG = LoggerFactory.getLogger(JWTTokenProvider.class);

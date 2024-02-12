@@ -49,6 +49,8 @@ public abstract class AbstractConnectorTest {
   protected static final int HTTP_SERVER_SIDE_ERROR_CODE = 500;
   private static final String AUTH_TOKEN_RESPONSE = "{\"access_token\":\"accessToken\"," +
     "\"refresh_token\":\"refreshToken\",\"token_type\":\"bearer\",\"expires_in\":82399996}";
+  private static final String AUTH_TOKEN_RESPONSE_OAUTH2 = "{\"access_token\":\"accessToken\"," +
+    "\"token_type\":\"bearer\",\"expires_in\":86400}";
 
   protected static final int TOPIC_PARTITION = 1;
   protected static final int NUMBER_OF_TASKS = 1;
@@ -64,6 +66,7 @@ public abstract class AbstractConnectorTest {
   private String relativePath;
   private String relativeImsAuthPath;
   private String relativeJWTAuthPath;
+  private String relativeOAuth2IMSAuthPath;
 
   @RegisterExtension
   public static final WiremockExtension wiremockExtension = new WiremockExtension(PORT);
@@ -85,6 +88,7 @@ public abstract class AbstractConnectorTest {
     relativePath = String.format("/collection/%s", inletId);
     relativeImsAuthPath = "/ims/token/v1";
     relativeJWTAuthPath = "/ims/exchange/jwt/";
+    relativeOAuth2IMSAuthPath = "/ims/token/v3";
   }
 
   protected void waitForConnectorStart(String connector, int numberOfTask, int waitTimeMs) throws InterruptedException {
@@ -139,6 +143,21 @@ public abstract class AbstractConnectorTest {
       .withJsonBody(JacksonFactory.OBJECT_MAPPER.readTree(AUTH_TOKEN_RESPONSE))));
   }
 
+  public void inletOAuth2IMSAuthenticationSuccessfulResponse() throws JsonProcessingException {
+    wiremockExtension.getWireMockServer()
+      .stubFor(WireMock
+      .post(WireMock.urlEqualTo(getRelativeOAuth2IMSAuthUrl()))
+      .willReturn(ResponseDefinitionBuilder.responseDefinition()
+      .withJsonBody(JacksonFactory.OBJECT_MAPPER.readTree(AUTH_TOKEN_RESPONSE_OAUTH2))));
+  }
+
+  public void inletOAuth2IMSAuthenticationSuccessfulResponseViaProxy() throws JsonProcessingException {
+    wiremockExtensionViaProxy.getWireMockServer()
+      .stubFor(WireMock
+      .post(WireMock.urlEqualTo(getRelativeOAuth2IMSAuthUrl()))
+      .willReturn(ResponseDefinitionBuilder.responseDefinition().proxiedFrom(baseUrl)));
+  }
+
   public void inletIMSAuthenticationSuccessfulResponseViaProxy() {
     wiremockExtensionViaProxy.getWireMockServer()
       .stubFor(WireMock
@@ -185,6 +204,10 @@ public abstract class AbstractConnectorTest {
 
   protected String getRelativeJWTAuthUrl() {
     return relativeJWTAuthPath;
+  }
+
+  protected String getRelativeOAuth2IMSAuthUrl() {
+    return relativeOAuth2IMSAuthPath;
   }
 
   protected String getInletUrl() {
