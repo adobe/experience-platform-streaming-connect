@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Map;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
@@ -54,7 +55,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
 
   @BeforeEach
   @Override
-  public void setup() throws JsonProcessingException {
+  public void setup() throws IOException, HttpException {
     super.setup();
     inletSuccessfulResponse();
     inletSuccessfulResponseViaProxy();

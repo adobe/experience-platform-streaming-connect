@@ -44,6 +44,8 @@ public class AEPPublisher extends AbstractAEPPublisher {
   private static final Logger LOG = LoggerFactory.getLogger(AEPPublisher.class);
 
   private static final String MESSAGES_KEY = "messages";
+  private static final String RESPONSES_KEY = "responses";
+  private static final String STATUS_KEY = "status";
 
   private int count;
   private final HttpProducer producer;
@@ -61,6 +63,9 @@ public class AEPPublisher extends AbstractAEPPublisher {
       LOG.debug("No messages to publish");
       return;
     }
+    int failedMessageCount = 0;
+    int successMessageCount = 0;
+    int totalMessageCount;
 
     final ArrayNode jsonMessages = JacksonFactory.OBJECT_MAPPER.createArrayNode();
     try {
@@ -80,6 +85,8 @@ public class AEPPublisher extends AbstractAEPPublisher {
       final JsonNode payload = JacksonFactory.OBJECT_MAPPER.createObjectNode()
         .set(MESSAGES_KEY, jsonMessages);
 
+      totalMessageCount = jsonMessages.size();
+
       final JsonNode response = producer.post(
         StringUtils.EMPTY,
         JacksonFactory.OBJECT_MAPPER.writeValueAsBytes(payload),
@@ -87,7 +94,23 @@ public class AEPPublisher extends AbstractAEPPublisher {
       );
 
       count++;
-      LOG.debug("Successfully published data to Adobe Experience Platform: {}", response);
+
+      if (!response.isNull() && !response.isEmpty()) {
+        JsonNode publishMessagesResponses = response.get(RESPONSES_KEY);
+        for (JsonNode messageResponse : publishMessagesResponses) {
+          if (messageResponse.hasNonNull(STATUS_KEY)) {
+            failedMessageCount++;
+            LOG.debug("Failed to publish message to Adobe Experience Platform: {}", messageResponse);
+          } else {
+            successMessageCount++;
+          }
+        }
+        LOG.debug("Total publish message count = {}. Success message count = {}. Failed " +
+          "message count = {}.", totalMessageCount, successMessageCount, failedMessageCount);
+      } else {
+        LOG.error("Invalid Response received while publishing data to  Adobe Experience Platform: {}", response);
+      }
+
     } catch (JsonProcessingException jsonException) {
       LOG.error("Failed to publish data to Adobe Experience Platform", jsonException);
       if (Objects.nonNull(errorReporter)) {
