@@ -13,7 +13,6 @@
 package com.adobe.platform.streaming.integration;
 
 import com.adobe.platform.streaming.JacksonFactory;
-import com.adobe.platform.streaming.http.HttpException;
 import com.adobe.platform.streaming.integration.extension.AEPConnectorTestWatcher;
 import com.adobe.platform.streaming.integration.extension.WiremockExtension;
 
@@ -80,7 +79,7 @@ public abstract class AbstractConnectorTest {
   public static final WiremockExtension wiremockExtensionViaProxy = new WiremockExtension(PORT_VIA_PROXY);
 
   @BeforeEach
-  public void setup() throws IOException, HttpException {
+  public void setup() throws IOException {
     connect = new EmbeddedConnectCluster.Builder()
         .name("aep-connect-cluster")
         .numWorkers(numberOfWorkers)

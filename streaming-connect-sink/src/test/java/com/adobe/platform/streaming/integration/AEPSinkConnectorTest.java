@@ -55,7 +55,7 @@ public class AEPSinkConnectorTest extends AbstractConnectorTest {
 
   @BeforeEach
   @Override
-  public void setup() throws IOException, HttpException {
+  public void setup() throws IOException {
     super.setup();
     inletSuccessfulResponse();
     inletSuccessfulResponseViaProxy();
