@@ -54,7 +54,7 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
 
   @BeforeEach
   @Override
-  public void setup() throws JsonProcessingException {
+  public void setup() throws IOException {
     super.setup();
     inletFailedResponse();
   }

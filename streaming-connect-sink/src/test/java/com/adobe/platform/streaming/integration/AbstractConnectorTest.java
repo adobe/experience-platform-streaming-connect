@@ -28,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -52,6 +53,9 @@ public abstract class AbstractConnectorTest {
   private static final String AUTH_TOKEN_RESPONSE_OAUTH2 = "{\"access_token\":\"accessToken\"," +
     "\"token_type\":\"bearer\",\"expires_in\":86400}";
 
+  private static final String AEP_CONNECTOR_INLET_SUCCESSFUL_RESPONSE =
+    "aep-connector-inlet-successful-response.json";
+
   protected static final int TOPIC_PARTITION = 1;
   protected static final int NUMBER_OF_TASKS = 1;
   protected static final String CONNECTOR_NAME = "aep-sink-connector";
@@ -75,7 +79,7 @@ public abstract class AbstractConnectorTest {
   public static final WiremockExtension wiremockExtensionViaProxy = new WiremockExtension(PORT_VIA_PROXY);
 
   @BeforeEach
-  public void setup() throws JsonProcessingException {
+  public void setup() throws IOException {
     connect = new EmbeddedConnectCluster.Builder()
         .name("aep-connect-cluster")
         .numWorkers(numberOfWorkers)
@@ -119,12 +123,13 @@ public abstract class AbstractConnectorTest {
     connect.stop();
   }
 
-  public void inletSuccessfulResponse() throws JsonProcessingException {
+  public void inletSuccessfulResponse() throws IOException {
     wiremockExtension.getWireMockServer()
       .stubFor(WireMock
       .post(WireMock.urlEqualTo(getRelativeUrl()))
       .willReturn(ResponseDefinitionBuilder.responseDefinition()
-      .withJsonBody(JacksonFactory.OBJECT_MAPPER.readTree("{\"payloadReceived\": true}"))));
+      .withJsonBody(JacksonFactory.OBJECT_MAPPER.readTree(this.getClass().getClassLoader()
+      .getResourceAsStream(AEP_CONNECTOR_INLET_SUCCESSFUL_RESPONSE)))));
   }
 
   public void inletIMSAuthenticationSuccessfulResponse() throws JsonProcessingException {
