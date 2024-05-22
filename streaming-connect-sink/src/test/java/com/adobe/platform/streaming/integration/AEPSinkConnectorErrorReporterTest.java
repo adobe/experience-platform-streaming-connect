@@ -47,6 +47,7 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
   private static final String AEP_KAFKA_ERROR_CONNECTOR_CONFIG = "aep-connector-error-reporter.json";
   private static final String AEP_KAFKA_ERROR_CONNECTOR_HEADER_CONFIG = "aep-connector-error-reporter-header.json";
   private static final String XDM_PAYLOAD_FILE = "xdm-data.json";
+  private static final String XDM_MULTI_MESSAGE_PAYLOAD_FILE = "xdm-data-multiple-messages.json";
   private static final String DEAD_LETTER_TOPIC = "errors.deadletterqueue.topic.name";
   private static final String ERROR_CLASS_NAME = "__connect.errors.exception.class.name";
   private static final String ERROR_HEADER_MESSAGE = "__connect.errors.exception.message";
@@ -70,7 +71,7 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
     LOG.info("Starting connector cluster with connector : {}", CONNECTOR_NAME);
     getConnect().configureConnector(CONNECTOR_NAME, connectorConfig);
 
-    String xdmData = xdmData();
+    String xdmData = xdmData(XDM_PAYLOAD_FILE);
     getConnect().kafka().produce(TOPIC_NAME, xdmData);
     waitForConnectorStart(CONNECTOR_NAME, 1, 8000);
 
@@ -87,7 +88,89 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
 
     // Verify inlet endpoint received 1 XDM record
     getWiremockServer().verify(postRequestedFor(urlEqualTo(getRelativeUrl()))
-      .withRequestBody(equalToJson(payloadReceivedXdmData())));
+      .withRequestBody(equalToJson(payloadReceivedXdmData(XDM_PAYLOAD_FILE))));
+  }
+
+  @Test
+  public void kafkaErrorReporterMultiMessageTest() throws HttpException, IOException, InterruptedException {
+    inletMultiStatusSuccessfulResponse();
+    getConnect().kafka().createTopic(TOPIC_NAME, TOPIC_PARTITION);
+
+    // Create error topic to dump failed data
+    Map<String, String> connectorConfig = connectorConfig(AEP_KAFKA_ERROR_CONNECTOR_CONFIG);
+    getConnect().kafka().createTopic(connectorConfig.get(DEAD_LETTER_TOPIC), TOPIC_PARTITION);
+
+    LOG.info("Starting connector cluster with connector : {}", CONNECTOR_NAME);
+    getConnect().configureConnector(CONNECTOR_NAME, connectorConfig);
+
+    String xdmData = xdmData(XDM_MULTI_MESSAGE_PAYLOAD_FILE);
+    ArrayNode xdmDataValues = (ArrayNode)JacksonFactory.OBJECT_MAPPER.readTree(xdmData);
+    String failedMessage = xdmDataValues.get(0).toString();
+    String successMessage = xdmDataValues.get(1).toString();
+
+    getConnect().kafka().produce(TOPIC_NAME, failedMessage);
+    getConnect().kafka().produce(TOPIC_NAME, successMessage);
+
+    waitForConnectorStart(CONNECTOR_NAME, 1, 8000);
+
+    // Check if error record sent to error topic
+    ConsumerRecords<byte[], byte[]> consumerRecords = getConnect().kafka()
+      .consume(1, 8000, connectorConfig.get(DEAD_LETTER_TOPIC));
+
+    Assertions.assertEquals(1, consumerRecords.count());
+
+    ConsumerRecord<byte[], byte[]> consumerRecord = consumerRecords.iterator().next();
+    JsonNode record = JacksonFactory.OBJECT_MAPPER.readTree(consumerRecord.value());
+
+    Assertions.assertEquals(JacksonFactory.OBJECT_MAPPER.readTree(failedMessage).toString(), record.toString());
+
+    // Verify inlet endpoint received 2 XDM record
+    getWiremockServer().verify(postRequestedFor(urlEqualTo(getRelativeUrl()))
+      .withRequestBody(equalToJson(payloadReceivedMultiMessageXdmData(XDM_MULTI_MESSAGE_PAYLOAD_FILE))));
+  }
+
+  @Test
+  public void kafkaErrorReporterMultiMessageWithHeadersTest() throws HttpException, IOException, InterruptedException {
+    inletMultiStatusSuccessfulResponse();
+
+    getConnect().kafka().createTopic(TOPIC_NAME, TOPIC_PARTITION);
+
+    // Create error topic to dump failed data
+    Map<String, String> connectorConfig = connectorConfig(AEP_KAFKA_ERROR_CONNECTOR_HEADER_CONFIG);
+    getConnect().kafka().createTopic(connectorConfig.get(DEAD_LETTER_TOPIC), TOPIC_PARTITION);
+
+    LOG.info("Starting connector cluster with connector : {}", CONNECTOR_NAME);
+    getConnect().configureConnector(CONNECTOR_NAME, connectorConfig);
+
+    String xdmData = xdmData(XDM_MULTI_MESSAGE_PAYLOAD_FILE);
+    ArrayNode xdmDataValues = (ArrayNode)JacksonFactory.OBJECT_MAPPER.readTree(xdmData);
+    String failedMessage = xdmDataValues.get(0).toString();
+    String successMessage = xdmDataValues.get(1).toString();
+    getConnect().kafka().produce(TOPIC_NAME, failedMessage);
+    getConnect().kafka().produce(TOPIC_NAME, successMessage);
+
+    waitForConnectorStart(CONNECTOR_NAME, 1, 8000);
+
+    // Check if error record sent to error topic
+    ConsumerRecords<byte[], byte[]> consumerRecords = getConnect().kafka()
+      .consume(1, 8000, connectorConfig.get(DEAD_LETTER_TOPIC));
+
+    Assertions.assertEquals(1, consumerRecords.count());
+
+    ConsumerRecord<byte[], byte[]> consumerRecord = consumerRecords.iterator().next();
+    JsonNode record = JacksonFactory.OBJECT_MAPPER.readTree(consumerRecord.value());
+
+    Assertions.assertEquals(JacksonFactory.OBJECT_MAPPER.readTree(failedMessage).toString(), record.toString());
+
+    final Headers errorHeaders = consumerRecord.headers();
+    errorHeaders.headers(ERROR_CLASS_NAME)
+      .forEach(header -> Assertions.assertEquals(EXPECTED_EXCEPTION_CLASS, new String(header.value())));
+    errorHeaders.headers(ERROR_HEADER_MESSAGE).forEach(header ->
+      Assertions.assertTrue(new String(header.value()).contains(String.valueOf(HTTP_BAD_REQUEST_ERROR_CODE))));
+
+    // Verify inlet endpoint received 2 XDM record
+    getWiremockServer().verify(postRequestedFor(urlEqualTo(getRelativeUrl()))
+      .withRequestBody(equalToJson(payloadReceivedMultiMessageXdmData(XDM_MULTI_MESSAGE_PAYLOAD_FILE))));
   }
 
   @Test
@@ -101,7 +184,7 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
     LOG.info("Starting connector cluster with connector : {}", CONNECTOR_NAME);
     getConnect().configureConnector(CONNECTOR_NAME, connectorConfig);
 
-    String xdmData = xdmData();
+    String xdmData = xdmData(XDM_PAYLOAD_FILE);
     getConnect().kafka().produce(TOPIC_NAME, xdmData);
     waitForConnectorStart(CONNECTOR_NAME, 1, 8000);
 
@@ -122,13 +205,21 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
     errorHeaders.headers(ERROR_HEADER_MESSAGE).forEach(header ->
       Assertions.assertTrue(new String(header.value()).contains(String.valueOf(HTTP_SERVER_SIDE_ERROR_CODE))));
 
-    // Verify inlet endpoint received 1 XDM record
+    // Verify inlet endpoint received 2 XDM record
     getWiremockServer().verify(postRequestedFor(urlEqualTo(getRelativeUrl()))
-      .withRequestBody(equalToJson(payloadReceivedXdmData())));
+      .withRequestBody(equalToJson(payloadReceivedXdmData(XDM_PAYLOAD_FILE))));
   }
 
-  public String payloadReceivedXdmData() throws HttpException, JsonProcessingException {
-    String xdmData = xdmData();
+  public String payloadReceivedMultiMessageXdmData(String payloadfile) throws HttpException, JsonProcessingException {
+    String xdmData = xdmData(payloadfile);
+    ObjectNode messageNode = JacksonFactory.OBJECT_MAPPER.createObjectNode();
+    ArrayNode xdmDataValues = (ArrayNode)JacksonFactory.OBJECT_MAPPER.readTree(xdmData);
+    messageNode.set("messages", xdmDataValues);
+    return JacksonFactory.OBJECT_MAPPER.writeValueAsString(messageNode);
+  }
+  
+  public String payloadReceivedXdmData(String payloadfile) throws HttpException, JsonProcessingException {
+    String xdmData = xdmData(payloadfile);
     ObjectNode messageNode = JacksonFactory.OBJECT_MAPPER.createObjectNode();
     ArrayNode xdmDataValues = JacksonFactory.OBJECT_MAPPER.createArrayNode();
     xdmDataValues.add(JacksonFactory.OBJECT_MAPPER.readTree(xdmData));
@@ -137,8 +228,8 @@ public class AEPSinkConnectorErrorReporterTest extends AbstractConnectorTest {
     return JacksonFactory.OBJECT_MAPPER.writeValueAsString(messageNode);
   }
 
-  public String xdmData() throws HttpException {
-    return HttpUtil.streamToString(this.getClass().getClassLoader().getResourceAsStream(XDM_PAYLOAD_FILE));
+  public String xdmData(String payloadfile) throws HttpException {
+    return HttpUtil.streamToString(this.getClass().getClassLoader().getResourceAsStream(payloadfile));
   }
 
   public Map<String, String> connectorConfig(String configFile) throws HttpException, JsonProcessingException {

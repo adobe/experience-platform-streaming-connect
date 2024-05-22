@@ -46,6 +46,8 @@ public class AEPPublisher extends AbstractAEPPublisher {
   private static final String MESSAGES_KEY = "messages";
   private static final String RESPONSES_KEY = "responses";
   private static final String STATUS_KEY = "status";
+  private static final String XACTIONID_KEY = "xactionId";
+  private static final String DASH = "-";
 
   private int count;
   private final HttpProducer producer;
@@ -68,6 +70,7 @@ public class AEPPublisher extends AbstractAEPPublisher {
     int totalMessageCount;
 
     final ArrayNode jsonMessages = JacksonFactory.OBJECT_MAPPER.createArrayNode();
+
     try {
       messages.stream()
           .map(Pair::getKey)
@@ -100,7 +103,14 @@ public class AEPPublisher extends AbstractAEPPublisher {
         for (JsonNode messageResponse : publishMessagesResponses) {
           if (messageResponse.hasNonNull(STATUS_KEY)) {
             failedMessageCount++;
-            LOG.debug("Failed to publish message to Adobe Experience Platform: {}", messageResponse);
+            final Pair<String, SinkRecord> failedMessage = messages.get(getFailedMessageIndex(messageResponse));
+            LOG.debug("Failed to publish message: {} to Adobe Experience Platform due to the error: {}",
+              failedMessage, messageResponse);
+            if (Objects.nonNull(errorReporter)) {
+              final int responseCode = messageResponse.get(STATUS_KEY).asInt();
+              errorReporter.report(failedMessage.getRight(),
+                new HttpException(String.format("error response= %s", messageResponse), responseCode));
+            }
           } else {
             successMessageCount++;
           }
@@ -110,23 +120,30 @@ public class AEPPublisher extends AbstractAEPPublisher {
       } else {
         LOG.error("Invalid Response received while publishing data to  Adobe Experience Platform: {}", response);
       }
-
     } catch (JsonProcessingException jsonException) {
       LOG.error("Failed to publish data to Adobe Experience Platform", jsonException);
       if (Objects.nonNull(errorReporter)) {
         messages.forEach(message -> errorReporter.report(message.getValue(), jsonException));
       }
-      throw new AEPStreamingException("Failed to publish invalid JSON", jsonException);
     } catch (HttpException httpException) {
       LOG.error("Failed to publish data to Adobe Experience Platform", httpException);
       if (Objects.nonNull(errorReporter)) {
         messages.forEach(message -> errorReporter.report(message.getValue(), httpException));
       }
       final int responseCode = httpException.getResponseCode();
-      if (HttpUtil.is500(responseCode) || HttpUtil.isUnauthorized(responseCode)) {
+      if (HttpUtil.isUnauthorized(responseCode)) {
         throw new AEPStreamingException("Failed to publish", httpException);
       }
     }
+  }
+
+  private Integer getFailedMessageIndex(final JsonNode messageResponse) throws HttpException {
+    if (messageResponse.hasNonNull(XACTIONID_KEY)) {
+      final String xactionId = messageResponse.get(XACTIONID_KEY).asText();
+      return Integer.parseInt(xactionId.substring(xactionId.lastIndexOf(DASH) + 1));
+    }
+    throw new HttpException(String.format("xactionId is missing in the failed message error response : %s",
+      messageResponse));
   }
 
   public void stop() {

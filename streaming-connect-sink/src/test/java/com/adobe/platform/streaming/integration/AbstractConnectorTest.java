@@ -48,6 +48,8 @@ public abstract class AbstractConnectorTest {
     .constructMapLikeType(TreeMap.class, String.class, String.class);
   private static final long OFFSET_COMMIT_INTERVAL_MS = TimeUnit.SECONDS.toMillis(5);
   protected static final int HTTP_SERVER_SIDE_ERROR_CODE = 500;
+  protected static final int HTTP_BAD_REQUEST_ERROR_CODE = 400;
+
   private static final String AUTH_TOKEN_RESPONSE = "{\"access_token\":\"accessToken\"," +
     "\"refresh_token\":\"refreshToken\",\"token_type\":\"bearer\",\"expires_in\":82399996}";
   private static final String AUTH_TOKEN_RESPONSE_OAUTH2 = "{\"access_token\":\"accessToken\"," +
@@ -56,6 +58,8 @@ public abstract class AbstractConnectorTest {
   private static final String AEP_CONNECTOR_INLET_SUCCESSFUL_RESPONSE =
     "aep-connector-inlet-successful-response.json";
 
+  private static final String AEP_CONNECTOR_INLET_MULTI_STATUS_SUCCESSFUL_RESPONSE =
+    "aep-connector-inlet-multi-message-response.json";
   protected static final int TOPIC_PARTITION = 1;
   protected static final int NUMBER_OF_TASKS = 1;
   protected static final String CONNECTOR_NAME = "aep-sink-connector";
@@ -130,6 +134,15 @@ public abstract class AbstractConnectorTest {
       .willReturn(ResponseDefinitionBuilder.responseDefinition()
       .withJsonBody(JacksonFactory.OBJECT_MAPPER.readTree(this.getClass().getClassLoader()
       .getResourceAsStream(AEP_CONNECTOR_INLET_SUCCESSFUL_RESPONSE)))));
+  }
+
+  public void inletMultiStatusSuccessfulResponse() throws IOException {
+    wiremockExtension.getWireMockServer()
+      .stubFor(WireMock
+      .post(WireMock.urlEqualTo(getRelativeUrl()))
+      .willReturn(ResponseDefinitionBuilder.responseDefinition()
+      .withJsonBody(JacksonFactory.OBJECT_MAPPER.readTree(this.getClass().getClassLoader()
+      .getResourceAsStream(AEP_CONNECTOR_INLET_MULTI_STATUS_SUCCESSFUL_RESPONSE)))));
   }
 
   public void inletIMSAuthenticationSuccessfulResponse() throws JsonProcessingException {
