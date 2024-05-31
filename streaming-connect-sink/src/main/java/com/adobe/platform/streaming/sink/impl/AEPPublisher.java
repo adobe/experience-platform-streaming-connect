@@ -124,13 +124,21 @@ public class AEPPublisher extends AbstractAEPPublisher {
       LOG.error("Failed to publish data to Adobe Experience Platform", jsonException);
       if (Objects.nonNull(errorReporter)) {
         messages.forEach(message -> errorReporter.report(message.getValue(), jsonException));
+      } else {
+        throw new AEPStreamingException("Failed to publish invalid JSON", jsonException);
       }
     } catch (HttpException httpException) {
       LOG.error("Failed to publish data to Adobe Experience Platform", httpException);
+      
+      final int responseCode = httpException.getResponseCode();
       if (Objects.nonNull(errorReporter)) {
         messages.forEach(message -> errorReporter.report(message.getValue(), httpException));
+      } else {
+        if (HttpUtil.is500(responseCode)) {
+          throw new AEPStreamingException("Failed to publish", httpException);
+        }
       }
-      final int responseCode = httpException.getResponseCode();
+
       if (HttpUtil.isUnauthorized(responseCode)) {
         throw new AEPStreamingException("Failed to publish", httpException);
       }
