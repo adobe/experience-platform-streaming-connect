@@ -5,18 +5,6 @@
   "responses": [
     {
       "xactionId": "1565650704337:2124:92:3"
-    },
-    {
-      "status": 400,
-      "message": "inletId: [9b0cb233972f3b0092992284c7353f5eead496218e8441a79b25e9421ea127f5] imsOrgId: [{ORG_ID}] Message has unknown xdm format"
-    },
-    {
-      "status": 400,
-      "message": "inletId: [9b0cb233972f3b0092992284c7353f5eead496218e8441a79b25e9421ea127f5] imsOrgId: [{ORG_ID}] Message has an absent or wrong ims org in the header"
-    },
-    {
-      "status": 400,
-      "message": "inletId: [9b0cb233972f3b0092992284c7353f5eead496218e8441a79b25e9421ea127f5] imsOrgId: [{ORG_ID}] Message has unknown xdm format"
     }
   ]
 }

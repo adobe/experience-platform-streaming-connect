@@ -1,0 +1,15 @@
+{
+  "inletId": "9b0cb233972f3b0092992284c7353f5eead496218e8441a79b25e9421ea127f5",
+  "batchId": "1565638336649:1750:244",
+  "receivedTimeMs": 1565638336705,
+  "responses": [
+    {
+      "xactionId":"9341f8eb-494a-4c89-9879-4d06a58d2dc7-0",
+      "status":400,
+      "message":"The 'header' field is mandatory. Provide a valid 'header' value and try again."
+    },
+    {
+      "xactionId": "9341f8eb-494a-4c89-9879-4d06a58d2dc7-1"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+[
+  {
+    "body": {
+      "xdmMeta": {
+        "schemaRef": {
+          "id": "https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}",
+          "contentType": "application/vnd.adobe.xed-full+json;version={SCHEMA_VERSION}"
+        }
+      },
+      "xdmEntity": {
+        "firstname": "abc",
+        "lastname": "def"
+      }
+    }
+  },
+  {
+    "header": {
+      "schemaRef": {
+        "id": "https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}",
+        "contentType": "application/vnd.adobe.xed-full+json;version={SCHEMA_VERSION}"
+      },
+      "source": {
+        "name": "aep-sink-connector"
+      }
+    },
+    "body": {
+      "xdmMeta": {
+        "schemaRef": {
+          "id": "https://ns.adobe.com/{TENANT_ID}/schemas/{SCHEMA_ID}",
+          "contentType": "application/vnd.adobe.xed-full+json;version={SCHEMA_VERSION}"
+        }
+      },
+      "xdmEntity": {
+        "firstname": "abc",
+        "lastname": "def"
+      }
+    }
+  }
+]

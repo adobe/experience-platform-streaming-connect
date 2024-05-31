@@ -341,6 +341,23 @@ curl -s -X POST \
 }' http://localhost:8083/connectors
 ```
 
+#### Error Handling And Logging
+
+
+
+
+| Config                                                                                      | Description                                                                             |
+|---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| "errors.tolerance": "none"                                                                  | Default Behaviour.Connector will stop working on error                                  |
+| "errors.tolerance": "all","errors.log.enable": "false"                                      | Connector will continue on error and error message will not be logged                   |
+| "errors.tolerance": "all","errors.log.enable": "true","errors.log.include.message": "false" | Connector will continue on error and error occurrence will be logged and failed message will not be logged                                                                                                                                                                      |
+| "errors.tolerance": "all","errors.log.enable": "true","errors.log.include.message": "true"  | Connector will continue on error and error occurrence  will be logged and failed message will be logged                                                                                                                                                                          |
+| "errors.tolerance": "all","errors.log.enable": "true or false","errors.deadletterqueue.topic.name": "topic-name"|Connector will continue on error and error occurrence  will be logged as per the option and failed message will be send to dead letter topic                                                                                                                  |
+| "errors.tolerance": "all","errors.log.enable": "true or false","errors.deadletterqueue.topic.name": "topic-name","errors.deadletterqueue.context.headers.enable": "true" | Connector will continue on error and error occurrence will be logged as per the option and failed message will be send to dead letter topic and failure reason will be logged in message header.  |                                                        
+Please follow documentation for more information : `https://www.confluent.io/blog/kafka-connect-deep-dive-error-handling-dead-letter-queues`
+
+Note : In case of Authentication error such as 401 and 403 connector will stop working irrespective of what error tolerance value we have set. 
+
 #### Dead Letter Configuration
 To send error records to dead letter topic please use standard kafka connector error configuration.
 
