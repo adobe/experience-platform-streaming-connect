@@ -205,31 +205,47 @@ curl -s -X POST \
 
 Use the command below to set up a Sink connector to a Authenticated Streaming Connection:
 
-1. Using access_token
-   ```shell
-   curl -s -X POST \
-   -H "Content-Type: application/json" \
-   --data '{
-     "name": "aep-auth-sink-connector",
-     "config": {
-       "connector.class": "com.adobe.platform.streaming.sink.impl.AEPSinkConnector",
-       "topics": "connect-test",
-       "tasks.max": 1,
-       "key.converter": "org.apache.kafka.connect.json.JsonConverter",
-       "key.converter.schemas.enable": "false",
-       "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-       "value.converter.schemas.enable": "false",
-       "aep.endpoint": "https://dcs.adobedc.net/collection/{DATA_INLET_ID}",
-       "aep.flush.interval.seconds": 1,
-       "aep.flush.bytes.kb": 4,       
-       "aep.connection.auth.enabled": true,
-       "aep.connection.auth.token.type": "access_token",
-       "aep.connection.auth.client.id": "<client_id>",
-       "aep.connection.auth.client.code": "<client_code>",
-       "aep.connection.auth.client.secret": "<client_secret>"
-     }
-   }' http://localhost:8083/connectors
-   ```
+1. Using oauth2_access_token
+   - Create http connector
+      ```shell
+      curl -s -X POST \
+      -H "Content-Type: application/json" \
+      --data '{
+        "name": "aep-auth-sink-connector",
+        "config": {
+          "connector.class": "com.adobe.platform.streaming.sink.impl.AEPSinkConnector",
+          "topics": "connect-test",
+          "tasks.max": 1,
+          "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+          "key.converter.schemas.enable": "false",
+          "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+          "value.converter.schemas.enable": "false",
+          "aep.endpoint": "https://dcs.adobedc.net/collection/{DATA_INLET_ID}",
+          "aep.flush.interval.seconds": 1,
+          "aep.flush.bytes.kb": 4,
+          "aep.connection.auth.enabled": true,
+          "aep.connection.auth.token.type": "oauth2_access_token",
+          "aep.connection.auth.client.id": "<client_id>",
+          "aep.connection.auth.client.secret": "<client_secret>"
+          "aep.connection.auth.endpoint": "<ims-url>",
+          "aep.connection.endpoint.headers": "<optional-header-that-needs-to-be-passed-to-AEP>"
+        }
+      }' http://localhost:8083/connectors
+      ```
+
+     Note -
+     1. `aep.connection.endpoint.headers` format should be JSON-encoded. Example: To send below 2 HTTP headers - 
+        1. key: `x-adobe-flow-id`, value: `341fd4f0-cdec-4912-1ab6-fb54aeb41286`
+        2. key: `x-adobe-dataset-id`, value: `3096fbfd5978431948af3ba3`
+
+        Use config -
+        ```json
+        "aep.connection.endpoint.headers": "{\"x-adobe-flow-id\":\"341fd4f0-cdec-4912-1ab6-fb54aeb41286\", \"x-adobe-dataset-id\": \"3096fbfd5978431948af3ba3\"}"
+        ```
+
+     2. `aep.connection.auth.endpoint` value for prod
+        `<ims-url>` : `https://ims-na1.adobelogin.com`
+
 
 2. Using jwt_token **[DEPRECATED]**
    - Convert private.key from adobe console to PKCS8 private using command
@@ -267,19 +283,24 @@ Use the command below to set up a Sink connector to a Authenticated Streaming Co
       }' http://localhost:8083/connectors
       ```
       
-     Note - `aep.connection.endpoint.headers` format should be JSON-encoded. 
-     Example: To send below 2 HTTP headers - 
-     1. key: `x-adobe-flow-id`, value: `341fd4f0-cdec-4912-1ab6-fb54aeb41286`
-     2. key: `x-adobe-dataset-id`, value: `3096fbfd5978431948af3ba3`
-   
-     Use config -
-     ```json
-     "aep.connection.endpoint.headers": "{\"x-adobe-flow-id\":\"341fd4f0-cdec-4912-1ab6-fb54aeb41286\", \"x-adobe-dataset-id\": \"3096fbfd5978431948af3ba3\"}"
-     ```
-#### note : jwt_token authentication is deprecated
+     Note -
+     1. `aep.connection.endpoint.headers` format should be JSON-encoded. Example: To send below 2 HTTP headers - 
+        1. key: `x-adobe-flow-id`, value: `341fd4f0-cdec-4912-1ab6-fb54aeb41286`
+        2. key: `x-adobe-dataset-id`, value: `3096fbfd5978431948af3ba3`
+
+        Use config -
+        ```json
+        "aep.connection.endpoint.headers": "{\"x-adobe-flow-id\":\"341fd4f0-cdec-4912-1ab6-fb54aeb41286\", \"x-adobe-dataset-id\": \"3096fbfd5978431948af3ba3\"}"
+        ```
+
+     2. `aep.connection.auth.endpoint` value for prod
+        `<ims-url>` : `https://ims-na1.adobelogin.com`
+
+####   Note : jwt_token authentication is deprecated
 
 
-3. Using oauth2_access_token
+3. Using access_token
+
    - Create http connector
       ```shell
       curl -s -X POST \
@@ -296,26 +317,30 @@ Use the command below to set up a Sink connector to a Authenticated Streaming Co
           "value.converter.schemas.enable": "false",
           "aep.endpoint": "https://dcs.adobedc.net/collection/{DATA_INLET_ID}",
           "aep.flush.interval.seconds": 1,
-          "aep.flush.bytes.kb": 4,
+          "aep.flush.bytes.kb": 4,       
           "aep.connection.auth.enabled": true,
-          "aep.connection.auth.token.type": "oauth2_access_token",
-          "aep.connection.auth.client.id": "<client_id>",
-          "aep.connection.auth.client.secret": "<client_secret>"
+          "aep.connection.auth.token.type": "access_token",
           "aep.connection.auth.endpoint": "<ims-url>",
           "aep.connection.endpoint.headers": "<optional-header-that-needs-to-be-passed-to-AEP>"
+          "aep.connection.auth.client.id": "<client_id>",
+          "aep.connection.auth.client.code": "<client_code>",
+          "aep.connection.auth.client.secret": "<client_secret>"
         }
       }' http://localhost:8083/connectors
       ```
 
-     Note - `aep.connection.endpoint.headers` format should be JSON-encoded.
-     Example: To send below 2 HTTP headers -
-     1. key: `x-adobe-flow-id`, value: `341fd4f0-cdec-4912-1ab6-fb54aeb41286`
-     2. key: `x-adobe-dataset-id`, value: `3096fbfd5978431948af3ba3`
+     Note -
+     1. `aep.connection.endpoint.headers` format should be JSON-encoded. Example: To send below 2 HTTP headers - 
+        1. key: `x-adobe-flow-id`, value: `341fd4f0-cdec-4912-1ab6-fb54aeb41286`
+        2. key: `x-adobe-dataset-id`, value: `3096fbfd5978431948af3ba3`
 
-     Use config -
-     ```json
-     "aep.connection.endpoint.headers": "{\"x-adobe-flow-id\":\"341fd4f0-cdec-4912-1ab6-fb54aeb41286\", \"x-adobe-dataset-id\": \"3096fbfd5978431948af3ba3\"}"
-     ```
+        Use config -
+        ```json
+        "aep.connection.endpoint.headers": "{\"x-adobe-flow-id\":\"341fd4f0-cdec-4912-1ab6-fb54aeb41286\", \"x-adobe-dataset-id\": \"3096fbfd5978431948af3ba3\"}"
+        ```
+
+     2. `aep.connection.auth.endpoint` value for prod
+        `<ims-url>` : `https://ims-na1.adobelogin.com`
 
 #### Batching
 
