@@ -17,11 +17,13 @@ configurations {
 }
 
 dependencies {
+  implementation platform(libraries.jacksonBom)
   implementation project(':streaming-connect-common')
   implementation libraries.collections4, libraries.commonslang,
                  libraries.guava,
                  libraries.jackson, libraries.httpClient,
-                 libraries.slf4j
+                 libraries.slf4j,
+                 libraries.commonscodec, libraries.snakeyaml
   implementation libraries.jsonPatch
   compileOnly libraries.kafkaConnectRuntime, libraries.kafkaConnect
   jmxAgent libraries.jmxPrometheusJavaAgent

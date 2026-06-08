@@ -13,8 +13,10 @@
 apply from: '../dependencies.gradle'
 
 dependencies {
+    implementation platform(libraries.jacksonBom)
     implementation libraries.collections4, libraries.commonslang, libraries.guava,
                    libraries.httpClient, libraries.jackson,
-                   libraries.jjwt, libraries.slf4j, libraries.jaxb
+                   libraries.jjwt, libraries.slf4j, libraries.jaxb,
+                   libraries.commonscodec, libraries.snakeyaml
     testImplementation libraries.jmockit, libraries.junitJupiter
 }
