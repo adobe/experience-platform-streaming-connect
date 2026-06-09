@@ -16,7 +16,6 @@ ext {
 }
 
 versions.collections4 = '4.4'
-versions.commonscodec = '1.18.0'
 versions.commonslang = '3.18.0'
 versions.guava = '32.0.0-jre'
 versions.httpClient = '4.5.13'
@@ -30,18 +29,9 @@ versions.kafkaConnect = '2.8.1'
 versions.slf4j = '1.7.25'
 versions.jaxb = '2.3.0'
 versions.wiremock = '2.27.2'
-versions.snakeyaml = '2.0'
 
 libraries.collections4 = [
   "org.apache.commons:commons-collections4:$versions.collections4"
-]
-
-libraries.commonscodec = [
-  "commons-codec:commons-codec:$versions.commonscodec"
-]
-
-libraries.snakeyaml = [
-  "org.yaml:snakeyaml:$versions.snakeyaml"
 ]
 
 libraries.commonslang = [
@@ -56,8 +46,6 @@ libraries.httpClient = [
   "org.apache.httpcomponents:httpclient:$versions.httpClient"
 ]
 
-// jackson-bom keeps all Jackson modules aligned (jackson-annotations follows a
-// different patch cadence than core/databind, e.g. 2.21 vs 2.21.3).
 libraries.jacksonBom = "com.fasterxml.jackson:jackson-bom:$versions.jackson"
 
 libraries.jackson = [

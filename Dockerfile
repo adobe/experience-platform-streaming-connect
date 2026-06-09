@@ -10,7 +10,7 @@
  # governing permissions and limitations under the License.
 ##
 
-FROM adoptopenjdk/openjdk11:jre-11.0.11_9-alpine
+FROM eclipse-temurin:11-jre-alpine
 
 ENV SCALA_VERSION="2.12" \
     KAFKA_VERSION="2.8.0"
@@ -23,9 +23,10 @@ ARG KAFKA_DIST_ASC=${KAFKA_DIST}.tgz.asc
 RUN set -x && \
     apk add --no-cache unzip curl ca-certificates gnupg jq && \
     eval $(gpg-agent --daemon) && \
-    curl -sSLO "https://archive.apache.org/dist/kafka/${KAFKA_VERSION}/${KAFKA_DIST_TGZ}" && \
-    curl -sSLO https://dist.apache.org/repos/dist/release/kafka/${KAFKA_VERSION}/${KAFKA_DIST_ASC} && \
-    curl -sSL  https://kafka.apache.org/KEYS | gpg -q --import - && \
+    curl -fsSLO "https://archive.apache.org/dist/kafka/${KAFKA_VERSION}/${KAFKA_DIST_TGZ}" && \
+    curl -fsSLO "https://archive.apache.org/dist/kafka/${KAFKA_VERSION}/${KAFKA_DIST_ASC}" && \
+    curl -fsSL  https://downloads.apache.org/kafka/KEYS | gpg -q --import - && \
+    gpg --batch --verify "${KAFKA_DIST_ASC}" "${KAFKA_DIST_TGZ}" && \
     mkdir -p /opt && \
     mv ${KAFKA_DIST_TGZ} /tmp && \
     tar xfz /tmp/${KAFKA_DIST_TGZ} -C /opt && \

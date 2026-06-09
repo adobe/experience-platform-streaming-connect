@@ -296,10 +296,7 @@ configurations.all {
 allprojects {
   configurations.all {
     resolutionStrategy {
-      // Pin transitively-introduced libraries to CVE-remediated versions (see CVE.md).
-      // jackson-* (incl. annotations) is aligned via the jackson-bom platform.
       force 'commons-codec:commons-codec:1.18.0'
-      force 'org.yaml:snakeyaml:2.0'
       force 'org.apache.commons:commons-lang3:3.18.0'
       force 'com.fasterxml.jackson.core:jackson-core:2.21.3'
       force 'com.fasterxml.jackson.core:jackson-databind:2.21.3'
