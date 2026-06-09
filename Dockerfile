@@ -10,7 +10,7 @@
  # governing permissions and limitations under the License.
 ##
 
-FROM eclipse-temurin:11-jre-alpine
+FROM eclipse-temurin:11.0.31_11-jre-alpine
 
 ENV SCALA_VERSION="2.12" \
     KAFKA_VERSION="2.8.0"
