@@ -17,8 +17,9 @@ configurations {
 }
 
 dependencies {
+  implementation platform(libraries.jacksonBom)
   implementation project(':streaming-connect-common')
-  implementation libraries.collections4, libraries.commonslang,
+  implementation libraries.collections4, libraries.commonscodec, libraries.commonslang,
                  libraries.guava,
                  libraries.jackson, libraries.httpClient,
                  libraries.slf4j
