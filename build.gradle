@@ -292,14 +292,3 @@ task kafkaConnectPublish(type: Zip) {
 configurations.all {
   exclude module: 'slf4j-log4j12'
 }
-
-allprojects {
-  configurations.all {
-    resolutionStrategy {
-      force 'commons-codec:commons-codec:1.18.0'
-      force 'org.apache.commons:commons-lang3:3.18.0'
-      force 'com.fasterxml.jackson.core:jackson-core:2.21.3'
-      force 'com.fasterxml.jackson.core:jackson-databind:2.21.3'
-    }
-  }
-}

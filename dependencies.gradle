@@ -16,6 +16,7 @@ ext {
 }
 
 versions.collections4 = '4.4'
+versions.commonscodec = '1.18.0'
 versions.commonslang = '3.18.0'
 versions.guava = '32.0.0-jre'
 versions.httpClient = '4.5.13'
@@ -32,6 +33,11 @@ versions.wiremock = '2.27.2'
 
 libraries.collections4 = [
   "org.apache.commons:commons-collections4:$versions.collections4"
+]
+
+
+libraries.commonscodec = [
+  "commons-codec:commons-codec:$versions.commonscodec"
 ]
 
 libraries.commonslang = [
