@@ -13,7 +13,9 @@
 apply from: '../dependencies.gradle'
 
 configurations {
-  jmxAgent
+  jmxAgent {
+    transitive = false
+  }
 }
 
 dependencies {
@@ -34,6 +36,8 @@ dependencies {
 task copyJmxAgent(type: Copy) {
   into "${buildDir}/libs"
   from configurations.jmxAgent
+  // Version-less name so the Dockerfile does not need to track the agent version.
+  rename { 'jmx_prometheus_javaagent.jar' }
 }
 
 shadowJar {
