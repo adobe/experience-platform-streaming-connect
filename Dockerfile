@@ -40,7 +40,7 @@ ENV PATH=$PATH:/${KAFKA_HOME}/bin \
     CONNECT_LOG_CFG=$KAFKA_HOME/config/log4j.properties
 
 ENV CONNECT_PORT=8083
-ENV EXTRA_ARGS="-javaagent:$KAFKA_HOME/connectors/jmx_prometheus_javaagent.jar=9999:${KAFKA_HOME}/config/prometheus.yml"
+ENV EXTRA_ARGS="-javaagent:$KAFKA_HOME/connectors/jmx_prometheus_javaagent-0.12.0.jar=9999:${KAFKA_HOME}/config/prometheus.yml"
 
 EXPOSE 9999
 EXPOSE ${CONNECT_PORT}
@@ -56,7 +56,7 @@ COPY application.conf $KAFKA_HOME/application.conf
 COPY docker-entrypoint.sh /
 RUN mkdir -p $KAFKA_HOME/connectors
 
-COPY streaming-connect-sink/build/libs/jmx_prometheus_javaagent.jar $KAFKA_HOME/connectors
+COPY streaming-connect-sink/build/libs/jmx_prometheus_javaagent-*.jar $KAFKA_HOME/connectors
 COPY streaming-connect-sink/build/libs/streaming-connect-sink-*.jar $KAFKA_HOME/connectors
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
